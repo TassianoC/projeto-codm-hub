@@ -1,5 +1,5 @@
 // ==========================================================================
-// LOBARK CODM HUB - INTEGRADO COM FIREBASE REALTIME DATABASE & ADM AUTH
+// LOBARK CODM HUB - VERSÃO ESTÁVEL & INTEGRADA COM FIREBASE
 // ==========================================================================
 
 const firebaseConfig = {
@@ -12,19 +12,25 @@ const firebaseConfig = {
     appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-// Inicializa o Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+// Inicialização segura do Firebase
+let db = null;
+let lobbiesRef = null;
+let rankingRef = null;
+
+try {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    db = firebase.database();
+    lobbiesRef = db.ref('lobbies');
+    rankingRef = db.ref('ranking');
+} catch (e) {
+    console.error("Erro ao conectar com Firebase:", e);
 }
-const db = firebase.database();
 
-// Referências das tabelas
-const lobbiesRef = db.ref('lobbies');
-const rankingRef = db.ref('ranking');
-
-// Controle de Permissão
+// Estado da Aplicação
 let isAdmin = false;
-const ADMIN_SECRET_PASSWORD = "lobark2026"; // Sua senha de ADM
+const ADMIN_SECRET_PASSWORD = "lobark2026"; // Senha para o Modo ADM
 
 let lobbies = [];
 let teamsRanking = [];
@@ -33,50 +39,52 @@ document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initCursor();
     initThemePicker();
-    listenToFirebase();
+    
+    if (lobbiesRef) {
+        listenToFirebase();
+    } else {
+        renderLobbies();
+        renderRanking();
+    }
 });
 
-// Ouve as atualizações do banco de dados em tempo real
+// Sincronização em Tempo Real
 function listenToFirebase() {
-    // Sincroniza Lobbies/Scrims
     lobbiesRef.on('value', (snapshot) => {
         const data = snapshot.val();
         lobbies = [];
         if (data) {
-            Object.keys(data).forEach(firebaseKey => {
-                lobbies.push({ 
-                    firebaseKey: firebaseKey, 
-                    ...data[firebaseKey] 
-                });
+            Object.keys(data).forEach(key => {
+                lobbies.push({ firebaseKey: key, ...data[key] });
             });
         }
         renderLobbies();
+    }, (error) => {
+        console.error("Erro na leitura dos Lobbies:", error);
     });
 
-    // Sincroniza Ranking
     rankingRef.on('value', (snapshot) => {
         const data = snapshot.val();
         teamsRanking = [];
         if (data) {
-            Object.keys(data).forEach(firebaseKey => {
-                teamsRanking.push({ 
-                    firebaseKey: firebaseKey, 
-                    ...data[firebaseKey] 
-                });
+            Object.keys(data).forEach(key => {
+                teamsRanking.push({ firebaseKey: key, ...data[key] });
             });
         }
         renderRanking();
+    }, (error) => {
+        console.error("Erro na leitura do Ranking:", error);
     });
 }
 
-// Alternar Modo ADM com Senha
+// Troca do Modo ADM
 function toggleAdminMode() {
     if (!isAdmin) {
         const pass = prompt("Digite a senha de Administrador LOBARK:");
         if (pass === ADMIN_SECRET_PASSWORD) {
             isAdmin = true;
             atualizarInterfaceAdmin();
-            alert("Acesso Concedido: Painel de Controle de ADM Ativado!");
+            alert("Acesso Concedido: Modo Administrador Ativado!");
         } else if (pass !== null) {
             alert("Senha incorreta!");
         }
@@ -91,39 +99,54 @@ function atualizarInterfaceAdmin() {
     const label = document.getElementById('role-label');
     const btn = document.getElementById('admin-toggle-btn');
 
-    if (isAdmin) {
-        label.innerText = 'ADMINISTRADOR';
-        label.style.color = 'var(--crimson)';
-        btn.style.borderColor = 'var(--crimson)';
-        document.body.classList.add('admin-mode');
-    } else {
-        label.innerText = 'JOGADOR';
-        label.style.color = 'var(--accent)';
-        btn.style.borderColor = 'var(--accent)';
-        document.body.classList.remove('admin-mode');
+    if (label && btn) {
+        if (isAdmin) {
+            label.innerText = 'ADMINISTRADOR';
+            label.style.color = 'var(--crimson)';
+            btn.style.borderColor = 'var(--crimson)';
+            document.body.classList.add('admin-mode');
+        } else {
+            label.innerText = 'JOGADOR';
+            label.style.color = 'var(--accent)';
+            btn.style.borderColor = 'var(--accent)';
+            document.body.classList.remove('admin-mode');
+        }
     }
 
     renderLobbies();
     renderRanking();
 }
 
+// Navegação entre Abas
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    event.currentTarget.classList.add('active');
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    if (activeTab) activeTab.classList.add('active');
+    
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 }
 
+// Visualizar Perfil Pro
 function viewPlayerProfile(playerName) {
     const cleanName = playerName.split(' ')[0];
-    document.getElementById('player-profile-name').innerHTML = `${cleanName}<span class="glow-text">_PRO</span>`;
-    document.getElementById('card-player-name').innerText = cleanName;
+    const profileNameEl = document.getElementById('player-profile-name');
+    const cardNameEl = document.getElementById('card-player-name');
+
+    if (profileNameEl) profileNameEl.innerHTML = `${cleanName}<span class="glow-text">_PRO</span>`;
+    if (cardNameEl) cardNameEl.innerText = cleanName;
+
     switchTab('profile');
 }
 
+// Renderizar Lobbies
 function renderLobbies() {
     const container = document.getElementById('lobbies-container');
+    if (!container) return;
+    
     container.innerHTML = '';
 
     if (lobbies.length === 0) {
@@ -151,7 +174,6 @@ function renderLobbies() {
 
         let adminControlsHTML = '';
         if (isAdmin) {
-            // Importante: Passa o firebaseKey entre aspas simples para o JS não quebrar
             adminControlsHTML = `
                 <div class="admin-actions">
                     <button class="btn-danger" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Cancelar Lobby (ADM)</button>
@@ -160,12 +182,12 @@ function renderLobbies() {
         }
 
         card.innerHTML = `
-            <span class="badge ${lobby.badgeClass}">${lobby.type}</span>
+            <span class="badge ${lobby.badgeClass || 'badge-t3'}">${lobby.type}</span>
             <h3 style="font-family: var(--font-heading);">${lobby.team}</h3>
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">⏰ Horário: <strong>${lobby.time}</strong></p>
             ${lineupHTML}
             <button class="btn-primary" onclick="acceptChallenge('${lobby.firebaseKey}')">
-                ${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio 5v5'}
+                ${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}
             </button>
             ${adminControlsHTML}
         `;
@@ -173,15 +195,18 @@ function renderLobbies() {
     });
 }
 
+// Renderizar Ranking
 function renderRanking() {
     const tbody = document.getElementById('ranking-body');
+    if (!tbody) return;
+    
     tbody.innerHTML = '';
 
-    teamsRanking.sort((a, b) => b.wins - a.wins);
+    teamsRanking.sort((a, b) => (b.wins || 0) - (a.wins || 0));
 
     teamsRanking.forEach((team, index) => {
-        const total = team.wins + team.losses;
-        const winrate = total > 0 ? ((team.wins / total) * 100).toFixed(1) + '%' : '0%';
+        const total = (team.wins || 0) + (team.losses || 0);
+        const winrate = total > 0 ? (((team.wins || 0) / total) * 100).toFixed(1) + '%' : '0%';
 
         let actionsHTML = '';
         if (isAdmin) {
@@ -199,8 +224,8 @@ function renderRanking() {
             <td><strong>#${index + 1}</strong></td>
             <td><strong>${team.name}</strong></td>
             <td><span class="badge badge-${team.tier ? team.tier.toLowerCase() : 't3'}">${team.tier || 'T3'}</span></td>
-            <td style="color: var(--accent); font-weight: bold;">${team.wins}</td>
-            <td style="color: var(--crimson);">${team.losses}</td>
+            <td style="color: var(--accent); font-weight: bold;">${team.wins || 0}</td>
+            <td style="color: var(--crimson);">${team.losses || 0}</td>
             <td>${winrate}</td>
             <td>${actionsHTML}</td>
         `;
@@ -208,14 +233,15 @@ function renderRanking() {
     });
 }
 
-// --- Operações em Tempo Real com o Firebase ---
+// Manipulação do Modal e Formulários
+function openModal(type) { 
+    const el = document.getElementById(`modal-${type}`);
+    if (el) el.classList.add('active'); 
+}
 
-function acceptChallenge(firebaseKey) {
-    const myTeam = prompt("Digite o nome da sua equipe/clã para aceitar o confronto:");
-    if (myTeam) {
-        lobbiesRef.child(firebaseKey).update({ challenger: myTeam });
-        alert(`Desafio confirmado! Sua equipe foi registrada no lobby.`);
-    }
+function closeModal(type) { 
+    const el = document.getElementById(`modal-${type}`);
+    if (el) el.classList.remove('active'); 
 }
 
 function handleCreateScrim(e) {
@@ -236,9 +262,11 @@ function handleCreateScrim(e) {
     if (type.includes('T1')) badgeClass = 'badge-t1';
     if (type.includes('T2')) badgeClass = 'badge-t2';
 
-    lobbiesRef.push({
-        type, time, team, lineup, challenger: null, badgeClass
-    });
+    if (lobbiesRef) {
+        lobbiesRef.push({
+            type, time, team, lineup, challenger: null, badgeClass
+        });
+    }
 
     closeModal('scrim');
 }
@@ -249,34 +277,40 @@ function handleCreateX1(e) {
     const time = document.getElementById('x1-time').value;
     const mode = document.getElementById('x1-mode').value;
 
-    lobbiesRef.push({
-        type: 'X1', time, team: `${player} (X1)`, mode, lineup: [], challenger: null, badgeClass: 'badge-x1'
-    });
+    if (lobbiesRef) {
+        lobbiesRef.push({
+            type: 'X1', time, team: `${player} (X1)`, mode, lineup: [], challenger: null, badgeClass: 'badge-x1'
+        });
+    }
 
     closeModal('x1');
 }
 
-// Função de Cancelar Corrigida para deletar do Firebase
+// Ações do ADM / Usuários
+function acceptChallenge(firebaseKey) {
+    const myTeam = prompt("Digite o nome da sua equipe/clã para aceitar o confronto:");
+    if (myTeam && lobbiesRef) {
+        lobbiesRef.child(firebaseKey).update({ challenger: myTeam });
+        alert(`Desafio confirmado! Sua equipe foi registrada no lobby.`);
+    }
+}
+
 function cancelLobby(firebaseKey) {
     if (!isAdmin) return;
     if (confirm("Tem certeza que deseja CANCELAR este lobby da nuvem?")) {
-        lobbiesRef.child(firebaseKey).remove()
-            .then(() => {
-                alert("Lobby deletado com sucesso!");
-            })
-            .catch((err) => {
-                alert("Erro ao excluir do banco de dados: " + err.message);
-            });
+        if (lobbiesRef) {
+            lobbiesRef.child(firebaseKey).remove();
+        }
     }
 }
 
 function updateScore(firebaseKey, winAdd, lossAdd) {
     if (!isAdmin) return;
     const team = teamsRanking.find(t => t.firebaseKey === firebaseKey);
-    if (team) {
+    if (team && rankingRef) {
         rankingRef.child(firebaseKey).update({
-            wins: team.wins + winAdd,
-            losses: team.losses + lossAdd
+            wins: (team.wins || 0) + winAdd,
+            losses: (team.losses || 0) + lossAdd
         });
     }
 }
@@ -284,14 +318,13 @@ function updateScore(firebaseKey, winAdd, lossAdd) {
 function removeTeam(firebaseKey) {
     if (!isAdmin) return;
     if (confirm("Remover esta equipe do ranking permanente?")) {
-        rankingRef.child(firebaseKey).remove();
+        if (rankingRef) {
+            rankingRef.child(firebaseKey).remove();
+        }
     }
 }
 
-// Modais & Efeitos Visuais
-function openModal(type) { document.getElementById(`modal-${type}`).classList.add('active'); }
-function closeModal(type) { document.getElementById(`modal-${type}`).classList.remove('active'); }
-
+// Efeitos Visuais
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
@@ -299,7 +332,7 @@ function initParticles() {
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
 
-    const particles = Array.from({ length: 40 }, () => ({
+    const particles = Array.from({ length: 30 }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5
     }));
