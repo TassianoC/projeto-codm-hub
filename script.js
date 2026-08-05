@@ -1,7 +1,4 @@
-// ==========================================================================
-// LOBARK CODM ANALYTICS - INSPIRADO NO ESPORTS CHARTS
-// ==========================================================================
-
+// Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
     authDomain: "projeto-codm-hub.firebaseapp.com",
@@ -12,25 +9,24 @@ const firebaseConfig = {
     appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-// Instâncias do Firebase
 let db = null;
 let auth = null;
 let lobbiesRef = null;
 let rankingRef = null;
 let usersRef = null;
 let teamsRef = null;
+let postsRef = null;
 
-// Estados Globais
 let currentUser = null;
 let currentUserProfile = null;
 let currentViewingUserUid = null;
 let isAdmin = false;
-let currentModeFilter = 'MP'; // MP ou BR
 const ADMIN_SECRET_PASSWORD = "lobark2026";
 
 let lobbies = [];
 let teamsRanking = [];
 let registeredTeams = [];
+let posts = [];
 let allProfiles = {};
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,9 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
         if (typeof firebase !== 'undefined') {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             db = firebase.database();
             auth = firebase.auth();
             
@@ -48,16 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingRef = db.ref('ranking');
             usersRef = db.ref('users');
             teamsRef = db.ref('teams');
+            postsRef = db.ref('posts');
 
             listenToAuth();
             listenToFirebase();
         }
     } catch (e) {
-        console.error("Erro no Firebase:", e);
+        console.error("Erro na inicialização do Firebase:", e);
     }
 });
 
-// AUTENTICAÇÃO E PRESENÇA EM TEMPO REAL
 function listenToAuth() {
     auth.onAuthStateChanged((user) => {
         currentUser = user;
@@ -69,9 +63,8 @@ function listenToAuth() {
             guestView.style.display = 'none';
             userView.style.display = 'flex';
             
-            const userStatusRef = db.ref(`users/${user.uid}/isOnline`);
-            userStatusRef.set(true);
-            userStatusRef.onDisconnect().set(false);
+            db.ref(`users/${user.uid}/isOnline`).set(true);
+            db.ref(`users/${user.uid}/isOnline`).onDisconnect().set(false);
 
             usersRef.child(user.uid).on('value', (snapshot) => {
                 currentUserProfile = snapshot.val();
@@ -89,88 +82,90 @@ function listenToAuth() {
     });
 }
 
-// SINCRONIZAÇÃO EM TEMPO REAL
 function listenToFirebase() {
-    lobbiesRef.on('value', (snapshot) => {
-        const data = snapshot.val();
+    lobbiesRef.on('value', (s) => {
         lobbies = [];
-        if (data) Object.keys(data).forEach(k => lobbies.push({ firebaseKey: k, ...data[k] }));
+        if (s.val()) Object.keys(s.val()).forEach(k => lobbies.push({ firebaseKey: k, ...s.val()[k] }));
         renderLobbies();
     });
 
-    rankingRef.on('value', (snapshot) => {
-        const data = snapshot.val();
+    rankingRef.on('value', (s) => {
         teamsRanking = [];
-        if (data) Object.keys(data).forEach(k => teamsRanking.push({ firebaseKey: k, ...data[k] }));
+        if (s.val()) Object.keys(s.val()).forEach(k => teamsRanking.push({ firebaseKey: k, ...s.val()[k] }));
         renderRanking();
     });
 
-    teamsRef.on('value', (snapshot) => {
-        const data = snapshot.val();
+    teamsRef.on('value', (s) => {
         registeredTeams = [];
-        if (data) Object.keys(data).forEach(k => registeredTeams.push({ firebaseKey: k, ...data[k] }));
+        if (s.val()) Object.keys(s.val()).forEach(k => registeredTeams.push({ firebaseKey: k, ...s.val()[k] }));
         renderTeams();
     });
 
-    usersRef.on('value', (snapshot) => {
-        allProfiles = snapshot.val() || {};
+    postsRef.on('value', (s) => {
+        posts = [];
+        if (s.val()) Object.keys(s.val()).forEach(k => posts.push({ firebaseKey: k, ...s.val()[k] }));
+        renderPosts();
+    });
+
+    usersRef.on('value', (s) => {
+        allProfiles = s.val() || {};
         renderOnlinePlayers();
     });
 }
 
-// FILTRAR RANKING POR MODO (MP / BR)
-function filterRankingMode(mode) {
-    currentModeFilter = mode;
-    document.getElementById('btn-mode-mp').classList.toggle('active', mode === 'MP');
-    document.getElementById('btn-mode-br').classList.toggle('active', mode === 'BR');
-    renderRanking();
-}
+// FEED DE PUBLICAÇÕES
+function renderPosts() {
+    const container = document.getElementById('posts-container');
+    if (!container) return;
+    container.innerHTML = '';
 
-// RENDERIZAR RANKINGS ESTILO ESPORTS CHARTS
-function renderRanking() {
-    const tbody = document.getElementById('ranking-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const filteredTeams = teamsRanking.filter(t => !t.mode || t.mode === currentModeFilter || t.mode === 'AMBOS');
-    filteredTeams.sort((a, b) => (b.wins || 0) - (a.wins || 0));
-
-    filteredTeams.forEach((team, index) => {
-        const total = (team.wins || 0) + (team.losses || 0);
-        const winrate = total > 0 ? (((team.wins || 0) / total) * 100).toFixed(1) + '%' : '0%';
-        const peakViewers = team.peakViewers ? team.peakViewers.toLocaleString('pt-BR') : 'N/I';
-
-        let actionsHTML = '';
-        if (isAdmin) {
-            actionsHTML = `
-                <button class="btn-secondary" style="padding:4px 8px;" onclick="updateScore('${team.firebaseKey}', 1, 0)">+1 Vit</button>
-                <button class="btn-secondary" style="padding:4px 8px; color:var(--crimson);" onclick="updateScore('${team.firebaseKey}', 0, 1)">+1 Der</button>
-                <button class="btn-danger" style="padding:4px 8px;" onclick="removeTeam('${team.firebaseKey}')">Excluir</button>
-            `;
-        } else {
-            actionsHTML = `<span style="font-size:0.8rem; color:var(--text-muted);">Somente Leitura</span>`;
-        }
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>#${index + 1}</strong></td>
-            <td><strong>${team.name}</strong></td>
-            <td><span class="badge badge-${team.tier ? team.tier.toLowerCase() : 't3'}">${team.tier || 'T3'}</span></td>
-            <td style="color: var(--accent); font-weight: bold;">${team.wins || 0}</td>
-            <td style="color: var(--crimson);">${team.losses || 0}</td>
-            <td>${winrate}</td>
-            <td><i class="fa-solid fa-eye" style="color:var(--accent);"></i> ${peakViewers}</td>
-            <td>${actionsHTML}</td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    if (filteredTeams.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Nenhum clã registrado para o modo ${currentModeFilter}.</td></tr>`;
+    if (posts.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding: 30px;">Nenhum clipe ou publicação no feed ainda.</p>`;
+        return;
     }
+
+    [...posts].reverse().forEach(post => {
+        const card = document.createElement('div');
+        card.className = 'post-card glass-panel';
+        card.innerHTML = `
+            <div class="post-header">
+                <div class="post-avatar"><i class="fa-solid fa-user"></i></div>
+                <strong style="cursor:pointer;" onclick="viewPlayerProfileByNick('${post.author}')">${post.author}</strong>
+            </div>
+            <img src="${post.imageUrl}" class="post-image" alt="Post">
+            <div class="post-actions">
+                <i class="fa-regular fa-heart" onclick="likePost('${post.firebaseKey}')"></i>
+                <i class="fa-regular fa-comment"></i>
+            </div>
+            <div class="post-caption">
+                <strong>${post.author}:</strong> ${post.caption}
+            </div>
+        `;
+        container.appendChild(card);
+    });
 }
 
-// PERFIL DETALHADO ESTILO ESPORTS CHARTS
+function handleCreatePost(e) {
+    e.preventDefault();
+    if (!currentUserProfile || !currentUserProfile.nick) return alert("Configure seu Nick no seu perfil antes de publicar algo.");
+
+    const caption = document.getElementById('post-caption').value;
+    const imageUrl = document.getElementById('post-image-url').value;
+
+    postsRef.push({ 
+        author: currentUserProfile.nick, 
+        caption, 
+        imageUrl, 
+        likes: 0,
+        createdAt: Date.now()
+    }).then(() => {
+        document.getElementById('post-caption').value = '';
+        document.getElementById('post-image-url').value = '';
+        closeModal('create-post');
+    });
+}
+
+// PERFIL PRO & INSTAGRAM
 function viewPlayerProfileByNick(nick) {
     let foundUid = null;
     let foundProfile = null;
@@ -187,39 +182,22 @@ function viewPlayerProfileByNick(nick) {
     if (foundProfile) {
         document.getElementById('view-profile-nick').innerText = foundProfile.nick;
         document.getElementById('view-profile-kd').innerText = foundProfile.kd || '0.00';
-        document.getElementById('view-profile-role-badge').innerText = foundProfile.role || 'Flex';
-        
-        // Métricas Esports Charts
         document.getElementById('view-profile-peak-viewers').innerText = foundProfile.peakViewers ? parseInt(foundProfile.peakViewers).toLocaleString('pt-BR') : '0';
-        document.getElementById('view-profile-hours-watched').innerText = foundProfile.hoursWatched ? foundProfile.hoursWatched + 'h' : '0h';
-        document.getElementById('view-profile-earnings').innerText = foundProfile.earnings ? 'R$ ' + parseInt(foundProfile.earnings).toLocaleString('pt-BR') : 'R$ 0';
+        document.getElementById('view-profile-earnings').innerText = foundProfile.earnings ? foundProfile.earnings : '$0';
+        document.getElementById('view-profile-bio').innerText = foundProfile.bio || 'Jogador oficial de CODM.';
+        document.getElementById('view-profile-role').innerText = 'Role: ' + (foundProfile.role || 'Flex');
+        document.getElementById('view-profile-device').innerHTML = `<i class="fa-solid fa-mobile-screen"></i> ${foundProfile.device || 'Dispositivo N/I'}`;
         
-        // Gears & Configurações
-        document.getElementById('view-profile-device').innerText = foundProfile.device || 'Não cadastrado';
-        document.getElementById('view-profile-hud').innerText = foundProfile.hud || 'Não informado';
-        document.getElementById('view-profile-sens').innerText = foundProfile.sens || 'Não informada';
-        
-        if (foundProfile.stream) {
-            document.getElementById('view-profile-stream').innerHTML = `<a href="${foundProfile.stream}" target="_blank" style="color:var(--accent);">${foundProfile.stream}</a>`;
-            document.getElementById('view-profile-live-tag').style.display = 'inline-block';
-        } else {
-            document.getElementById('view-profile-stream').innerText = 'Nenhum canal ativo';
-            document.getElementById('view-profile-live-tag').style.display = 'none';
-        }
+        document.getElementById('gear-device').innerText = foundProfile.device || 'iPad Pro 12.9"';
+        document.getElementById('gear-hud').innerText = foundProfile.hud || '4 Dedos (Garra)';
 
-        const statusDot = document.getElementById('view-profile-status-dot');
-        statusDot.className = foundProfile.isOnline ? 'status-indicator online' : 'status-indicator offline';
+        document.getElementById('view-profile-status-dot').className = foundProfile.isOnline ? 'status-indicator online' : 'status-indicator offline';
     } else {
         document.getElementById('view-profile-nick').innerText = nick;
         document.getElementById('view-profile-kd').innerText = 'N/A';
         document.getElementById('view-profile-peak-viewers').innerText = '0';
-        document.getElementById('view-profile-hours-watched').innerText = '0h';
-        document.getElementById('view-profile-earnings').innerText = 'R$ 0';
-        document.getElementById('view-profile-device').innerText = 'Não cadastrado';
-        document.getElementById('view-profile-hud').innerText = 'Não informado';
-        document.getElementById('view-profile-sens').innerText = 'Não informada';
-        document.getElementById('view-profile-stream').innerText = 'Nenhum';
-        document.getElementById('view-profile-live-tag').style.display = 'none';
+        document.getElementById('view-profile-earnings').innerText = '$0';
+        document.getElementById('view-profile-bio').innerText = 'Perfil sem estatísticas registradas.';
         document.getElementById('view-profile-status-dot').className = 'status-indicator offline';
     }
 
@@ -229,32 +207,37 @@ function viewPlayerProfileByNick(nick) {
     switchTab('profile');
 }
 
-// SALVAR PERFIL PRO
+function switchProfileSubTab(sub) {
+    document.querySelectorAll('.p-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.profile-sub-content').forEach(c => c.classList.remove('active'));
+
+    document.getElementById(`ptab-${sub}`).classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
+}
+
 function handleSaveProfile(e) {
     e.preventDefault();
-    if (!currentUser) return alert("Faça login para continuar.");
+    if (!currentUser) return alert("Faça login primeiro.");
 
     const nick = document.getElementById('edit-nick').value.trim();
     const kd = document.getElementById('edit-kd').value.trim();
-    const winrate = document.getElementById('edit-winrate').value.trim();
     const role = document.getElementById('edit-role').value;
     const device = document.getElementById('edit-device').value.trim();
-    const hud = document.getElementById('edit-hud').value;
     const peakViewers = document.getElementById('edit-peak-viewers').value;
-    const earnings = document.getElementById('edit-earnings').value;
-    const stream = document.getElementById('edit-stream').value.trim();
+    const earnings = document.getElementById('edit-earnings').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
 
     usersRef.child(currentUser.uid).update({
-        nick, kd, winrate, role, device, hud, peakViewers, earnings, stream, bio, isOnline: true
+        nick, kd, role, device, peakViewers, earnings, bio, isOnline: true
     }).then(() => {
-        alert("Perfil profissional atualizado!");
         closeModal('edit-profile');
         viewPlayerProfileByNick(nick);
     });
 }
 
-// DEMAIS FUNÇÕES DE SUPORTE
+// RENDERIZADORES DE TABS
 function renderOnlinePlayers() {
     const container = document.getElementById('online-players-grid');
     const badge = document.getElementById('online-count-badge');
@@ -263,29 +246,22 @@ function renderOnlinePlayers() {
     let onlineCount = 0;
 
     Object.keys(allProfiles).forEach(uid => {
-        const profile = allProfiles[uid];
-        if (profile.isOnline) {
+        const p = allProfiles[uid];
+        if (p.isOnline) {
             onlineCount++;
             const card = document.createElement('div');
             card.className = 'card glass-panel';
             card.innerHTML = `
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
                     <span class="status-indicator online"></span>
-                    <h3 style="font-family: var(--font-heading);">${profile.nick || 'Jogador CODM'}</h3>
+                    <h3 style="font-family: var(--font-heading);">${p.nick || 'Jogador'}</h3>
                 </div>
-                <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px;">
-                    Função: <strong>${profile.role || 'Flex'}</strong> | Dispositivo: <strong>${profile.device || 'N/I'}</strong>
-                </p>
-                <button class="btn-secondary btn-block" onclick="viewPlayerProfileByNick('${profile.nick}')">Ver Estatísticas</button>
+                <button class="btn-secondary btn-block" onclick="viewPlayerProfileByNick('${p.nick}')">Ver Perfil</button>
             `;
             container.appendChild(card);
         }
     });
-
     if (badge) badge.innerText = onlineCount;
-    if (onlineCount === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Nenhum jogador online no momento.</p>`;
-    }
 }
 
 function renderTeams() {
@@ -293,75 +269,44 @@ function renderTeams() {
     if (!container) return;
     container.innerHTML = '';
 
-    if (registeredTeams.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Nenhuma organização cadastrada.</p>`;
-        return;
-    }
-
     registeredTeams.forEach(team => {
         const card = document.createElement('div');
         card.className = 'card glass-panel';
-        let adminControls = isAdmin ? `<button class="btn-danger btn-block" style="margin-top:10px;" onclick="adminDeleteTeam('${team.firebaseKey}')"><i class="fa-solid fa-trash"></i> Excluir Equipe</button>` : '';
-
         card.innerHTML = `
             <span class="badge badge-${team.tier ? team.tier.toLowerCase() : 't3'}">${team.tier || 'T3'}</span>
-            <span class="badge badge-tech" style="margin-left:5px;">${team.mode || 'MP'}</span>
             <h3 style="font-family: var(--font-heading); margin-top:8px;">${team.name}</h3>
-            <p style="color: var(--text-secondary); font-size:0.85rem; margin:8px 0;">${team.desc || 'Sem descrição.'}</p>
-            <button class="btn-primary btn-block" onclick="openTeamDetails('${team.firebaseKey}')">Relatório & Lineup</button>
-            ${adminControls}
+            <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:5px;">${team.desc || 'Sem descrição.'}</p>
+            <button class="btn-primary btn-block" style="margin-top:15px;" onclick="openTeamDetails('${team.firebaseKey}')">Detalhes & Lineup</button>
         `;
         container.appendChild(card);
     });
 }
 
-function openTeamDetails(teamKey) {
-    const team = registeredTeams.find(t => t.firebaseKey === teamKey);
+function openTeamDetails(key) {
+    const team = registeredTeams.find(t => t.firebaseKey === key);
     if (!team) return;
-
-    document.getElementById('modal-team-title').innerHTML = `<i class="fa-solid fa-shield"></i> ${team.name} [${team.tier || 'T3'}]`;
-    const rosterList = team.roster ? team.roster.split(',').map(nick => nick.trim()) : [];
-
-    let rosterHTML = rosterList.map(nick => `
-        <li style="padding:6px; cursor:pointer; color:var(--accent);" onclick="closeModal('team-details'); viewPlayerProfileByNick('${nick}')">
-            <i class="fa-solid fa-user-ninja"></i> ${nick}
-        </li>
-    `).join('');
-
-    const body = document.getElementById('modal-team-body');
-    body.innerHTML = `
-        <div style="margin-bottom:15px;">
-            <h4 style="color:var(--text-secondary);">Modalidade Principal:</h4>
-            <p style="color:var(--accent); font-weight:bold;">${team.mode || 'Multiplayer 5v5'}</p>
-        </div>
-        <div style="margin-bottom:15px;">
-            <h4 style="color:var(--text-secondary);">Histórico / Títulos:</h4>
-            <p>${team.achievements || 'Nenhum título registrado.'}</p>
-        </div>
-        <div class="lineup-box">
-            <h4>Lineup Oficial (Clique para ver Perfil Pro):</h4>
-            <ul>${rosterHTML || '<li>Nenhum jogador escalado</li>'}</ul>
+    document.getElementById('modal-team-title').innerText = team.name;
+    document.getElementById('modal-team-body').innerHTML = `
+        <p><strong>Tier:</strong> ${team.tier}</p>
+        <p><strong>Descrição:</strong> ${team.desc || 'Nenhuma'}</p>
+        <div style="margin-top:15px;">
+            <h4>Lineup Oficial:</h4>
+            <p style="color:var(--accent); font-weight:bold; margin-top:5px;">${team.roster || 'Não informada'}</p>
         </div>
     `;
-
     openModal('team-details');
 }
 
 function handleCreateTeam(e) {
     e.preventDefault();
-    const name = document.getElementById('team-name').value;
-    const mode = document.getElementById('team-mode').value;
-    const tier = document.getElementById('team-tier').value;
-    const desc = document.getElementById('team-desc').value;
-    const achievements = document.getElementById('team-achievements').value;
-    const roster = document.getElementById('team-roster').value;
-
-    if (teamsRef) {
-        teamsRef.push({ name, mode, tier, desc, achievements, roster, peakViewers: Math.floor(Math.random() * 500) + 100 }).then(() => {
-            alert("Organização cadastrada!");
-            closeModal('create-team');
-        });
-    }
+    teamsRef.push({
+        name: document.getElementById('team-name').value,
+        tier: document.getElementById('team-tier').value,
+        desc: document.getElementById('team-desc').value,
+        roster: document.getElementById('team-roster').value
+    }).then(() => {
+        closeModal('create-team');
+    });
 }
 
 function renderLobbies() {
@@ -369,160 +314,153 @@ function renderLobbies() {
     if (!container) return;
     container.innerHTML = '';
 
-    if (lobbies.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Nenhum lobby ativo no momento.</p>`;
-        return;
-    }
-
     lobbies.forEach(lobby => {
         const card = document.createElement('div');
         card.className = 'card glass-panel';
-
-        let lineupHTML = '';
-        if (lobby.lineup && lobby.lineup.length > 0) {
-            lineupHTML = `
-                <div class="lineup-box">
-                    <h4>Escalação (Clique para ver Perfil):</h4>
-                    <ul>${lobby.lineup.map(p => `<li style="cursor:pointer; color:var(--accent);" onclick="viewPlayerProfileByNick('${p}')"><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}</ul>
-                </div>
-            `;
-        }
-
-        let adminControls = isAdmin ? `<button class="btn-danger btn-block" style="margin-top:10px;" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Cancelar Lobby</button>` : '';
-
         card.innerHTML = `
-            <span class="badge ${lobby.badgeClass || 'badge-t3'}">${lobby.type}</span>
-            <h3 style="font-family: var(--font-heading); margin-top:5px;">${lobby.team}</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">⏰ Horário: <strong>${lobby.time}</strong></p>
-            ${lineupHTML}
-            <button class="btn-primary btn-block" onclick="acceptChallenge('${lobby.firebaseKey}')">${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}</button>
-            ${adminControls}
+            <span class="badge ${lobby.type === 'X1' ? 'badge-x1' : 'badge-t3'}">${lobby.type}</span>
+            <h3 style="font-family: var(--font-heading); margin-top:8px;">${lobby.team}</h3>
+            <p style="margin-top:5px; font-size:0.9rem;">⏰ Horário: ${lobby.time}</p>
+            ${lobby.mode ? `<p style="font-size:0.85rem; color:var(--text-secondary);">Regras: ${lobby.mode}</p>` : ''}
+            <button class="btn-primary btn-block" style="margin-top:12px;" onclick="acceptChallenge('${lobby.firebaseKey}')">
+                ${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}
+            </button>
         `;
         container.appendChild(card);
     });
 }
 
+function renderRanking() {
+    const tbody = document.getElementById('ranking-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    teamsRanking.sort((a, b) => (b.wins || 0) - (a.wins || 0));
+    teamsRanking.forEach((team, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>#${index + 1}</td>
+            <td><strong>${team.name}</strong></td>
+            <td><span class="badge badge-t3">${team.tier || 'T3'}</span></td>
+            <td>${team.wins || 0}</td>
+            <td>${team.losses || 0}</td>
+            <td>100%</td>
+            <td>500</td>
+            <td><button class="btn-outline" style="padding:2px 6px; font-size:0.7rem;">Ver</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
 function handleCreateScrim(e) {
     e.preventDefault();
-    const type = document.getElementById('scrim-type').value;
-    const time = document.getElementById('scrim-time').value;
-    const team = document.getElementById('scrim-team-name').value;
-    const lineup = [
-        document.getElementById('p1').value.trim(),
-        document.getElementById('p2').value.trim(),
-        document.getElementById('p3').value.trim(),
-        document.getElementById('p4').value.trim(),
-        document.getElementById('p5').value.trim()
-    ];
-
-    lobbiesRef.push({ type, time, team, lineup, challenger: null, badgeClass: type.includes('T1') ? 'badge-t1' : 'badge-t3' }).then(() => {
-        closeModal('scrim');
-        document.getElementById('form-scrim').reset();
-    });
+    lobbiesRef.push({
+        type: document.getElementById('scrim-type').value,
+        time: document.getElementById('scrim-time').value,
+        team: document.getElementById('scrim-team-name').value,
+        lineup: [
+            document.getElementById('p1').value, 
+            document.getElementById('p2').value, 
+            document.getElementById('p3').value, 
+            document.getElementById('p4').value, 
+            document.getElementById('p5').value
+        ]
+    }).then(() => closeModal('scrim'));
 }
 
 function handleCreateX1(e) {
     e.preventDefault();
-    const player = document.getElementById('x1-player').value.trim();
-    const time = document.getElementById('x1-time').value;
-    const mode = document.getElementById('x1-mode').value;
-
-    lobbiesRef.push({ type: 'X1', time, team: `${player} (X1)`, mode, lineup: [player], challenger: null, badgeClass: 'badge-x1' }).then(() => {
-        closeModal('x1');
-        document.getElementById('form-x1').reset();
-    });
+    lobbiesRef.push({
+        type: 'X1',
+        time: document.getElementById('x1-time').value,
+        team: `${document.getElementById('x1-player').value} (X1)`,
+        mode: document.getElementById('x1-mode').value
+    }).then(() => closeModal('x1'));
 }
 
-function handleGoogleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeModal('auth')); }
-function handleEmailAuth(e) {
-    e.preventDefault();
-    auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => closeModal('auth')).catch(err => alert(err.message));
+// AUTENTICAÇÃO E ADMIN
+function handleGoogleLogin() { 
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeModal('auth')); 
 }
-function handleRegister() {
-    auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => { closeModal('auth'); openModal('edit-profile'); });
+
+function handleEmailAuth(e) { 
+    e.preventDefault(); 
+    auth.signInWithEmailAndPassword(
+        document.getElementById('auth-email').value, 
+        document.getElementById('auth-password').value
+    ).then(() => closeModal('auth')); 
 }
-function handleLogout() { auth.signOut(); }
+
+function handleRegister() { 
+    auth.createUserWithEmailAndPassword(
+        document.getElementById('auth-email').value, 
+        document.getElementById('auth-password').value
+    ).then(() => closeModal('auth')); 
+}
+
+function handleLogout() { 
+    auth.signOut(); 
+}
 
 function toggleAdminMode() {
-    if (!isAdmin) {
-        if (prompt("Digite a senha de ADM:") === ADMIN_SECRET_PASSWORD) {
-            isAdmin = true;
-            atualizarInterfaceAdmin();
-            alert("Modo Administrador Ativado!");
-        }
-    } else {
-        isAdmin = false;
-        atualizarInterfaceAdmin();
+    if (prompt("Senha ADM:") === ADMIN_SECRET_PASSWORD) { 
+        isAdmin = true; 
+        atualizarInterfaceAdmin(); 
     }
 }
 
-function atualizarInterfaceAdmin() {
-    document.getElementById('role-label').innerText = isAdmin ? 'ADMINISTRADOR' : 'JOGADOR';
-    renderLobbies();
-    renderRanking();
-    renderTeams();
+function atualizarInterfaceAdmin() { 
+    document.getElementById('role-label').innerText = isAdmin ? 'ADMINISTRADOR' : 'JOGADOR'; 
+    renderLobbies(); 
 }
 
-function adminBanPlayer() {
-    if (!isAdmin || !currentViewingUserUid) return;
-    if (confirm("PODER SUPREMO DE ADM: Deseja BANIR este jogador permanentemente?")) {
-        usersRef.child(currentViewingUserUid).remove().then(() => { alert("Jogador banido!"); switchTab('online'); });
+function adminBanPlayer() { 
+    if (isAdmin && confirm("Tem certeza que deseja banir este jogador?")) {
+        usersRef.child(currentViewingUserUid).remove().then(() => switchTab('online')); 
     }
 }
 
-function adminDeleteTeam(teamKey) {
-    if (!isAdmin) return;
-    if (confirm("PODER SUPREMO DE ADM: Deseja EXCLUIR este clã?")) {
-        teamsRef.child(teamKey).remove().then(() => alert("Clã excluído!"));
-    }
-}
-
+// UTILITÁRIOS DA INTERFACE
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const activeTab = document.getElementById(`tab-${tabName}`);
-    if (activeTab) activeTab.classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
 }
 
-function acceptChallenge(key) {
-    const myTeam = prompt("Nome da sua equipe:");
-    if (myTeam) lobbiesRef.child(key).update({ challenger: myTeam });
+function acceptChallenge(key) { 
+    const team = prompt("Digite o nome da sua equipe para aceitar:"); 
+    if (team) lobbiesRef.child(key).update({ challenger: team }); 
 }
 
-function cancelLobby(key) { if (isAdmin && confirm("Excluir lobby?")) lobbiesRef.child(key).remove(); }
-function updateScore(key, w, l) {
-    if (!isAdmin) return;
-    const team = teamsRanking.find(t => t.firebaseKey === key);
-    if (team) rankingRef.child(key).update({ wins: (team.wins || 0) + w, losses: (team.losses || 0) + l });
-}
-function removeTeam(key) { if (isAdmin && confirm("Remover clã?")) rankingRef.child(key).remove(); }
+function openModal(t) { document.getElementById(`modal-${t}`).classList.add('active'); }
+function closeModal(t) { document.getElementById(`modal-${t}`).classList.remove('active'); }
 
-function openModal(t) { const m = document.getElementById(`modal-${t}`); if (m) m.classList.add('active'); }
-function closeModal(t) { const m = document.getElementById(`modal-${t}`); if (m) m.classList.remove('active'); }
-
+// PARTICULAS NO BACKGROUND
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
-
+    
     const particles = Array.from({ length: 30 }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5
     }));
 
     function draw() {
         ctx.clearRect(0, 0, w, h);
         particles.forEach(p => {
-            p.x += p.vx; p.y += p.vy;
+            p.x += p.vx; 
+            p.y += p.vy;
             if (p.x < 0 || p.x > w) p.vx *= -1;
             if (p.y < 0 || p.y > h) p.vy *= -1;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#00f3ff';
-            ctx.globalAlpha = 0.3;
+            ctx.beginPath(); 
+            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); 
+            ctx.fillStyle = '#00f3ff'; 
+            ctx.globalAlpha = 0.3; 
             ctx.fill();
         });
         requestAnimationFrame(draw);
