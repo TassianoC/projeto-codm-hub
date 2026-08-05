@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOBARK // CODM ESPORTS & SOCIAL HUB</title>
+    <title>LOBARK // CODM ESPORTS & HUB</title>
     
     <!-- Font Awesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,12 +24,11 @@
         </div>
 
         <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('feed')"><i class="fa-solid fa-house"></i> Feed</button>
+            <button class="nav-btn active" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
             <button class="nav-btn" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies</button>
             <button class="nav-btn" onclick="switchTab('online')"><i class="fa-solid fa-users"></i> Online <span id="online-count-badge" class="counter-badge">0</span></button>
             <button class="nav-btn" onclick="switchTab('teams')"><i class="fa-solid fa-shield-cat"></i> Equipes</button>
             <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking</button>
-            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
         </nav>
 
         <div class="user-auth-control">
@@ -51,93 +50,17 @@
     <!-- Conteúdo Principal -->
     <main class="main-container">
 
-        <!-- ABA 1: FEED DE CLIPES E HIGHLIGHTS (ESTILO INSTAGRAM) -->
-        <section id="tab-feed" class="tab-content active">
-            <div class="feed-layout">
-                <div class="feed-main">
-                    <div class="create-post-card glass-panel" onclick="openModal('create-post')">
-                        <i class="fa-solid fa-photo-film"></i>
-                        <span>Compartilhar uma jogada, highlight ou foto de campeonato...</span>
-                    </div>
-
-                    <div id="posts-container" class="posts-list">
-                        <!-- Posts inseridos dinamicamente -->
-                    </div>
-                </div>
-
-                <div class="feed-sidebar">
-                    <div class="glass-panel sidebar-box">
-                        <h3><i class="fa-solid fa-fire"></i> Em Destaque (CODM)</h3>
-                        <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:8px;">
-                            Grizz (Will S.) venceu o Top Plays da Semana pela Snapdragon Pro Series!
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 2: LOBBIES / SCRIMS -->
-        <section id="tab-lobbies" class="tab-content">
-            <div class="section-header">
-                <h2>Lobbies Abertos & Desafios</h2>
-                <div class="action-buttons">
-                    <button class="btn-primary" onclick="openModal('scrim')"><i class="fa-solid fa-plus"></i> Agendar Scrim 5v5</button>
-                    <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-bolt"></i> Desafio X1</button>
-                </div>
-            </div>
-            <div id="lobbies-container" class="cards-grid"></div>
-        </section>
-
-        <!-- ABA 3: JOGADORES ONLINE -->
-        <section id="tab-online" class="tab-content">
-            <div class="section-header">
-                <h2>Jogadores Conectados no Hub</h2>
-            </div>
-            <div id="online-players-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- ABA 4: EQUIPES CADASTRADAS -->
-        <section id="tab-teams" class="tab-content">
-            <div class="section-header">
-                <h2>Equipes & Organizações</h2>
-                <button class="btn-primary" onclick="openModal('create-team')"><i class="fa-solid fa-shield-plus"></i> Registrar Nova Equipe</button>
-            </div>
-            <div id="teams-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- ABA 5: RANKING COMPETITIVO -->
-        <section id="tab-ranking" class="tab-content">
-            <div class="section-header">
-                <h2>Classificação de Clãs CODM</h2>
-            </div>
-            <div class="table-wrapper glass-panel">
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th>Posição</th>
-                            <th>Clã / Organização</th>
-                            <th>Tier</th>
-                            <th>Vitórias</th>
-                            <th>Derrotas</th>
-                            <th>Winrate</th>
-                            <th>Pico Viewers</th>
-                            <th>Ações ADM</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ranking-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- ABA 6: PERFIL PRO (ESTILO INSTAGRAM + ESPORTS CHARTS) -->
-        <section id="tab-profile" class="tab-content">
+        <!-- ABA PERFIL PRO + FEED PRÓPRIO INTEGRADO -->
+        <section id="tab-profile" class="tab-content active">
             <div class="insta-profile-card glass-panel">
-                <!-- Cabeçalho Instagram -->
+                
+                <!-- Cabeçalho do Perfil -->
                 <div class="insta-header">
                     <div class="insta-avatar-container">
                         <div class="insta-avatar-ring">
-                            <div class="avatar-box">
-                                <i class="fa-solid fa-user-ninja"></i>
+                            <div class="avatar-box" id="profile-avatar-box">
+                                <i class="fa-solid fa-user-ninja" id="profile-default-icon"></i>
+                                <img id="profile-avatar-img" src="" alt="Foto de Perfil" style="display:none;">
                             </div>
                         </div>
                         <span id="view-profile-status-dot" class="status-indicator offline"></span>
@@ -145,9 +68,12 @@
 
                     <div class="insta-details">
                         <div class="insta-user-row">
-                            <h2 id="view-profile-nick">Grizz_CODM</h2>
+                            <h2 id="view-profile-nick">Nick do Jogador</h2>
                             <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> PRO</span>
-                            <span id="view-profile-live-tag" class="badge-live" style="display:none;"><i class="fa-solid fa-broadcast-tower"></i> LIVE</span>
+                            <div class="profile-header-actions">
+                                <button id="btn-edit-my-profile" class="btn-secondary" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</button>
+                                <button class="btn-primary" onclick="openModal('create-post')"><i class="fa-solid fa-plus"></i> Novo Mídia/Post</button>
+                            </div>
                             <div id="admin-player-controls" style="display:none;">
                                 <button class="btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="adminBanPlayer()"><i class="fa-solid fa-ban"></i> Banir</button>
                             </div>
@@ -156,56 +82,49 @@
                         <!-- Métricas estilo seguidores/posts + Esports Charts -->
                         <div class="insta-stats-row">
                             <div class="insta-stat">
-                                <strong id="view-profile-peak-viewers">534K</strong>
+                                <strong id="view-profile-posts-count">0</strong>
+                                <span>Publicações</span>
+                            </div>
+                            <div class="insta-stat">
+                                <strong id="view-profile-peak-viewers">0</strong>
                                 <span>Pico Viewers</span>
                             </div>
                             <div class="insta-stat">
-                                <strong id="view-profile-hours-watched">1.2M</strong>
-                                <span>Hrs Assistidas</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="view-profile-earnings">$47,133</strong>
+                                <strong id="view-profile-earnings">$0</strong>
                                 <span>Premiação</span>
                             </div>
                             <div class="insta-stat">
-                                <strong id="view-profile-kd">2.45</strong>
+                                <strong id="view-profile-kd">0.00</strong>
                                 <span>K/D Global</span>
                             </div>
                         </div>
 
                         <div class="insta-bio">
-                            <p id="view-profile-bio">🎮 Ex-STMN & Exclusive CODM Player | Snapdragon Pro Series Winner | 📍 United Kingdom</p>
+                            <p id="view-profile-bio">Sua biografia aparecerá aqui. Clique em "Editar Perfil" para personalizar suas informações.</p>
                             <div class="insta-gears-tags">
-                                <span id="view-profile-role" class="badge badge-t1">Role: Sniper</span>
-                                <span id="view-profile-device" class="badge badge-tech"><i class="fa-solid fa-mobile-screen"></i> iPad Pro 12.9"</span>
-                                <span id="view-profile-hud" class="badge badge-tech"><i class="fa-solid fa-hand"></i> 4 Dedos (Garra)</span>
+                                <span id="view-profile-role" class="badge badge-t1">Role: Flex</span>
+                                <span id="view-profile-device" class="badge badge-tech"><i class="fa-solid fa-mobile-screen"></i> Dispositivo N/I</span>
+                                <span id="view-profile-hud" class="badge badge-tech"><i class="fa-solid fa-hand"></i> HUD N/I</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sub-Navegação do Perfil Estilo Instagram -->
+                <!-- Navegação Interna do Perfil -->
                 <div class="profile-tabs-bar">
-                    <button class="p-tab-btn active" onclick="switchProfileSubTab('grid')"><i class="fa-solid fa-table-cells"></i> Mídia / Clipes</button>
-                    <button class="p-tab-btn" onclick="switchProfileSubTab('tournaments')"><i class="fa-solid fa-trophy"></i> Torneios & Conquistas</button>
-                    <button class="p-tab-btn" onclick="switchProfileSubTab('gears')"><i class="fa-solid fa-sliders"></i> Gears & Sensibilidade</button>
+                    <button class="p-tab-btn active" onclick="switchProfileSubTab('feed-grid')"><i class="fa-solid fa-border-all"></i> Feed de Mídias (Fotos/Vídeos)</button>
+                    <button class="p-tab-btn" onclick="switchProfileSubTab('tournaments')"><i class="fa-solid fa-trophy"></i> Conquistas & Torneios</button>
+                    <button class="p-tab-btn" onclick="switchProfileSubTab('gears')"><i class="fa-solid fa-sliders"></i> Sensibilidade & Gears</button>
                 </div>
 
-                <!-- Sub-Aba 1: Grid de Fotos/Vídeos (Instagram Grid) -->
-                <div id="ptab-grid" class="profile-sub-content active">
-                    <div id="profile-media-grid" class="insta-grid">
-                        <div class="insta-grid-item" onclick="viewMediaDetail('clip1')">
-                            <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=500&q=80" alt="CODM Clip">
-                            <div class="grid-overlay"><i class="fa-solid fa-play"></i> 12.4K</div>
-                        </div>
-                        <div class="insta-grid-item" onclick="viewMediaDetail('clip2')">
-                            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80" alt="CODM Match">
-                            <div class="grid-overlay"><i class="fa-solid fa-heart"></i> 3.2K</div>
-                        </div>
+                <!-- SUB-ABA 1: FEED EM GRID DE FOTOS E VÍDEOS DO PERFIL -->
+                <div id="ptab-feed-grid" class="profile-sub-content active">
+                    <div id="my-feed-grid" class="insta-grid">
+                        <!-- Posts/Mídias inseridos dinamicamente -->
                     </div>
                 </div>
 
-                <!-- Sub-Aba 2: Tabela de Torneios (Estilo Grizz / Liquipedia) -->
+                <!-- SUB-ABA 2: TORNEIOS -->
                 <div id="ptab-tournaments" class="profile-sub-content">
                     <div class="table-wrapper">
                         <table class="custom-table">
@@ -220,98 +139,152 @@
                             </thead>
                             <tbody id="view-profile-tournaments-body">
                                 <tr>
-                                    <td>2025-08-24</td>
-                                    <td>CODM World Championship 2025 Europe Finals</td>
-                                    <td>117NotFound</td>
-                                    <td><span class="badge badge-t1">3º Lugar</span></td>
-                                    <td>$3,000</td>
-                                </tr>
-                                <tr>
-                                    <td>2025-03-30</td>
-                                    <td>Snapdragon Pro Series S6 Europe</td>
-                                    <td>Exclusive</td>
-                                    <td><span class="badge badge-t3">1º - 2º</span></td>
-                                    <td>$2,250</td>
+                                    <td colspan="5" style="text-align:center; color: var(--text-muted);">Nenhum torneio registrado no histórico.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Sub-Aba 3: Configurações & Gears (Grizz Gears) -->
+                <!-- SUB-ABA 3: CONFIGURAÇÕES E GEARS -->
                 <div id="ptab-gears" class="profile-sub-content">
                     <div class="gears-card glass-panel">
-                        <h3><i class="fa-solid fa-gamepad"></i> Dispositivo & Configurações Oficiais</h3>
+                        <h3><i class="fa-solid fa-gamepad"></i> Dispositivo & Configurações de Jogo</h3>
                         <div class="gears-grid">
-                            <div><strong>Dispositivo Principal:</strong> <span id="gear-device">iPad Pro 12.9" M2</span></div>
-                            <div><strong>Layout HUD:</strong> <span id="gear-hud">4 Dedos (Garra Avançada)</span></div>
-                            <div><strong>Sensibilidade de Câmera:</strong> <span id="gear-sens-cam">120 (Padrão Pro)</span></div>
-                            <div><strong>Sensibilidade de Mira/Sniper:</strong> <span id="gear-sens-scope">85 (Precision)</span></div>
-                            <div><strong>Giroscópio:</strong> <span>Ativado (Apenas ao Mirar)</span></div>
-                            <div><strong>Canal de Transmissão:</strong> <span id="gear-stream"><a href="#" target="_blank">twitch.tv/grizz_codm</a></span></div>
+                            <div><strong>Dispositivo Principal:</strong> <span id="gear-device">N/I</span></div>
+                            <div><strong>Layout HUD:</strong> <span id="gear-hud">N/I</span></div>
+                            <div><strong>Sensibilidade Câmera:</strong> <span id="gear-sens-cam">N/I</span></div>
+                            <div><strong>Sensibilidade Mira:</strong> <span id="gear-sens-scope">N/I</span></div>
                         </div>
                     </div>
                 </div>
+
+            </div>
+        </section>
+
+        <!-- DEMAIS ABAS DO SISTEMA -->
+        <section id="tab-lobbies" class="tab-content">
+            <div class="section-header">
+                <h2>Lobbies Abertos & Desafios</h2>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="openModal('scrim')"><i class="fa-solid fa-plus"></i> Agendar Scrim 5v5</button>
+                    <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-bolt"></i> Desafio X1</button>
+                </div>
+            </div>
+            <div id="lobbies-container" class="cards-grid"></div>
+        </section>
+
+        <section id="tab-online" class="tab-content">
+            <div class="section-header">
+                <h2>Jogadores Conectados no Hub</h2>
+            </div>
+            <div id="online-players-grid" class="cards-grid"></div>
+        </section>
+
+        <section id="tab-teams" class="tab-content">
+            <div class="section-header">
+                <h2>Equipes & Organizações</h2>
+                <button class="btn-primary" onclick="openModal('create-team')"><i class="fa-solid fa-shield-plus"></i> Registrar Nova Equipe</button>
+            </div>
+            <div id="teams-grid" class="cards-grid"></div>
+        </section>
+
+        <section id="tab-ranking" class="tab-content">
+            <div class="section-header">
+                <h2>Classificação de Clãs CODM</h2>
+            </div>
+            <div class="table-wrapper glass-panel">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Clã / Organização</th>
+                            <th>Tier</th>
+                            <th>Vitórias</th>
+                            <th>Derrotas</th>
+                            <th>Winrate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body"></tbody>
+                </table>
             </div>
         </section>
     </main>
 
-    <!-- MODAL CRIAR POST NO FEED -->
+    <!-- MODAL EDITAR PERFIL COMPLETO (Foto de Perfil, Bio, Gears, etc.) -->
+    <div id="modal-edit-profile" class="modal">
+        <div class="modal-content glass-panel modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen"></i> Editar Tudo no Perfil</h3>
+                <span class="close-btn" onclick="closeModal('edit-profile')">&times;</span>
+            </div>
+            <form onsubmit="handleSaveProfile(event)">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div class="form-group"><label>URL da Foto de Perfil (Avatar):</label><input type="url" id="edit-avatar-url" placeholder="https://exemplo.com/sua-foto.jpg"></div>
+                    <div class="form-group"><label>Nick Oficial no CODM:</label><input type="text" id="edit-nick" required></div>
+                    <div class="form-group"><label>Função Principal:</label>
+                        <select id="edit-role">
+                            <option value="Sniper">Sniper Principal</option>
+                            <option value="IGL">IGL (Líder)</option>
+                            <option value="Entry">Entry Fragger</option>
+                            <option value="Support">Suporte</option>
+                            <option value="Flex">Flexível</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>K/D Ratio:</label><input type="text" id="edit-kd" placeholder="Ex: 2.45"></div>
+                    <div class="form-group"><label>Dispositivo:</label><input type="text" id="edit-device" placeholder="Ex: iPad Pro 12.9 / ROG Phone"></div>
+                    <div class="form-group"><label>Layout HUD:</label><input type="text" id="edit-hud" placeholder="Ex: 4 Dedos (Garra)"></div>
+                    <div class="form-group"><label>Sensibilidade Câmera:</label><input type="text" id="edit-sens-cam" placeholder="Ex: 120"></div>
+                    <div class="form-group"><label>Sensibilidade Mira:</label><input type="text" id="edit-sens-scope" placeholder="Ex: 85"></div>
+                    <div class="form-group"><label>Pico de Viewers:</label><input type="number" id="edit-peak-viewers" placeholder="Ex: 1500"></div>
+                    <div class="form-group"><label>Premiação Total (USD):</label><input type="text" id="edit-earnings" placeholder="Ex: $5,000"></div>
+                </div>
+                <div class="form-group"><label>Biografia do Perfil:</label><input type="text" id="edit-bio" placeholder="Escreva algo sobre você..."></div>
+                <button type="submit" class="btn-primary btn-block">Salvar Perfil</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR FOTO/VÍDEO AO FEED DO PERFIL -->
     <div id="modal-create-post" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-plus"></i> Novo Post / Jogada</h3>
+                <h3><i class="fa-solid fa-photo-film"></i> Adicionar Foto ou Vídeo ao Feed</h3>
                 <span class="close-btn" onclick="closeModal('create-post')">&times;</span>
             </div>
             <form onsubmit="handleCreatePost(event)">
                 <div class="form-group">
-                    <label>Legenda do Post:</label>
-                    <input type="text" id="post-caption" required placeholder="Ex: Clutch 1v4 inacreditável na Scrim T1!">
-                </div>
-                <div class="form-group">
-                    <label>URL da Imagem ou Thumbnail do Clipe:</label>
-                    <input type="url" id="post-image-url" required placeholder="https://exemplo.com/imagem.jpg">
-                </div>
-                <button type="submit" class="btn-primary btn-block">Publicar no Feed</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DETALHES DA EQUIPE -->
-    <div id="modal-team-details" class="modal">
-        <div class="modal-content glass-panel modal-lg">
-            <div class="modal-header">
-                <h3 id="modal-team-title"><i class="fa-solid fa-shield"></i> Detalhes da Equipe</h3>
-                <span class="close-btn" onclick="closeModal('team-details')">&times;</span>
-            </div>
-            <div id="modal-team-body"></div>
-        </div>
-    </div>
-
-    <!-- MODAL REGISTRAR EQUIPE -->
-    <div id="modal-create-team" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-shield-plus"></i> Registrar Equipe CODM</h3>
-                <span class="close-btn" onclick="closeModal('create-team')">&times;</span>
-            </div>
-            <form onsubmit="handleCreateTeam(event)">
-                <div class="form-group"><label>Nome da Equipe:</label><input type="text" id="team-name" required placeholder="Ex: LOBARK ESPORTS"></div>
-                <div class="form-group"><label>Tier:</label>
-                    <select id="team-tier">
-                        <option value="T1">Tier 1 (Pro Circuit)</option>
-                        <option value="T2">Tier 2 (Competitive)</option>
-                        <option value="T3" selected>Tier 3 (Amador)</option>
+                    <label>Tipo de Mídia:</label>
+                    <select id="post-type" onchange="togglePostInputType()">
+                        <option value="image">Foto / Imagem</option>
+                        <option value="video">Vídeo (MP4 ou Direct Link)</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Descrição:</label><input type="text" id="team-desc" placeholder="Foco em campeonatos oficiais."></div>
-                <div class="form-group"><label>Lineup (Nicks separados por vírgula):</label><input type="text" id="team-roster" placeholder="Nick1, Nick2, Nick3, Nick4, Nick5"></div>
-                <button type="submit" class="btn-primary btn-block">Cadastrar Equipe</button>
+                <div class="form-group">
+                    <label>URL da Foto ou Vídeo:</label>
+                    <input type="url" id="post-media-url" required placeholder="https://exemplo.com/midia.jpg ou .mp4">
+                </div>
+                <div class="form-group">
+                    <label>Legenda / Descrição da Jogada:</label>
+                    <input type="text" id="post-caption" required placeholder="Ex: Clutch 1v4 no Campeonato!">
+                </div>
+                <button type="submit" class="btn-primary btn-block">Publicar no Perfil</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL AUTH -->
+    <!-- MODAL VISUALIZAR / EDITAR POST INDIVIDUAL DO FEED -->
+    <div id="modal-view-post" class="modal">
+        <div class="modal-content glass-panel modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-eye"></i> Detalhes da Mídia</h3>
+                <span class="close-btn" onclick="closeModal('view-post')">&times;</span>
+            </div>
+            <div id="modal-post-content-display"></div>
+        </div>
+    </div>
+
+    <!-- MODAIS ADICIONAIS -->
     <div id="modal-auth" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
@@ -333,37 +306,6 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR PERFIL PRO -->
-    <div id="modal-edit-profile" class="modal">
-        <div class="modal-content glass-panel modal-lg">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-pen"></i> Editar Meu Perfil Pro</h3>
-                <span class="close-btn" onclick="closeModal('edit-profile')">&times;</span>
-            </div>
-            <form onsubmit="handleSaveProfile(event)">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                    <div class="form-group"><label>Nick Exato no CODM:</label><input type="text" id="edit-nick" required></div>
-                    <div class="form-group"><label>Função:</label>
-                        <select id="edit-role">
-                            <option value="Sniper">Sniper Principal</option>
-                            <option value="IGL">IGL (Líder)</option>
-                            <option value="Entry">Entry Fragger</option>
-                            <option value="Support">Suporte</option>
-                            <option value="Flex">Flexível</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>K/D Ratio:</label><input type="text" id="edit-kd" required></div>
-                    <div class="form-group"><label>Dispositivo:</label><input type="text" id="edit-device" placeholder="Ex: iPad Pro 12.9 / ROG Phone"></div>
-                    <div class="form-group"><label>Pico de Viewers:</label><input type="number" id="edit-peak-viewers" placeholder="Ex: 5000"></div>
-                    <div class="form-group"><label>Premiação (USD):</label><input type="text" id="edit-earnings" placeholder="Ex: $12,500"></div>
-                </div>
-                <div class="form-group"><label>Biografia estilo Instagram:</label><input type="text" id="edit-bio"></div>
-                <button type="submit" class="btn-primary btn-block">Salvar Alterações</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL SCRIM & X1 -->
     <div id="modal-scrim" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
@@ -371,22 +313,11 @@
                 <span class="close-btn" onclick="closeModal('scrim')">&times;</span>
             </div>
             <form id="form-scrim" onsubmit="handleCreateScrim(event)">
-                <div class="form-group"><label>Tipo de Scrim:</label>
-                    <select id="scrim-type" required>
-                        <option value="Scrim T1">Scrim T1</option>
-                        <option value="Scrim T2">Scrim T2</option>
-                        <option value="Scrim T3" selected>Scrim T3</option>
-                    </select>
+                <div class="form-group"><label>Tipo:</label>
+                    <select id="scrim-type" required><option value="Scrim T1">Scrim T1</option><option value="Scrim T2">Scrim T2</option><option value="Scrim T3" selected>Scrim T3</option></select>
                 </div>
                 <div class="form-group"><label>Horário:</label><input type="text" id="scrim-time" required></div>
                 <div class="form-group"><label>Equipe:</label><input type="text" id="scrim-team-name" required></div>
-                <div class="form-group"><label>Escalação (5 Nicks):</label>
-                    <input type="text" id="p1" placeholder="Jogador 1" required style="margin-bottom:5px;">
-                    <input type="text" id="p2" placeholder="Jogador 2" required style="margin-bottom:5px;">
-                    <input type="text" id="p3" placeholder="Jogador 3" required style="margin-bottom:5px;">
-                    <input type="text" id="p4" placeholder="Jogador 4" required style="margin-bottom:5px;">
-                    <input type="text" id="p5" placeholder="Jogador 5" required>
-                </div>
                 <button type="submit" class="btn-primary btn-block">Criar Lobby</button>
             </form>
         </div>
@@ -401,13 +332,27 @@
             <form id="form-x1" onsubmit="handleCreateX1(event)">
                 <div class="form-group"><label>Seu Nick:</label><input type="text" id="x1-player" required></div>
                 <div class="form-group"><label>Horário:</label><input type="text" id="x1-time" required></div>
-                <div class="form-group"><label>Regras:</label><input type="text" id="x1-mode" required placeholder="Ex: Apenas Sniper / Regras Campeonatos"></div>
+                <div class="form-group"><label>Regras:</label><input type="text" id="x1-mode" required placeholder="Ex: Apenas Sniper"></div>
                 <button type="submit" class="btn-primary btn-block">Publicar Desafio</button>
             </form>
         </div>
     </div>
 
-    <!-- SDKs do Firebase -->
+    <div id="modal-create-team" class="modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-plus"></i> Registrar Equipe</h3>
+                <span class="close-btn" onclick="closeModal('create-team')">&times;</span>
+            </div>
+            <form onsubmit="handleCreateTeam(event)">
+                <div class="form-group"><label>Nome:</label><input type="text" id="team-name" required></div>
+                <div class="form-group"><label>Tier:</label><select id="team-tier"><option value="T1">T1</option><option value="T2">T2</option><option value="T3" selected>T3</option></select></div>
+                <button type="submit" class="btn-primary btn-block">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
