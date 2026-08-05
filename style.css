@@ -138,7 +138,7 @@ body {
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeIn 0.4s ease-in-out; }
 
-/* LAYOUT DO PERFIL COM FEED DE MÍDIAS INTEGRADO */
+/* PERFIL DE JOGADOR E FEED */
 .insta-profile-card { padding: 30px; }
 .insta-header { display: flex; gap: 40px; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
 .insta-avatar-ring { padding: 3px; background: linear-gradient(45deg, var(--accent), #00a2ff, var(--crimson)); border-radius: 50%; }
@@ -167,7 +167,7 @@ body {
 .profile-sub-content { display: none; }
 .profile-sub-content.active { display: block; }
 
-/* FEED ESTILO INSTAGRAM GRID NO PERFIL */
+/* FEED GRID */
 .insta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
 .insta-grid-item { position: relative; aspect-ratio: 1/1; overflow: hidden; border-radius: 8px; cursor: pointer; border: 1px solid var(--card-border); background: #000; }
 .insta-grid-item img, .insta-grid-item video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
@@ -180,9 +180,14 @@ body {
 .gears-card { padding: 20px; }
 .gears-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; font-size: 0.95rem; }
 
-/* REGRAS DE CARDS, BADGES E MODAIS */
+/* CARD DE JOGADORES */
+.player-card { text-align: center; padding: 20px; }
+.player-card-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 12px auto; overflow: hidden; background: #0d131d; border: 2px solid var(--accent); display: flex; justify-content: center; align-items: center; font-size: 2rem; color: var(--accent); }
+.player-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ELEMENTOS GERAIS */
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .card { padding: 20px; position: relative; transition: transform 0.3s ease; }
 .card:hover { transform: translateY(-4px); border-color: var(--accent); }
 
