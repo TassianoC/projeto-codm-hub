@@ -15,7 +15,6 @@ let lobbiesRef = null;
 let rankingRef = null;
 let usersRef = null;
 let teamsRef = null;
-let postsRef = null;
 
 let currentUser = null;
 let currentUserProfile = null;
@@ -26,7 +25,6 @@ const ADMIN_SECRET_PASSWORD = "lobark2026";
 let lobbies = [];
 let teamsRanking = [];
 let registeredTeams = [];
-let posts = [];
 let allProfiles = {};
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingRef = db.ref('ranking');
             usersRef = db.ref('users');
             teamsRef = db.ref('teams');
-            postsRef = db.ref('posts');
 
             listenToAuth();
             listenToFirebase();
@@ -67,11 +64,12 @@ function listenToAuth() {
             db.ref(`users/${user.uid}/isOnline`).onDisconnect().set(false);
 
             usersRef.child(user.uid).on('value', (snapshot) => {
-                currentUserProfile = snapshot.val();
-                if (currentUserProfile && currentUserProfile.nick) {
-                    userDisplayName.innerText = currentUserProfile.nick;
-                } else {
-                    userDisplayName.innerText = user.email.split('@')[0];
+                currentUserProfile = snapshot.val() || {};
+                userDisplayName.innerText = currentUserProfile.nick || user.email.split('@')[0];
+                
+                // Se o usuário estiver na tela do próprio perfil, atualiza
+                if (!currentViewingUserUid || currentViewingUserUid === user.uid) {
+                    renderUserProfile(user.uid);
                 }
             });
         } else {
@@ -101,112 +99,198 @@ function listenToFirebase() {
         renderTeams();
     });
 
-    postsRef.on('value', (s) => {
-        posts = [];
-        if (s.val()) Object.keys(s.val()).forEach(k => posts.push({ firebaseKey: k, ...s.val()[k] }));
-        renderPosts();
-    });
-
     usersRef.on('value', (s) => {
         allProfiles = s.val() || {};
         renderOnlinePlayers();
+        if (currentViewingUserUid) renderUserProfile(currentViewingUserUid);
+        else if (currentUser) renderUserProfile(currentUser.uid);
     });
 }
 
-// FEED DE PUBLICAÇÕES
-function renderPosts() {
-    const container = document.getElementById('posts-container');
-    if (!container) return;
-    container.innerHTML = '';
+// PERFIL E FEED INDIVIDUAL EM GRID
+function renderUserProfile(targetUid) {
+    currentViewingUserUid = targetUid;
+    const profile = allProfiles[targetUid] || {};
+    const isOwner = currentUser && currentUser.uid === targetUid;
 
-    if (posts.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding: 30px;">Nenhum clipe ou publicação no feed ainda.</p>`;
+    // Foto de Perfil / Avatar
+    const avatarImg = document.getElementById('profile-avatar-img');
+    const avatarDefault = document.getElementById('profile-default-icon');
+    if (profile.avatarUrl) {
+        avatarImg.src = profile.avatarUrl;
+        avatarImg.style.display = 'block';
+        avatarDefault.style.display = 'none';
+    } else {
+        avatarImg.style.display = 'none';
+        avatarDefault.style.display = 'block';
+    }
+
+    // Dados Principais
+    document.getElementById('view-profile-nick').innerText = profile.nick || 'Jogador LOBARK';
+    document.getElementById('view-profile-kd').innerText = profile.kd || '0.00';
+    document.getElementById('view-profile-peak-viewers').innerText = profile.peakViewers ? parseInt(profile.peakViewers).toLocaleString('pt-BR') : '0';
+    document.getElementById('view-profile-earnings').innerText = profile.earnings || '$0';
+    document.getElementById('view-profile-bio').innerText = profile.bio || 'Biografia não definida.';
+    document.getElementById('view-profile-role').innerText = 'Role: ' + (profile.role || 'Flex');
+    document.getElementById('view-profile-device').innerHTML = `<i class="fa-solid fa-mobile-screen"></i> ${profile.device || 'Dispositivo N/I'}`;
+    document.getElementById('view-profile-hud').innerHTML = `<i class="fa-solid fa-hand"></i> ${profile.hud || 'HUD N/I'}`;
+    
+    document.getElementById('gear-device').innerText = profile.device || 'N/I';
+    document.getElementById('gear-hud').innerText = profile.hud || 'N/I';
+    document.getElementById('gear-sens-cam').innerText = profile.sensCam || 'N/I';
+    document.getElementById('gear-sens-scope').innerText = profile.sensScope || 'N/I';
+
+    document.getElementById('view-profile-status-dot').className = profile.isOnline ? 'status-indicator online' : 'status-indicator offline';
+
+    // Oculta botão de editar se não for dono do perfil
+    const btnEdit = document.getElementById('btn-edit-my-profile');
+    if (btnEdit) btnEdit.style.display = isOwner ? 'inline-flex' : 'none';
+
+    // Preenche os campos do modal de edição com os dados atuais
+    if (isOwner) {
+        document.getElementById('edit-avatar-url').value = profile.avatarUrl || '';
+        document.getElementById('edit-nick').value = profile.nick || '';
+        document.getElementById('edit-role').value = profile.role || 'Flex';
+        document.getElementById('edit-kd').value = profile.kd || '';
+        document.getElementById('edit-device').value = profile.device || '';
+        document.getElementById('edit-hud').value = profile.hud || '';
+        document.getElementById('edit-sens-cam').value = profile.sensCam || '';
+        document.getElementById('edit-sens-scope').value = profile.sensScope || '';
+        document.getElementById('edit-peak-viewers').value = profile.peakViewers || '';
+        document.getElementById('edit-earnings').value = profile.earnings || '';
+        document.getElementById('edit-bio').value = profile.bio || '';
+    }
+
+    // Renderiza os Posts/Mídias no Feed do Perfil
+    renderProfileFeed(profile.posts || {}, isOwner, targetUid);
+}
+
+function renderProfileFeed(postsObject, isOwner, targetUid) {
+    const grid = document.getElementById('my-feed-grid');
+    const postsCountLabel = document.getElementById('view-profile-posts-count');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const postKeys = Object.keys(postsObject);
+    if (postsCountLabel) postsCountLabel.innerText = postKeys.length;
+
+    if (postKeys.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">
+            <i class="fa-solid fa-camera" style="font-size:2rem; margin-bottom:10px;"></i>
+            <p>Nenhuma publicação ou mídia adicionada ao perfil ainda.</p>
+        </div>`;
         return;
     }
 
-    [...posts].reverse().forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'post-card glass-panel';
-        card.innerHTML = `
-            <div class="post-header">
-                <div class="post-avatar"><i class="fa-solid fa-user"></i></div>
-                <strong style="cursor:pointer;" onclick="viewPlayerProfileByNick('${post.author}')">${post.author}</strong>
-            </div>
-            <img src="${post.imageUrl}" class="post-image" alt="Post">
-            <div class="post-actions">
-                <i class="fa-regular fa-heart" onclick="likePost('${post.firebaseKey}')"></i>
-                <i class="fa-regular fa-comment"></i>
-            </div>
-            <div class="post-caption">
-                <strong>${post.author}:</strong> ${post.caption}
+    postKeys.reverse().forEach(key => {
+        const post = postsObject[key];
+        const item = document.createElement('div');
+        item.className = 'insta-grid-item';
+
+        const isVideo = post.type === 'video';
+        const mediaHtml = isVideo 
+            ? `<video src="${post.mediaUrl}" muted></video>` 
+            : `<img src="${post.mediaUrl}" alt="Mídia">`;
+
+        item.innerHTML = `
+            <span class="media-type-icon"><i class="fa-solid ${isVideo ? 'fa-video' : 'fa-image'}"></i></span>
+            ${mediaHtml}
+            <div class="grid-overlay" onclick="openPostModal('${targetUid}', '${key}')">
+                <i class="fa-solid fa-heart"></i> ${post.likes || 0}
+                <p style="font-size:0.75rem; color:#ddd;">${post.caption}</p>
             </div>
         `;
-        container.appendChild(card);
+        grid.appendChild(item);
     });
 }
 
+function handleSaveProfile(e) {
+    e.preventDefault();
+    if (!currentUser) return alert("Faça login para salvar alterações.");
+
+    const avatarUrl = document.getElementById('edit-avatar-url').value.trim();
+    const nick = document.getElementById('edit-nick').value.trim();
+    const role = document.getElementById('edit-role').value;
+    const kd = document.getElementById('edit-kd').value.trim();
+    const device = document.getElementById('edit-device').value.trim();
+    const hud = document.getElementById('edit-hud').value.trim();
+    const sensCam = document.getElementById('edit-sens-cam').value.trim();
+    const sensScope = document.getElementById('edit-sens-scope').value.trim();
+    const peakViewers = document.getElementById('edit-peak-viewers').value;
+    const earnings = document.getElementById('edit-earnings').value.trim();
+    const bio = document.getElementById('edit-bio').value.trim();
+
+    usersRef.child(currentUser.uid).update({
+        avatarUrl, nick, role, kd, device, hud, sensCam, sensScope, peakViewers, earnings, bio, isOnline: true
+    }).then(() => {
+        closeModal('edit-profile');
+        renderUserProfile(currentUser.uid);
+    });
+}
+
+// ADICIONAR NOVA MÍDIA/POST AO PERFIL
 function handleCreatePost(e) {
     e.preventDefault();
-    if (!currentUserProfile || !currentUserProfile.nick) return alert("Configure seu Nick no seu perfil antes de publicar algo.");
+    if (!currentUser) return alert("Faça login para adicionar uma mídia.");
 
-    const caption = document.getElementById('post-caption').value;
-    const imageUrl = document.getElementById('post-image-url').value;
+    const type = document.getElementById('post-type').value;
+    const mediaUrl = document.getElementById('post-media-url').value.trim();
+    const caption = document.getElementById('post-caption').value.trim();
 
-    postsRef.push({ 
-        author: currentUserProfile.nick, 
-        caption, 
-        imageUrl, 
+    const newPostRef = usersRef.child(`${currentUser.uid}/posts`).push();
+    newPostRef.set({
+        type,
+        mediaUrl,
+        caption,
         likes: 0,
         createdAt: Date.now()
     }).then(() => {
+        document.getElementById('post-media-url').value = '';
         document.getElementById('post-caption').value = '';
-        document.getElementById('post-image-url').value = '';
         closeModal('create-post');
     });
 }
 
-// PERFIL PRO & INSTAGRAM
-function viewPlayerProfileByNick(nick) {
-    let foundUid = null;
-    let foundProfile = null;
+// VISUALIZAR E DELETAR/EDITAR POST
+function openPostModal(ownerUid, postKey) {
+    const post = allProfiles[ownerUid]?.posts?.[postKey];
+    if (!post) return;
 
-    Object.keys(allProfiles).forEach(uid => {
-        if (allProfiles[uid].nick && allProfiles[uid].nick.toLowerCase() === nick.toLowerCase()) {
-            foundUid = uid;
-            foundProfile = allProfiles[uid];
-        }
-    });
+    const isOwner = currentUser && currentUser.uid === ownerUid;
+    const modalDisplay = document.getElementById('modal-post-content-display');
 
-    currentViewingUserUid = foundUid;
+    const mediaElement = post.type === 'video'
+        ? `<video src="${post.mediaUrl}" controls style="width:100%; max-height:400px; border-radius:8px;"></video>`
+        : `<img src="${post.mediaUrl}" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px;">`;
 
-    if (foundProfile) {
-        document.getElementById('view-profile-nick').innerText = foundProfile.nick;
-        document.getElementById('view-profile-kd').innerText = foundProfile.kd || '0.00';
-        document.getElementById('view-profile-peak-viewers').innerText = foundProfile.peakViewers ? parseInt(foundProfile.peakViewers).toLocaleString('pt-BR') : '0';
-        document.getElementById('view-profile-earnings').innerText = foundProfile.earnings ? foundProfile.earnings : '$0';
-        document.getElementById('view-profile-bio').innerText = foundProfile.bio || 'Jogador oficial de CODM.';
-        document.getElementById('view-profile-role').innerText = 'Role: ' + (foundProfile.role || 'Flex');
-        document.getElementById('view-profile-device').innerHTML = `<i class="fa-solid fa-mobile-screen"></i> ${foundProfile.device || 'Dispositivo N/I'}`;
-        
-        document.getElementById('gear-device').innerText = foundProfile.device || 'iPad Pro 12.9"';
-        document.getElementById('gear-hud').innerText = foundProfile.hud || '4 Dedos (Garra)';
+    modalDisplay.innerHTML = `
+        <div style="margin-bottom:15px;">${mediaElement}</div>
+        <p style="font-size:1.1rem; margin-bottom:15px;"><strong>Legenda:</strong> ${post.caption}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn-secondary" onclick="likeProfilePost('${ownerUid}', '${postKey}')"><i class="fa-solid fa-heart"></i> Curtir (${post.likes || 0})</button>
+            ${isOwner || isAdmin ? `<button class="btn-danger" onclick="deleteProfilePost('${ownerUid}', '${postKey}')"><i class="fa-solid fa-trash"></i> Excluir Mídia</button>` : ''}
+        </div>
+    `;
 
-        document.getElementById('view-profile-status-dot').className = foundProfile.isOnline ? 'status-indicator online' : 'status-indicator offline';
-    } else {
-        document.getElementById('view-profile-nick').innerText = nick;
-        document.getElementById('view-profile-kd').innerText = 'N/A';
-        document.getElementById('view-profile-peak-viewers').innerText = '0';
-        document.getElementById('view-profile-earnings').innerText = '$0';
-        document.getElementById('view-profile-bio').innerText = 'Perfil sem estatísticas registradas.';
-        document.getElementById('view-profile-status-dot').className = 'status-indicator offline';
-    }
-
-    const adminControls = document.getElementById('admin-player-controls');
-    if (adminControls) adminControls.style.display = (isAdmin && foundUid) ? 'block' : 'none';
-
-    switchTab('profile');
+    openModal('view-post');
 }
 
+function likeProfilePost(ownerUid, postKey) {
+    const currentLikes = allProfiles[ownerUid]?.posts?.[postKey]?.likes || 0;
+    usersRef.child(`${ownerUid}/posts/${postKey}`).update({ likes: currentLikes + 1 }).then(() => {
+        openPostModal(ownerUid, postKey);
+    });
+}
+
+function deleteProfilePost(ownerUid, postKey) {
+    if (confirm("Tem certeza que deseja excluir esta mídia do perfil?")) {
+        usersRef.child(`${ownerUid}/posts/${postKey}`).remove().then(() => {
+            closeModal('view-post');
+        });
+    }
+}
+
+// UTILITÁRIOS DA INTERFACE DE ABAS
 function switchProfileSubTab(sub) {
     document.querySelectorAll('.p-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.profile-sub-content').forEach(c => c.classList.remove('active'));
@@ -217,27 +301,11 @@ function switchProfileSubTab(sub) {
     }
 }
 
-function handleSaveProfile(e) {
-    e.preventDefault();
-    if (!currentUser) return alert("Faça login primeiro.");
-
-    const nick = document.getElementById('edit-nick').value.trim();
-    const kd = document.getElementById('edit-kd').value.trim();
-    const role = document.getElementById('edit-role').value;
-    const device = document.getElementById('edit-device').value.trim();
-    const peakViewers = document.getElementById('edit-peak-viewers').value;
-    const earnings = document.getElementById('edit-earnings').value.trim();
-    const bio = document.getElementById('edit-bio').value.trim();
-
-    usersRef.child(currentUser.uid).update({
-        nick, kd, role, device, peakViewers, earnings, bio, isOnline: true
-    }).then(() => {
-        closeModal('edit-profile');
-        viewPlayerProfileByNick(nick);
-    });
+function viewPlayerProfileByUid(uid) {
+    switchTab('profile');
+    renderUserProfile(uid);
 }
 
-// RENDERIZADORES DE TABS
 function renderOnlinePlayers() {
     const container = document.getElementById('online-players-grid');
     const badge = document.getElementById('online-count-badge');
@@ -256,7 +324,7 @@ function renderOnlinePlayers() {
                     <span class="status-indicator online"></span>
                     <h3 style="font-family: var(--font-heading);">${p.nick || 'Jogador'}</h3>
                 </div>
-                <button class="btn-secondary btn-block" onclick="viewPlayerProfileByNick('${p.nick}')">Ver Perfil</button>
+                <button class="btn-secondary btn-block" onclick="viewPlayerProfileByUid('${uid}')">Ver Perfil</button>
             `;
             container.appendChild(card);
         }
@@ -275,38 +343,18 @@ function renderTeams() {
         card.innerHTML = `
             <span class="badge badge-${team.tier ? team.tier.toLowerCase() : 't3'}">${team.tier || 'T3'}</span>
             <h3 style="font-family: var(--font-heading); margin-top:8px;">${team.name}</h3>
-            <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:5px;">${team.desc || 'Sem descrição.'}</p>
-            <button class="btn-primary btn-block" style="margin-top:15px;" onclick="openTeamDetails('${team.firebaseKey}')">Detalhes & Lineup</button>
+            <button class="btn-primary btn-block" style="margin-top:15px;">Detalhes da Equipe</button>
         `;
         container.appendChild(card);
     });
-}
-
-function openTeamDetails(key) {
-    const team = registeredTeams.find(t => t.firebaseKey === key);
-    if (!team) return;
-    document.getElementById('modal-team-title').innerText = team.name;
-    document.getElementById('modal-team-body').innerHTML = `
-        <p><strong>Tier:</strong> ${team.tier}</p>
-        <p><strong>Descrição:</strong> ${team.desc || 'Nenhuma'}</p>
-        <div style="margin-top:15px;">
-            <h4>Lineup Oficial:</h4>
-            <p style="color:var(--accent); font-weight:bold; margin-top:5px;">${team.roster || 'Não informada'}</p>
-        </div>
-    `;
-    openModal('team-details');
 }
 
 function handleCreateTeam(e) {
     e.preventDefault();
     teamsRef.push({
         name: document.getElementById('team-name').value,
-        tier: document.getElementById('team-tier').value,
-        desc: document.getElementById('team-desc').value,
-        roster: document.getElementById('team-roster').value
-    }).then(() => {
-        closeModal('create-team');
-    });
+        tier: document.getElementById('team-tier').value
+    }).then(() => closeModal('create-team'));
 }
 
 function renderLobbies() {
@@ -318,13 +366,9 @@ function renderLobbies() {
         const card = document.createElement('div');
         card.className = 'card glass-panel';
         card.innerHTML = `
-            <span class="badge ${lobby.type === 'X1' ? 'badge-x1' : 'badge-t3'}">${lobby.type}</span>
+            <span class="badge badge-t3">${lobby.type}</span>
             <h3 style="font-family: var(--font-heading); margin-top:8px;">${lobby.team}</h3>
             <p style="margin-top:5px; font-size:0.9rem;">⏰ Horário: ${lobby.time}</p>
-            ${lobby.mode ? `<p style="font-size:0.85rem; color:var(--text-secondary);">Regras: ${lobby.mode}</p>` : ''}
-            <button class="btn-primary btn-block" style="margin-top:12px;" onclick="acceptChallenge('${lobby.firebaseKey}')">
-                ${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}
-            </button>
         `;
         container.appendChild(card);
     });
@@ -335,7 +379,6 @@ function renderRanking() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    teamsRanking.sort((a, b) => (b.wins || 0) - (a.wins || 0));
     teamsRanking.forEach((team, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -345,8 +388,6 @@ function renderRanking() {
             <td>${team.wins || 0}</td>
             <td>${team.losses || 0}</td>
             <td>100%</td>
-            <td>500</td>
-            <td><button class="btn-outline" style="padding:2px 6px; font-size:0.7rem;">Ver</button></td>
         `;
         tbody.appendChild(row);
     });
@@ -357,14 +398,7 @@ function handleCreateScrim(e) {
     lobbiesRef.push({
         type: document.getElementById('scrim-type').value,
         time: document.getElementById('scrim-time').value,
-        team: document.getElementById('scrim-team-name').value,
-        lineup: [
-            document.getElementById('p1').value, 
-            document.getElementById('p2').value, 
-            document.getElementById('p3').value, 
-            document.getElementById('p4').value, 
-            document.getElementById('p5').value
-        ]
+        team: document.getElementById('scrim-team-name').value
     }).then(() => closeModal('scrim'));
 }
 
@@ -373,95 +407,50 @@ function handleCreateX1(e) {
     lobbiesRef.push({
         type: 'X1',
         time: document.getElementById('x1-time').value,
-        team: `${document.getElementById('x1-player').value} (X1)`,
-        mode: document.getElementById('x1-mode').value
+        team: `${document.getElementById('x1-player').value} (X1)`
     }).then(() => closeModal('x1'));
 }
 
 // AUTENTICAÇÃO E ADMIN
-function handleGoogleLogin() { 
-    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeModal('auth')); 
-}
-
-function handleEmailAuth(e) { 
-    e.preventDefault(); 
-    auth.signInWithEmailAndPassword(
-        document.getElementById('auth-email').value, 
-        document.getElementById('auth-password').value
-    ).then(() => closeModal('auth')); 
-}
-
-function handleRegister() { 
-    auth.createUserWithEmailAndPassword(
-        document.getElementById('auth-email').value, 
-        document.getElementById('auth-password').value
-    ).then(() => closeModal('auth')); 
-}
-
-function handleLogout() { 
-    auth.signOut(); 
-}
+function handleGoogleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeModal('auth')); }
+function handleEmailAuth(e) { e.preventDefault(); auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => closeModal('auth')); }
+function handleRegister() { auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => closeModal('auth')); }
+function handleLogout() { auth.signOut(); }
 
 function toggleAdminMode() {
-    if (prompt("Senha ADM:") === ADMIN_SECRET_PASSWORD) { 
-        isAdmin = true; 
-        atualizarInterfaceAdmin(); 
+    if (prompt("Senha ADM:") === ADMIN_SECRET_PASSWORD) {
+        isAdmin = true;
+        document.getElementById('role-label').innerText = 'ADMINISTRADOR';
     }
 }
 
-function atualizarInterfaceAdmin() { 
-    document.getElementById('role-label').innerText = isAdmin ? 'ADMINISTRADOR' : 'JOGADOR'; 
-    renderLobbies(); 
-}
-
-function adminBanPlayer() { 
-    if (isAdmin && confirm("Tem certeza que deseja banir este jogador?")) {
-        usersRef.child(currentViewingUserUid).remove().then(() => switchTab('online')); 
-    }
-}
-
-// UTILITÁRIOS DA INTERFACE
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`tab-${tabName}`).classList.add('active');
 }
 
-function acceptChallenge(key) { 
-    const team = prompt("Digite o nome da sua equipe para aceitar:"); 
-    if (team) lobbiesRef.child(key).update({ challenger: team }); 
-}
-
 function openModal(t) { document.getElementById(`modal-${t}`).classList.add('active'); }
 function closeModal(t) { document.getElementById(`modal-${t}`).classList.remove('active'); }
 
-// PARTICULAS NO BACKGROUND
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
-    
     const particles = Array.from({ length: 30 }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5
+        x: Math.random() * w, y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5
     }));
-
     function draw() {
         ctx.clearRect(0, 0, w, h);
         particles.forEach(p => {
-            p.x += p.vx; 
-            p.y += p.vy;
+            p.x += p.vx; p.y += p.vy;
             if (p.x < 0 || p.x > w) p.vx *= -1;
             if (p.y < 0 || p.y > h) p.vy *= -1;
-            ctx.beginPath(); 
-            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); 
-            ctx.fillStyle = '#00f3ff'; 
-            ctx.globalAlpha = 0.3; 
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#00f3ff'; ctx.globalAlpha = 0.3; ctx.fill();
         });
         requestAnimationFrame(draw);
     }
