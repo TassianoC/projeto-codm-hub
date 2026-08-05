@@ -25,6 +25,7 @@
 
         <nav class="nav-links">
             <button class="nav-btn active" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
+            <button class="nav-btn" onclick="switchTab('players')"><i class="fa-solid fa-address-card"></i> Jogadores</button>
             <button class="nav-btn" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies</button>
             <button class="nav-btn" onclick="switchTab('online')"><i class="fa-solid fa-users"></i> Online <span id="online-count-badge" class="counter-badge">0</span></button>
             <button class="nav-btn" onclick="switchTab('teams')"><i class="fa-solid fa-shield-cat"></i> Equipes</button>
@@ -50,10 +51,15 @@
     <!-- Conteúdo Principal -->
     <main class="main-container">
 
-        <!-- ABA PERFIL PRO + FEED PRÓPRIO INTEGRADO -->
+        <!-- ABA PERFIL DO JOGADOR (Exibe Meu Perfil ou Perfil de Terceiros) -->
         <section id="tab-profile" class="tab-content active">
             <div class="insta-profile-card glass-panel">
                 
+                <!-- Alerta de visitante -->
+                <div id="profile-visitor-banner" style="display:none; background: rgba(0,243,255,0.1); border: 1px solid var(--accent); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                    <span><i class="fa-solid fa-eye"></i> Você está visualizando o perfil de <strong id="visitor-player-name">...</strong>. <a href="#" onclick="viewMyOwnProfile()" style="color: var(--accent); text-decoration: underline;">Clique aqui para voltar ao Seu Perfil</a></span>
+                </div>
+
                 <!-- Cabeçalho do Perfil -->
                 <div class="insta-header">
                     <div class="insta-avatar-container">
@@ -72,14 +78,11 @@
                             <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> PRO</span>
                             <div class="profile-header-actions">
                                 <button id="btn-edit-my-profile" class="btn-secondary" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</button>
-                                <button class="btn-primary" onclick="openModal('create-post')"><i class="fa-solid fa-plus"></i> Novo Mídia/Post</button>
-                            </div>
-                            <div id="admin-player-controls" style="display:none;">
-                                <button class="btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="adminBanPlayer()"><i class="fa-solid fa-ban"></i> Banir</button>
+                                <button id="btn-create-my-post" class="btn-primary" onclick="openModal('create-post')"><i class="fa-solid fa-plus"></i> Publicar Mídia</button>
                             </div>
                         </div>
 
-                        <!-- Métricas estilo seguidores/posts + Esports Charts -->
+                        <!-- Métricas estilo Instagram / Esports Charts -->
                         <div class="insta-stats-row">
                             <div class="insta-stat">
                                 <strong id="view-profile-posts-count">0</strong>
@@ -100,7 +103,7 @@
                         </div>
 
                         <div class="insta-bio">
-                            <p id="view-profile-bio">Sua biografia aparecerá aqui. Clique em "Editar Perfil" para personalizar suas informações.</p>
+                            <p id="view-profile-bio">Sua biografia aparecerá aqui. Faça login para personalizar suas informações.</p>
                             <div class="insta-gears-tags">
                                 <span id="view-profile-role" class="badge badge-t1">Role: Flex</span>
                                 <span id="view-profile-device" class="badge badge-tech"><i class="fa-solid fa-mobile-screen"></i> Dispositivo N/I</span>
@@ -117,7 +120,7 @@
                     <button class="p-tab-btn" onclick="switchProfileSubTab('gears')"><i class="fa-solid fa-sliders"></i> Sensibilidade & Gears</button>
                 </div>
 
-                <!-- SUB-ABA 1: FEED EM GRID DE FOTOS E VÍDEOS DO PERFIL -->
+                <!-- SUB-ABA 1: FEED EM GRID -->
                 <div id="ptab-feed-grid" class="profile-sub-content active">
                     <div id="my-feed-grid" class="insta-grid">
                         <!-- Posts/Mídias inseridos dinamicamente -->
@@ -160,6 +163,15 @@
                 </div>
 
             </div>
+        </section>
+
+        <!-- NOVA ABA: COMUNIDADE / TODOS OS JOGADORES -->
+        <section id="tab-players" class="tab-content">
+            <div class="section-header">
+                <h2>Comunidade de Jogadores CODM</h2>
+                <input type="text" id="search-player-input" placeholder="Buscar por nick..." onkeyup="filterPlayersList()" style="padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 6px; color: #fff; width: 250px;">
+            </div>
+            <div id="all-players-grid" class="cards-grid"></div>
         </section>
 
         <!-- DEMAIS ABAS DO SISTEMA -->
@@ -211,11 +223,11 @@
         </section>
     </main>
 
-    <!-- MODAL EDITAR PERFIL COMPLETO (Foto de Perfil, Bio, Gears, etc.) -->
+    <!-- MODAL EDITAR PERFIL COMPLETO -->
     <div id="modal-edit-profile" class="modal">
         <div class="modal-content glass-panel modal-lg">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-user-pen"></i> Editar Tudo no Perfil</h3>
+                <h3><i class="fa-solid fa-user-pen"></i> Editar Meu Perfil</h3>
                 <span class="close-btn" onclick="closeModal('edit-profile')">&times;</span>
             </div>
             <form onsubmit="handleSaveProfile(event)">
@@ -245,19 +257,19 @@
         </div>
     </div>
 
-    <!-- MODAL ADICIONAR FOTO/VÍDEO AO FEED DO PERFIL -->
+    <!-- MODAL ADICIONAR FOTO/VÍDEO AO FEED -->
     <div id="modal-create-post" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-photo-film"></i> Adicionar Foto ou Vídeo ao Feed</h3>
+                <h3><i class="fa-solid fa-photo-film"></i> Publicar Mídia no Feed</h3>
                 <span class="close-btn" onclick="closeModal('create-post')">&times;</span>
             </div>
             <form onsubmit="handleCreatePost(event)">
                 <div class="form-group">
                     <label>Tipo de Mídia:</label>
-                    <select id="post-type" onchange="togglePostInputType()">
+                    <select id="post-type">
                         <option value="image">Foto / Imagem</option>
-                        <option value="video">Vídeo (MP4 ou Direct Link)</option>
+                        <option value="video">Vídeo (MP4 / Link direto)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -265,15 +277,15 @@
                     <input type="url" id="post-media-url" required placeholder="https://exemplo.com/midia.jpg ou .mp4">
                 </div>
                 <div class="form-group">
-                    <label>Legenda / Descrição da Jogada:</label>
+                    <label>Legenda / Descrição:</label>
                     <input type="text" id="post-caption" required placeholder="Ex: Clutch 1v4 no Campeonato!">
                 </div>
-                <button type="submit" class="btn-primary btn-block">Publicar no Perfil</button>
+                <button type="submit" class="btn-primary btn-block">Publicar</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL VISUALIZAR / EDITAR POST INDIVIDUAL DO FEED -->
+    <!-- MODAL VISUALIZAR POST DO FEED -->
     <div id="modal-view-post" class="modal">
         <div class="modal-content glass-panel modal-lg">
             <div class="modal-header">
