@@ -245,45 +245,56 @@
 
     </main>
 
-    <!-- MODAL SCRIM 5v5 -->
-    <div class="modal-overlay" id="modal-scrim">
-        <div class="modal glass-panel">
-            <h2>Agendar Scrim CODM 5v5</h2>
-            <form id="form-scrim" onsubmit="handleCreateScrim(event)">
-                <div class="form-group">
-                    <label>Tier do Confronto</label>
-                    <select id="scrim-type" required>
-                        <option value="Scrim T1">Scrim T1 (Elite / Pro Teams)</option>
-                        <option value="Scrim T2">Scrim T2 (Competitive Semi-Pro)</option>
-                        <option value="Scrim T3">Scrim T3 (Amador / Iniciante)</option>
-                        <option value="Treino Lineup">Treino de Lineup 5v5</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Horário da Sala</label>
-                    <input type="time" id="scrim-time" required>
-                </div>
-                <div class="form-group">
-                    <label>Nome do Clã / Equipe</label>
-                    <input type="text" id="scrim-team-name" value="LOBARK eSports" required>
-                </div>
+    <!-- Modal para Criar Scrim -->
+<div id="modal-scrim" class="modal">
+    <div class="modal-content glass-panel">
+        <span class="close-btn" onclick="closeModal('scrim')">&times;</span>
+        <h3>Agendar Scrim 5v5</h3>
+        <form onsubmit="handleCreateScrim(event)">
+            <label>Tipo de Scrim:</label>
+            <select id="scrim-type">
+                <option value="Scrim T1">Scrim T1</option>
+                <option value="Scrim T2">Scrim T2</option>
+                <option value="Scrim T3">Scrim T3</option>
+            </select>
 
-                <h3 style="margin: 15px 0 10px 0; font-size: 0.9rem; color: var(--accent);">Escalação dos 5 Jogadores</h3>
-                <div class="lineup-inputs">
-                    <input type="text" id="p1" value="FALLK_OP (IGL)" placeholder="Player 1 (IGL)" required>
-                    <input type="text" id="p2" value="Ghost_99 (Main Sniper)" placeholder="Player 2 (Sniper)" required>
-                    <input type="text" id="p3" value="Viper_CODM (Entry)" placeholder="Player 3 (Entry)" required>
-                    <input type="text" id="p4" value="Rex_SA (Support/Anchor)" placeholder="Player 4 (Support)" required>
-                    <input type="text" id="p5" value="Shadow_X (Flex)" placeholder="Player 5 (Flex)" required>
-                </div>
+            <label>Horário:</label>
+            <input type="text" id="scrim-time" placeholder="Ex: 21:00" required>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('scrim')">Cancelar</button>
-                    <button type="submit" class="btn-primary">Criar Lobby 5v5</button>
-                </div>
-            </form>
-        </div>
+            <label>Nome do Clã/Time:</label>
+            <input type="text" id="scrim-team-name" placeholder="Ex: LOBARK eSports" required>
+
+            <label>Lineup (5 Jogadores):</label>
+            <input type="text" id="p1" placeholder="Jogador 1 (IGL)" required>
+            <input type="text" id="p2" placeholder="Jogador 2 (Sniper)" required>
+            <input type="text" id="p3" placeholder="Jogador 3 (Entry)" required>
+            <input type="text" id="p4" placeholder="Jogador 4 (Support)" required>
+            <input type="text" id="p5" placeholder="Jogador 5 (Flex)" required>
+
+            <button type="submit" class="btn-primary" style="margin-top: 15px;">Criar Lobby na Nuvem</button>
+        </form>
     </div>
+</div>
+
+<!-- Modal para Propor X1 -->
+<div id="modal-x1" class="modal">
+    <div class="modal-content glass-panel">
+        <span class="close-btn" onclick="closeModal('x1')">&times;</span>
+        <h3>Propor Desafio X1</h3>
+        <form onsubmit="handleCreateX1(event)">
+            <label>Seu Nick:</label>
+            <input type="text" id="x1-player" placeholder="Ex: FALLK_OP" required>
+
+            <label>Horário:</label>
+            <input type="text" id="x1-time" placeholder="Ex: 22:30" required>
+
+            <label>Regras do X1:</label>
+            <input type="text" id="x1-mode" placeholder="Ex: Killhouse // AWP Only // 20 Kills" required>
+
+            <button type="submit" class="btn-primary" style="margin-top: 15px;">Criar Desafio X1</button>
+        </form>
+    </div>
+</div>
 
     <!-- MODAL DESAFIO X1 -->
     <div class="modal-overlay" id="modal-x1">
@@ -319,5 +330,6 @@
 
 <!-- Seu script principal -->
 <script src="script.js"></script>
+
 </body>
 </html>
