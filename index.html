@@ -17,26 +17,28 @@
 
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Navegação / Header -->
+    <!-- Header / Navbar -->
     <header class="navbar glass-panel">
         <div class="logo-container">
             <h1 class="glow-text">LOBARK <span class="sub-logo">HUB</span></h1>
         </div>
 
         <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies / Scrims</button>
-            <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking Clãs</button>
-            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-user-shield"></i> Meu Perfil</button>
+            <button class="nav-btn active" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies</button>
+            <button class="nav-btn" onclick="switchTab('online')"><i class="fa-solid fa-users"></i> Online <span id="online-count-badge" class="counter-badge">0</span></button>
+            <button class="nav-btn" onclick="switchTab('teams')"><i class="fa-solid fa-shield-cat"></i> Equipes</button>
+            <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking</button>
+            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-id-card"></i> Meu Perfil</button>
         </nav>
 
         <div class="user-auth-control">
             <div id="auth-guest-view">
-                <button class="btn-outline" onclick="openModal('auth')"><i class="fa-solid fa-right-to-bracket"></i> Entrar / Criar Conta</button>
+                <button class="btn-outline" onclick="openModal('auth')"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
             </div>
             <div id="auth-user-view" style="display: none; align-items: center; gap: 10px;">
-                <span id="user-display-name" style="font-weight: bold; color: var(--accent);"></span>
-                <button class="btn-secondary" style="padding: 4px 8px;" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen"></i> Editar</button>
-                <button class="btn-outline" style="padding: 4px 8px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Sair</button>
+                <span id="user-display-name" class="user-tag"></span>
+                <button class="btn-secondary" style="padding: 4px 8px;" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-outline" style="padding: 4px 8px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i></button>
             </div>
             <div class="admin-control" style="margin-left: 10px;">
                 <span id="role-label" class="role-badge">JOGADOR</span>
@@ -57,18 +59,31 @@
                     <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-bolt"></i> Desafio X1</button>
                 </div>
             </div>
-
-            <div id="lobbies-container" class="cards-grid">
-                <!-- Cards injetados via JS -->
-            </div>
+            <div id="lobbies-container" class="cards-grid"></div>
         </section>
 
-        <!-- ABA 2: RANKING -->
+        <!-- ABA 2: JOGADORES ONLINE -->
+        <section id="tab-online" class="tab-content">
+            <div class="section-header">
+                <h2>Jogadores Conectados no Hub</h2>
+            </div>
+            <div id="online-players-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 3: EQUIPES CADASTRADAS -->
+        <section id="tab-teams" class="tab-content">
+            <div class="section-header">
+                <h2>Equipes & Clãs Registrados</h2>
+                <button class="btn-primary" onclick="openModal('create-team')"><i class="fa-solid fa-shield-plus"></i> Registrar Nova Equipe</button>
+            </div>
+            <div id="teams-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 4: RANKING DE CLÃS -->
         <section id="tab-ranking" class="tab-content">
             <div class="section-header">
-                <h2>Tabela de Classificação de Clãs</h2>
+                <h2>Tabela de Classificação Profissional</h2>
             </div>
-
             <div class="table-wrapper glass-panel">
                 <table class="custom-table">
                     <thead>
@@ -79,47 +94,117 @@
                             <th>Vitórias</th>
                             <th>Derrotas</th>
                             <th>Winrate</th>
-                            <th>Ações</th>
+                            <th>Ações ADM</th>
                         </tr>
                     </thead>
-                    <tbody id="ranking-body">
-                        <!-- Linhas injetadas via JS -->
-                    </tbody>
+                    <tbody id="ranking-body"></tbody>
                 </table>
             </div>
         </section>
 
-        <!-- ABA 3: PERFIL PRO -->
+        <!-- ABA 5: VISUALIZADOR DE PERFIL PRO (INTERATIVO) -->
         <section id="tab-profile" class="tab-content">
             <div class="profile-card glass-panel">
-                <div class="profile-header">
+                <div class="profile-banner"></div>
+                <div class="profile-header-content">
                     <div class="avatar-box">
                         <i class="fa-solid fa-user-ninja"></i>
+                        <span id="view-profile-status-dot" class="status-indicator offline"></span>
                     </div>
-                    <div class="profile-info">
-                        <h2 id="view-profile-nick">Nenhum jogador selecionado</h2>
-                        <span id="view-profile-tier" class="badge badge-t3">JOGADOR</span>
+                    <div class="profile-main-info">
+                        <h2 id="view-profile-nick">Carregando Perfil...</h2>
+                        <div class="profile-badges">
+                            <span id="view-profile-role-badge" class="badge badge-t1">SLOT</span>
+                            <span id="view-profile-team-badge" class="badge badge-t3">Sem Equipe</span>
+                        </div>
+                    </div>
+                    <div id="admin-player-controls" class="admin-only-actions" style="display:none;">
+                        <button class="btn-danger" onclick="adminBanPlayer()"><i class="fa-solid fa-ban"></i> Banir Jogador</button>
                     </div>
                 </div>
-                <div class="profile-stats">
-                    <div class="stat-box">
+
+                <div class="profile-stats-grid">
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-crosshairs stat-icon"></i>
                         <span id="view-profile-kd" class="stat-value">0.00</span>
                         <span class="stat-label">K/D Ratio</span>
                     </div>
-                    <div class="stat-box">
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-chart-line stat-icon"></i>
                         <span id="view-profile-winrate" class="stat-value">0%</span>
                         <span class="stat-label">Win Rate</span>
                     </div>
-                    <div class="stat-box">
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-gun stat-icon"></i>
                         <span id="view-profile-role" class="stat-value">Flex</span>
                         <span class="stat-label">Função Principal</span>
                     </div>
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-trophy stat-icon"></i>
+                        <span id="view-profile-matches" class="stat-value">0</span>
+                        <span class="stat-label">Partidas Disputadas</span>
+                    </div>
+                </div>
+
+                <div class="profile-bio-box glass-panel">
+                    <h3><i class="fa-solid fa-address-card"></i> Sobre o Jogador / Bio</h3>
+                    <p id="view-profile-bio">Nenhuma biografia cadastrada.</p>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- MODAL AUTH (LOGIN / REGISTRO) -->
+    <!-- MODAL DETALHES DA EQUIPE -->
+    <div id="modal-team-details" class="modal">
+        <div class="modal-content glass-panel modal-lg">
+            <div class="modal-header">
+                <h3 id="modal-team-title"><i class="fa-solid fa-shield"></i> Detalhes da Equipe</h3>
+                <span class="close-btn" onclick="closeModal('team-details')">&times;</span>
+            </div>
+            <div id="modal-team-body">
+                <!-- Informações Injetadas via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRAR EQUIPE -->
+    <div id="modal-create-team" class="modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-plus"></i> Cadastrar Nova Equipe</h3>
+                <span class="close-btn" onclick="closeModal('create-team')">&times;</span>
+            </div>
+            <form onsubmit="handleCreateTeam(event)">
+                <div class="form-group">
+                    <label>Nome do Clã/Equipe:</label>
+                    <input type="text" id="team-name" required placeholder="Ex: LOBARK ESPORTS">
+                </div>
+                <div class="form-group">
+                    <label>Tier da Equipe:</label>
+                    <select id="team-tier">
+                        <option value="T1">Tier 1 (Profissional)</option>
+                        <option value="T2">Tier 2 (Semi-Pro)</option>
+                        <option value="T3" selected>Tier 3 (Amador)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descrição do Clã:</label>
+                    <input type="text" id="team-desc" placeholder="Ex: Foco em campeonatos e scrims diárias.">
+                </div>
+                <div class="form-group">
+                    <label>Principais Conquistas:</label>
+                    <input type="text" id="team-achievements" placeholder="Ex: 1º Lugar Copa LOBARK T2, Top 4 Liga CODM">
+                </div>
+                <div class="form-group">
+                    <label>Lineup Competitiva (Informe até 5 Nicks separados por vírgula):</label>
+                    <input type="text" id="team-roster" placeholder="Ex: FALLK_OP, Player2, Player3, Player4, Player5">
+                </div>
+                <button type="submit" class="btn-primary btn-block">Registrar Equipe</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AUTH -->
     <div id="modal-auth" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
@@ -131,16 +216,10 @@
             </button>
             <hr style="border:0; border-top:1px solid var(--card-border); margin:15px 0;">
             <form onsubmit="handleEmailAuth(event)">
-                <div class="form-group">
-                    <label>E-mail:</label>
-                    <input type="email" id="auth-email" required>
-                </div>
-                <div class="form-group">
-                    <label>Senha:</label>
-                    <input type="password" id="auth-password" required>
-                </div>
+                <div class="form-group"><label>E-mail:</label><input type="email" id="auth-email" required></div>
+                <div class="form-group"><label>Senha:</label><input type="password" id="auth-password" required></div>
                 <div style="display:flex; gap:10px;">
-                    <button type="submit" class="btn-primary btn-block" onclick="authMode = 'login'">Entrar</button>
+                    <button type="submit" class="btn-primary btn-block">Entrar</button>
                     <button type="button" class="btn-secondary btn-block" onclick="handleRegister()">Cadastrar</button>
                 </div>
             </form>
@@ -151,13 +230,13 @@
     <div id="modal-edit-profile" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-user-pen"></i> Editar Meu Perfil</h3>
+                <h3><i class="fa-solid fa-user-pen"></i> Configurar Meu Perfil</h3>
                 <span class="close-btn" onclick="closeModal('edit-profile')">&times;</span>
             </div>
             <form onsubmit="handleSaveProfile(event)">
                 <div class="form-group">
-                    <label>Nick Exato no CODM (Usado para buscar seu perfil):</label>
-                    <input type="text" id="edit-nick" placeholder="Ex: FALLK_OP" required>
+                    <label>Seu Nick Exato no CODM:</label>
+                    <input type="text" id="edit-nick" required placeholder="Ex: FALLK_OP">
                 </div>
                 <div class="form-group">
                     <label>K/D Ratio:</label>
@@ -165,19 +244,23 @@
                 </div>
                 <div class="form-group">
                     <label>Win Rate (%):</label>
-                    <input type="text" id="edit-winrate" placeholder="Ex: 65%" required>
+                    <input type="text" id="edit-winrate" placeholder="Ex: 68%" required>
                 </div>
                 <div class="form-group">
                     <label>Função Principal:</label>
                     <select id="edit-role">
-                        <option value="IGL">IGL (Líder)</option>
-                        <option value="Sniper">Sniper</option>
+                        <option value="IGL">IGL (Líder Tático)</option>
+                        <option value="Sniper">Sniper Principal</option>
                         <option value="Entry">Entry Fragger</option>
                         <option value="Support">Suporte</option>
                         <option value="Flex">Flexível</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary btn-block">Salvar Alterações</button>
+                <div class="form-group">
+                    <label>Biografia / Apresentação:</label>
+                    <input type="text" id="edit-bio" placeholder="Ex: Focado no competitivo T1 desde 2022.">
+                </div>
+                <button type="submit" class="btn-primary btn-block">Salvar Perfil</button>
             </form>
         </div>
     </div>
@@ -198,27 +281,17 @@
                         <option value="Scrim T3" selected>Scrim T3</option>
                     </select>
                 </div>
-
+                <div class="form-group"><label>Horário do Confronto:</label><input type="text" id="scrim-time" placeholder="Ex: 21:00" required></div>
+                <div class="form-group"><label>Nome da Equipe:</label><input type="text" id="scrim-team-name" placeholder="Ex: LOBARK eSports" required></div>
                 <div class="form-group">
-                    <label>Horário do Confronto:</label>
-                    <input type="text" id="scrim-time" placeholder="Ex: 21:00" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Nome do Clã/Equipe:</label>
-                    <input type="text" id="scrim-team-name" placeholder="Ex: LOBARK eSports" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Escalação (Informe o Nick exato dos 5 Jogadores):</label>
+                    <label>Escalação (5 Nicks Exatos):</label>
                     <input type="text" id="p1" placeholder="Jogador 1 (IGL)" required>
                     <input type="text" id="p2" placeholder="Jogador 2 (Sniper)" required>
                     <input type="text" id="p3" placeholder="Jogador 3 (Entry)" required>
                     <input type="text" id="p4" placeholder="Jogador 4 (Support)" required>
                     <input type="text" id="p5" placeholder="Jogador 5 (Flex)" required>
                 </div>
-
-                <button type="submit" class="btn-primary btn-block"><i class="fa-solid fa-check"></i> Criar Lobby na Nuvem</button>
+                <button type="submit" class="btn-primary btn-block">Criar Lobby na Nuvem</button>
             </form>
         </div>
     </div>
@@ -231,27 +304,15 @@
                 <span class="close-btn" onclick="closeModal('x1')">&times;</span>
             </div>
             <form id="form-x1" onsubmit="handleCreateX1(event)">
-                <div class="form-group">
-                    <label>Seu Nick/Tag Exato:</label>
-                    <input type="text" id="x1-player" placeholder="Ex: FALLK_OP" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Horário:</label>
-                    <input type="text" id="x1-time" placeholder="Ex: 22:30" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Regras do Confronto:</label>
-                    <input type="text" id="x1-mode" placeholder="Ex: Killhouse // AWP Only // 20 Kills" required>
-                </div>
-
-                <button type="submit" class="btn-primary btn-block"><i class="fa-solid fa-check"></i> Publicar Desafio X1</button>
+                <div class="form-group"><label>Seu Nick Exato:</label><input type="text" id="x1-player" placeholder="Ex: FALLK_OP" required></div>
+                <div class="form-group"><label>Horário:</label><input type="text" id="x1-time" placeholder="Ex: 22:30" required></div>
+                <div class="form-group"><label>Regras do Desafio:</label><input type="text" id="x1-mode" placeholder="Ex: Killhouse // AWP Only // 20 Kills" required></div>
+                <button type="submit" class="btn-primary btn-block">Publicar Desafio X1</button>
             </form>
         </div>
     </div>
 
-    <!-- SDKs do Firebase Compatíveis (Inclui App, Database e Auth) -->
+    <!-- SDKs do Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
