@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOBARK // CODM HUB</title>
+    <title>LOBARK // CODM ESPORTS ANALYTICS</title>
     
     <!-- Font Awesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,15 +20,15 @@
     <!-- Header / Navbar -->
     <header class="navbar glass-panel">
         <div class="logo-container">
-            <h1 class="glow-text">LOBARK <span class="sub-logo">HUB</span></h1>
+            <h1 class="glow-text">LOBARK <span class="sub-logo">CHARTS</span></h1>
         </div>
 
         <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies</button>
+            <button class="nav-btn active" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies & Scrims</button>
             <button class="nav-btn" onclick="switchTab('online')"><i class="fa-solid fa-users"></i> Online <span id="online-count-badge" class="counter-badge">0</span></button>
             <button class="nav-btn" onclick="switchTab('teams')"><i class="fa-solid fa-shield-cat"></i> Equipes</button>
-            <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking</button>
-            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-id-card"></i> Meu Perfil</button>
+            <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Rankings CODM</button>
+            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-id-card"></i> Meu Perfil Pro</button>
         </nav>
 
         <div class="user-auth-control">
@@ -53,10 +53,10 @@
         <!-- ABA 1: LOBBIES / SCRIMS -->
         <section id="tab-lobbies" class="tab-content active">
             <div class="section-header">
-                <h2>Lobbies Abertos & Desafios</h2>
+                <h2>Lobbies Ativos & Desafios</h2>
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="openModal('scrim')"><i class="fa-solid fa-plus"></i> Agendar Scrim 5v5</button>
-                    <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-bolt"></i> Desafio X1</button>
+                    <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-bolt"></i> Desafio X1 Sniper/MP</button>
                 </div>
             </div>
             <div id="lobbies-container" class="cards-grid"></div>
@@ -73,27 +73,32 @@
         <!-- ABA 3: EQUIPES CADASTRADAS -->
         <section id="tab-teams" class="tab-content">
             <div class="section-header">
-                <h2>Equipes & Clãs Registrados</h2>
+                <h2>Organizações & Clãs Registrados</h2>
                 <button class="btn-primary" onclick="openModal('create-team')"><i class="fa-solid fa-shield-plus"></i> Registrar Nova Equipe</button>
             </div>
             <div id="teams-grid" class="cards-grid"></div>
         </section>
 
-        <!-- ABA 4: RANKING DE CLÃS -->
+        <!-- ABA 4: RANKINGS & ANÁLISE COMPETITIVA -->
         <section id="tab-ranking" class="tab-content">
             <div class="section-header">
-                <h2>Tabela de Classificação Profissional</h2>
+                <h2>Tabela de Classificação Profissional CODM</h2>
+                <div class="mode-selector">
+                    <button class="btn-outline active" id="btn-mode-mp" onclick="filterRankingMode('MP')">Multiplayer 5v5</button>
+                    <button class="btn-outline" id="btn-mode-br" onclick="filterRankingMode('BR')">Battle Royale</button>
+                </div>
             </div>
             <div class="table-wrapper glass-panel">
                 <table class="custom-table">
                     <thead>
                         <tr>
                             <th>Posição</th>
-                            <th>Clã / Equipe</th>
+                            <th>Clã / Organização</th>
                             <th>Tier</th>
                             <th>Vitórias</th>
                             <th>Derrotas</th>
                             <th>Winrate</th>
+                            <th>Pico de Viewers</th>
                             <th>Ações ADM</th>
                         </tr>
                     </thead>
@@ -102,7 +107,7 @@
             </div>
         </section>
 
-        <!-- ABA 5: VISUALIZADOR DE PERFIL PRO (INTERATIVO) -->
+        <!-- ABA 5: PERFIL ESTILO ESPORTS CHARTS -->
         <section id="tab-profile" class="tab-content">
             <div class="profile-card glass-panel">
                 <div class="profile-banner"></div>
@@ -112,10 +117,14 @@
                         <span id="view-profile-status-dot" class="status-indicator offline"></span>
                     </div>
                     <div class="profile-main-info">
-                        <h2 id="view-profile-nick">Carregando Perfil...</h2>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <h2 id="view-profile-nick">Carregando Perfil...</h2>
+                            <span id="view-profile-live-tag" class="badge-live" style="display:none;"><i class="fa-solid fa-broadcast-tower"></i> AO VIVO</span>
+                        </div>
                         <div class="profile-badges">
                             <span id="view-profile-role-badge" class="badge badge-t1">SLOT</span>
                             <span id="view-profile-team-badge" class="badge badge-t3">Sem Equipe</span>
+                            <span id="view-profile-device-badge" class="badge badge-tech"><i class="fa-solid fa-mobile-screen"></i> Dispositivo não informado</span>
                         </div>
                     </div>
                     <div id="admin-player-controls" class="admin-only-actions" style="display:none;">
@@ -123,32 +132,59 @@
                     </div>
                 </div>
 
+                <!-- CARDS DE MÉTRICAS ESPORTS CHARTS -->
                 <div class="profile-stats-grid">
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-eye stat-icon"></i>
+                        <span id="view-profile-peak-viewers" class="stat-value">0</span>
+                        <span class="stat-label">Pico de Espectadores</span>
+                    </div>
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-stopwatch stat-icon"></i>
+                        <span id="view-profile-hours-watched" class="stat-value">0h</span>
+                        <span class="stat-label">Horas Assistidas</span>
+                    </div>
+                    <div class="stat-box glass-panel">
+                        <i class="fa-solid fa-sack-dollar stat-icon"></i>
+                        <span id="view-profile-earnings" class="stat-value">R$ 0</span>
+                        <span class="stat-label">Premiação Estimada</span>
+                    </div>
                     <div class="stat-box glass-panel">
                         <i class="fa-solid fa-crosshairs stat-icon"></i>
                         <span id="view-profile-kd" class="stat-value">0.00</span>
-                        <span class="stat-label">K/D Ratio</span>
-                    </div>
-                    <div class="stat-box glass-panel">
-                        <i class="fa-solid fa-chart-line stat-icon"></i>
-                        <span id="view-profile-winrate" class="stat-value">0%</span>
-                        <span class="stat-label">Win Rate</span>
-                    </div>
-                    <div class="stat-box glass-panel">
-                        <i class="fa-solid fa-gun stat-icon"></i>
-                        <span id="view-profile-role" class="stat-value">Flex</span>
-                        <span class="stat-label">Função Principal</span>
-                    </div>
-                    <div class="stat-box glass-panel">
-                        <i class="fa-solid fa-trophy stat-icon"></i>
-                        <span id="view-profile-matches" class="stat-value">0</span>
-                        <span class="stat-label">Partidas Disputadas</span>
+                        <span class="stat-label">K/D Ratio Global</span>
                     </div>
                 </div>
 
+                <!-- CONFIGURAÇÕES DE HARDWARE E HUD (GEARS) -->
+                <div class="profile-bio-box glass-panel" style="margin-bottom:20px;">
+                    <h3><i class="fa-solid fa-gamepad"></i> Dispositivo & Configurações (Gears)</h3>
+                    <div class="gears-grid">
+                        <div><strong>Dispositivo:</strong> <span id="view-profile-device">Não cadastrado</span></div>
+                        <div><strong>Estilo de HUD:</strong> <span id="view-profile-hud">Não informado</span></div>
+                        <div><strong>Sensibilidade Principal:</strong> <span id="view-profile-sens">Não informada</span></div>
+                        <div><strong>Canal de Stream:</strong> <span id="view-profile-stream">Nenhum</span></div>
+                    </div>
+                </div>
+
+                <!-- HISTÓRICO DE TORNEIOS -->
                 <div class="profile-bio-box glass-panel">
-                    <h3><i class="fa-solid fa-address-card"></i> Sobre o Jogador / Bio</h3>
-                    <p id="view-profile-bio">Nenhuma biografia cadastrada.</p>
+                    <h3><i class="fa-solid fa-trophy"></i> Histórico de Campeonatos Oficiais CODM</h3>
+                    <div class="table-wrapper">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Torneio</th>
+                                    <th>Modo</th>
+                                    <th>Colocação</th>
+                                    <th>Prêmio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="view-profile-tournaments-body">
+                                <tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Nenhum histórico registrado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
@@ -161,9 +197,7 @@
                 <h3 id="modal-team-title"><i class="fa-solid fa-shield"></i> Detalhes da Equipe</h3>
                 <span class="close-btn" onclick="closeModal('team-details')">&times;</span>
             </div>
-            <div id="modal-team-body">
-                <!-- Informações Injetadas via JS -->
-            </div>
+            <div id="modal-team-body"></div>
         </div>
     </div>
 
@@ -171,35 +205,43 @@
     <div id="modal-create-team" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-shield-plus"></i> Cadastrar Nova Equipe</h3>
+                <h3><i class="fa-solid fa-shield-plus"></i> Cadastrar Nova Equipe CODM</h3>
                 <span class="close-btn" onclick="closeModal('create-team')">&times;</span>
             </div>
             <form onsubmit="handleCreateTeam(event)">
                 <div class="form-group">
-                    <label>Nome do Clã/Equipe:</label>
+                    <label>Nome da Organização/Clã:</label>
                     <input type="text" id="team-name" required placeholder="Ex: LOBARK ESPORTS">
                 </div>
                 <div class="form-group">
-                    <label>Tier da Equipe:</label>
+                    <label>Modalidade Foco:</label>
+                    <select id="team-mode">
+                        <option value="MP" selected>Multiplayer 5v5</option>
+                        <option value="BR">Battle Royale</option>
+                        <option value="AMBOS">Multiplayer & BR</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tier Competitivo:</label>
                     <select id="team-tier">
-                        <option value="T1">Tier 1 (Profissional)</option>
-                        <option value="T2">Tier 2 (Semi-Pro)</option>
-                        <option value="T3" selected>Tier 3 (Amador)</option>
+                        <option value="T1">Tier 1 (Pro Circuit / World Championship)</option>
+                        <option value="T2">Tier 2 (Semi-Pro / Ligas Regionais)</option>
+                        <option value="T3" selected>Tier 3 (Comunidade / Amador)</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Descrição do Clã:</label>
-                    <input type="text" id="team-desc" placeholder="Ex: Foco em campeonatos e scrims diárias.">
+                    <input type="text" id="team-desc" placeholder="Ex: Foco em campeonatos oficiais e scrims diárias T1.">
                 </div>
                 <div class="form-group">
-                    <label>Principais Conquistas:</label>
-                    <input type="text" id="team-achievements" placeholder="Ex: 1º Lugar Copa LOBARK T2, Top 4 Liga CODM">
+                    <label>Principais Títulos / Conquistas:</label>
+                    <input type="text" id="team-achievements" placeholder="Ex: 1º Lugar CODM Championship Qualifier, Top 4 Liga T2">
                 </div>
                 <div class="form-group">
-                    <label>Lineup Competitiva (Informe até 5 Nicks separados por vírgula):</label>
+                    <label>Lineup Titular (Separe os Nicks por vírgula):</label>
                     <input type="text" id="team-roster" placeholder="Ex: FALLK_OP, Player2, Player3, Player4, Player5">
                 </div>
-                <button type="submit" class="btn-primary btn-block">Registrar Equipe</button>
+                <button type="submit" class="btn-primary btn-block">Registrar Organização</button>
             </form>
         </div>
     </div>
@@ -226,41 +268,70 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR PERFIL -->
+    <!-- MODAL EDITAR PERFIL PRO (COM CONFIGURAÇÕES CODM & METRICAS) -->
     <div id="modal-edit-profile" class="modal">
-        <div class="modal-content glass-panel">
+        <div class="modal-content glass-panel modal-lg">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-user-pen"></i> Configurar Meu Perfil</h3>
+                <h3><i class="fa-solid fa-user-pen"></i> Configurar Perfil Profissional CODM</h3>
                 <span class="close-btn" onclick="closeModal('edit-profile')">&times;</span>
             </div>
             <form onsubmit="handleSaveProfile(event)">
-                <div class="form-group">
-                    <label>Seu Nick Exato no CODM:</label>
-                    <input type="text" id="edit-nick" required placeholder="Ex: FALLK_OP">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <div class="form-group">
+                        <label>Nick Exato no CODM:</label>
+                        <input type="text" id="edit-nick" required placeholder="Ex: FALLK_OP">
+                    </div>
+                    <div class="form-group">
+                        <label>Função Principal no CODM:</label>
+                        <select id="edit-role">
+                            <option value="IGL">IGL (Líder Tático)</option>
+                            <option value="Sniper">Sniper Principal</option>
+                            <option value="Entry">Entry Fragger</option>
+                            <option value="Support">Suporte / Anchor</option>
+                            <option value="Flex">Flexível</option>
+                            <option value="BR Rusher">BR - Rusher</option>
+                            <option value="BR Scout">BR - Scout / Mestre de Veículos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>K/D Ratio Global:</label>
+                        <input type="text" id="edit-kd" placeholder="Ex: 2.15" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Win Rate (%):</label>
+                        <input type="text" id="edit-winrate" placeholder="Ex: 68%" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dispositivo Utlizado:</label>
+                        <input type="text" id="edit-device" placeholder="Ex: iPad Pro 12.9 / ROG Phone 7">
+                    </div>
+                    <div class="form-group">
+                        <label>HUD / Layout de Controle:</label>
+                        <select id="edit-hud">
+                            <option value="2 Dedos (Polegares)">2 Dedos (Polegares)</option>
+                            <option value="4 Dedos (Garra)" selected>4 Dedos (Garra)</option>
+                            <option value="6 Dedos (Garra Avançada)">6 Dedos (Garra Avançada)</option>
+                            <option value="Gatilhos / Acoplamentos">Gatilhos / Acoplamentos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pico de Espectadores (Live/Torneios):</label>
+                        <input type="number" id="edit-peak-viewers" placeholder="Ex: 1500">
+                    </div>
+                    <div class="form-group">
+                        <label>Premiação Acumulada Estimada (R$):</label>
+                        <input type="number" id="edit-earnings" placeholder="Ex: 5000">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>K/D Ratio:</label>
-                    <input type="text" id="edit-kd" placeholder="Ex: 2.15" required>
+                    <label>Link da Stream (Twitch / YouTube / Kick):</label>
+                    <input type="url" id="edit-stream" placeholder="Ex: https://twitch.tv/seu_canal">
                 </div>
                 <div class="form-group">
-                    <label>Win Rate (%):</label>
-                    <input type="text" id="edit-winrate" placeholder="Ex: 68%" required>
+                    <label>Biografia / Histórico Competitivo:</label>
+                    <input type="text" id="edit-bio" placeholder="Ex: Ex-jogador da equipe X, campeão do torneio Y.">
                 </div>
-                <div class="form-group">
-                    <label>Função Principal:</label>
-                    <select id="edit-role">
-                        <option value="IGL">IGL (Líder Tático)</option>
-                        <option value="Sniper">Sniper Principal</option>
-                        <option value="Entry">Entry Fragger</option>
-                        <option value="Support">Suporte</option>
-                        <option value="Flex">Flexível</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Biografia / Apresentação:</label>
-                    <input type="text" id="edit-bio" placeholder="Ex: Focado no competitivo T1 desde 2022.">
-                </div>
-                <button type="submit" class="btn-primary btn-block">Salvar Perfil</button>
+                <button type="submit" class="btn-primary btn-block">Salvar Perfil Profissional</button>
             </form>
         </div>
     </div>
@@ -269,29 +340,29 @@
     <div id="modal-scrim" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-shield-halved"></i> Agendar Scrim 5v5</h3>
+                <h3><i class="fa-solid fa-shield-halved"></i> Agendar Scrim 5v5 (MP)</h3>
                 <span class="close-btn" onclick="closeModal('scrim')">&times;</span>
             </div>
             <form id="form-scrim" onsubmit="handleCreateScrim(event)">
                 <div class="form-group">
-                    <label>Tipo de Scrim:</label>
+                    <label>Nível do Confronto:</label>
                     <select id="scrim-type" required>
-                        <option value="Scrim T1">Scrim T1</option>
-                        <option value="Scrim T2">Scrim T2</option>
-                        <option value="Scrim T3" selected>Scrim T3</option>
+                        <option value="Scrim T1">Scrim T1 (Pro Circuit)</option>
+                        <option value="Scrim T2">Scrim T2 (Competitive)</option>
+                        <option value="Scrim T3" selected>Scrim T3 (Amador/Treino)</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Horário do Confronto:</label><input type="text" id="scrim-time" placeholder="Ex: 21:00" required></div>
-                <div class="form-group"><label>Nome da Equipe:</label><input type="text" id="scrim-team-name" placeholder="Ex: LOBARK eSports" required></div>
+                <div class="form-group"><label>Horário do Confronto:</label><input type="text" id="scrim-time" placeholder="Ex: 21:00 BRT" required></div>
+                <div class="form-group"><label>Nome da Organização:</label><input type="text" id="scrim-team-name" placeholder="Ex: LOBARK eSports" required></div>
                 <div class="form-group">
-                    <label>Escalação (5 Nicks Exatos):</label>
+                    <label>Escalação Titular (5 Nicks Exatos):</label>
                     <input type="text" id="p1" placeholder="Jogador 1 (IGL)" required>
                     <input type="text" id="p2" placeholder="Jogador 2 (Sniper)" required>
                     <input type="text" id="p3" placeholder="Jogador 3 (Entry)" required>
                     <input type="text" id="p4" placeholder="Jogador 4 (Support)" required>
                     <input type="text" id="p5" placeholder="Jogador 5 (Flex)" required>
                 </div>
-                <button type="submit" class="btn-primary btn-block">Criar Lobby na Nuvem</button>
+                <button type="submit" class="btn-primary btn-block">Publicar Lobby na Nuvem</button>
             </form>
         </div>
     </div>
@@ -300,13 +371,13 @@
     <div id="modal-x1" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-bolt"></i> Propor Desafio X1</h3>
+                <h3><i class="fa-solid fa-bolt"></i> Desafio X1 CODM</h3>
                 <span class="close-btn" onclick="closeModal('x1')">&times;</span>
             </div>
             <form id="form-x1" onsubmit="handleCreateX1(event)">
                 <div class="form-group"><label>Seu Nick Exato:</label><input type="text" id="x1-player" placeholder="Ex: FALLK_OP" required></div>
                 <div class="form-group"><label>Horário:</label><input type="text" id="x1-time" placeholder="Ex: 22:30" required></div>
-                <div class="form-group"><label>Regras do Desafio:</label><input type="text" id="x1-mode" placeholder="Ex: Killhouse // AWP Only // 20 Kills" required></div>
+                <div class="form-group"><label>Regras do Desafio:</label><input type="text" id="x1-mode" placeholder="Ex: Killhouse // AWP Only // 20 Kills // Sem Operador" required></div>
                 <button type="submit" class="btn-primary btn-block">Publicar Desafio X1</button>
             </form>
         </div>
