@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOBARK eSports // CODM Manager Hub & Pro Profile</title>
+    
+    <!-- CSS & Typography -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="theme-cyan">
+
+    <!-- Canvas Background & Cyber Overlay -->
+    <canvas id="particles-canvas"></canvas>
+    <div class="cyber-overlay"></div>
+
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursor-follower"></div>
+
+   <!-- Navegação Atualizada -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <div class="brand-icon"><i class="fa-solid fa-crosshair"></i></div>
+            <div class="brand-title">LOBARK<span class="accent">_CODM</span></div>
+        </div>
+        
+        <div class="nav-links">
+            <button class="nav-btn active" onclick="switchTab('manager')"><i class="fa-solid fa-gamepad"></i> Manager & Scrims</button>
+            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-user-ninja"></i> Perfil Pro Player</button>
+            <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking Vitórias</button>
+            <button class="nav-btn" onclick="switchTab('rules')"><i class="fa-solid fa-scroll"></i> Regras CODM</button>
+        </div>
+
+        <div class="nav-actions">
+            <!-- Selector de Perfil/Role (Simulação de Login ADM vs User) -->
+            <button id="admin-toggle-btn" class="btn-secondary admin-btn" onclick="toggleAdminMode()">
+                <i class="fa-solid fa-user-shield"></i> Modo: <span id="role-label">JOGADOR</span>
+            </button>
+
+            <div class="theme-picker">
+                <button class="theme-btn active" data-theme="cyan" title="Tema Cyan" style="background: #00f3ff;"></button>
+                <button class="theme-btn" data-theme="gold" title="Tema Gold" style="background: #ffb700;"></button>
+                <button class="theme-btn" data-theme="red" title="Tema Crimson" style="background: #ff2a5f;"></button>
+                <button class="theme-btn" data-theme="purple" title="Tema Purple" style="background: #a855f7;"></button>
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <!-- Main Container -->
+    <main class="main-wrapper">
+
+        <!-- ABA 1: MANAGER & SCRIMS (5v5 / X1 CODM) -->
+        <section id="tab-manager" class="tab-content active">
+            <header class="section-header">
+                <h1 class="section-title"><i class="fa-solid fa-shield-halved"></i> MANAGER DE PARTIDAS CODM</h1>
+                <p class="section-subtitle">Agende Scrims 5v5 (T1, T2, T3), Treinos de Lineup ou Desafios X1 de Sniper com escalação completa.</p>
+            </header>
+
+            <div class="actions-bar">
+                <button class="btn-primary glow-btn" onclick="openModal('scrim')"><i class="fa-solid fa-plus"></i> Agendar Scrim / Treino 5v5</button>
+                <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-crosshair"></i> Desafio X1 (Sniper / Aim)</button>
+            </div>
+
+            <h2 class="sub-header">Lobbies e Treinos Disponíveis</h2>
+            <div class="cards-grid" id="lobbies-container">
+                <!-- Cards Gerados via JS -->
+            </div>
+        </section>
+
+        <!-- ABA 2: PERFIL DO JOGADOR (PRO PROFILE INTEGRADO) -->
+        <section id="tab-profile" class="tab-content">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="badge-rank glow-box">
+                        <i class="fa-solid fa-crown"></i> LEGENDARY RANKED #14
+                    </div>
+                    <h1 class="hero-title" id="player-profile-name">FALLK<span class="glow-text">_OP</span></h1>
+                    <p class="hero-subtitle">SNIPER MAIN & IGL // LOBARK COMPETITIVE TEAM</p>
+                    <div class="hero-tags">
+                        <span class="tag"><i class="fa-solid fa-mobile-screen-button"></i> Mobile Specialist (Poco F3)</span>
+                        <span class="tag"><i class="fa-solid fa-bullseye"></i> 82.4% Quickscope Acc</span>
+                        <span class="tag"><i class="fa-solid fa-earth-americas"></i> SA Region</span>
+                    </div>
+                </div>
+                <div class="hero-card glass-panel">
+                    <div class="card-header">
+                        <span class="live-dot"></span> EM OPERAÇÃO
+                    </div>
+                    <div class="hero-avatar-wrapper">
+                        <div class="avatar-ring"></div>
+                        <div class="avatar-img-placeholder">
+                            <i class="fa-solid fa-user-ninja"></i>
+                        </div>
+                    </div>
+                    <div class="hero-player-info">
+                        <h3 id="card-player-name">FALLK_OP</h3>
+                        <p class="clan-tag">[LOBARK] TEAM LEADER</p>
+                        <div class="level-badge">LVL 350 - MAX</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats do Jogador -->
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> ESTATÍSTICAS DE COMBATE</h2>
+                    <span class="section-subtitle">Dados de desempenho acumulados em Ranked MP</span>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-skull"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">K/D Ratio</span>
+                            <span class="stat-number" id="stat-kd">3.85</span>
+                            <span class="stat-desc">Top 0.1% Mundial</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Taxa de Vitória</span>
+                            <span class="stat-number"><span id="stat-winrate">74</span>%</span>
+                            <span class="stat-desc">Em 4.200+ partidas</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-bullseye"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Precisão Geral</span>
+                            <span class="stat-number"><span id="stat-accuracy">42.8</span>%</span>
+                            <span class="stat-desc">Média Snipers: 82%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-person-rifle"></i></div>
+                        <div class="stat-content">
+                            <span class="stat-label">Total Kills</span>
+                            <span class="stat-number" id="stat-kills">142,500</span>
+                            <span class="stat-desc">Eliminações confirmadas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arsenal -->
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fa-solid fa-gun"></i> LOADOUT COMPETITIVO</h2>
+                </div>
+                <div class="weapon-grid">
+                    <div class="weapon-card glass-panel">
+                        <div class="weapon-badge">SNIPER MAIN</div>
+                        <div class="weapon-preview">
+                            <i class="fa-solid fa-crosshair weapon-icon-bg"></i>
+                            <h3>DL Q33 — Zealot</h3>
+                            <p class="skin-name">Camo Lendária // Fast ADS Build</p>
+                        </div>
+                    </div>
+                    <div class="weapon-card glass-panel">
+                        <div class="weapon-badge secondary">AGGRESSIVE RIFLE</div>
+                        <div class="weapon-preview">
+                            <i class="fa-solid fa-fire weapon-icon-bg"></i>
+                            <h3>AK117 — Meltdown</h3>
+                            <p class="skin-name">Camo Mítica // Mid-Range Control</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: RANKING DE VITÓRIAS -->
+        <section id="tab-ranking" class="tab-content">
+            <header class="section-header">
+                <h1 class="section-title"><i class="fa-solid fa-ranking-star"></i> LEADERBOARD DE EQUIPES CODM</h1>
+                <p class="section-subtitle">Classificação por pontos e vitórias acumuladas em Scrims T1, T2 e T3.</p>
+            </header>
+
+            <div class="glass-panel table-wrapper">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th># Pos</th>
+                            <th>Equipe / Clã</th>
+                            <th>Tier</th>
+                            <th>Vitórias</th>
+                            <th>Derrotas</th>
+                            <th>Winrate</th>
+                            <th>Ações Manager</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body">
+                        <!-- Gerado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ABA 4: REGRAS COMPETITIVAS CODM -->
+        <section id="tab-rules" class="tab-content">
+            <header class="section-header">
+                <h1 class="section-title"><i class="fa-solid fa-book-skull"></i> REGULAMENTO OFICIAL CODM COMPETITIVO</h1>
+                <p class="section-subtitle">Normas de salas personalizadas, equipamentos permitidos e diretrizes de campeonatos.</p>
+            </header>
+
+            <div class="rules-grid">
+                <div class="rule-card glass-panel">
+                    <h3><i class="fa-solid fa-ban"></i> 1. Restrições de Armas e Itens (Banned List)</h3>
+                    <ul>
+                        <li><strong>Incapazes/Proibidos:</strong> Todos os Lança-foguetes (SMRS, FHJ-18), Armas Míticas com miras integradas P2W excessivas (sujeito a acordo).</li>
+                        <li><strong>Especialistas/Operadores:</strong> Permitidos apenas Aniquiladora, Garra e Cão de Caça (dependendo do Tier/Modo). Proibido Escudo Transformável e Colmeia.</li>
+                        <li><strong>Granadas:</strong> Proibida Granada de Gás e Termite. Permitido apenas Frag, Concussão, Smoke e EMP.</li>
+                    </ul>
+                </div>
+
+                <div class="rule-card glass-panel">
+                    <h3><i class="fa-solid fa-gamepad"></i> 2. Modos de Jogo & Estrutura 5v5</h3>
+                    <p>Todas as Scrims T1/T2 oficiais devem seguir a ordem BO3 padrão das ligas regionais de Call of Duty: Mobile:</p>
+                    <ol style="margin-left: 20px; margin-top: 8px; color: var(--text-secondary);">
+                        <li><strong>Mapa 1:</strong> Ponto Caliente (Hardpoint) - 250 Pontos</li>
+                        <li><strong>Mapa 2:</strong> Buscar e Destruir (S&D) - 7 Vínculos/Rounds</li>
+                        <li><strong>Mapa 3:</strong> Controle (Control) - 3 Rounds Vencedores</li>
+                    </ol>
+                </div>
+
+                <div class="rule-card glass-panel">
+                    <h3><i class="fa-solid fa-users"></i> 3. Composição de Lineup (5 Jogadores)</h3>
+                    <p>Cada equipe DEVE ser composta por exatamente 5 jogadores em campo com as seguintes funções recomendadas:</p>
+                    <ul>
+                        <li><strong>1x IGL:</strong> Líder de estratégias em tempo real.</li>
+                        <li><strong>1x Main Sniper:</strong> Cobertura de longa distância no S&D.</li>
+                        <li><strong>1x Entry Fragger:</strong> Abertura de espaço e confrontos diretos.</li>
+                        <li><strong>1x Support / Anchor:</strong> Controle de respawn no Ponto Caliente.</li>
+                        <li><strong>1x Flex:</strong> Adaptação entre SMG/AR conforme o mapa.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL SCRIM 5v5 -->
+    <div class="modal-overlay" id="modal-scrim">
+        <div class="modal glass-panel">
+            <h2>Agendar Scrim CODM 5v5</h2>
+            <form id="form-scrim" onsubmit="handleCreateScrim(event)">
+                <div class="form-group">
+                    <label>Tier do Confronto</label>
+                    <select id="scrim-type" required>
+                        <option value="Scrim T1">Scrim T1 (Elite / Pro Teams)</option>
+                        <option value="Scrim T2">Scrim T2 (Competitive Semi-Pro)</option>
+                        <option value="Scrim T3">Scrim T3 (Amador / Iniciante)</option>
+                        <option value="Treino Lineup">Treino de Lineup 5v5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Horário da Sala</label>
+                    <input type="time" id="scrim-time" required>
+                </div>
+                <div class="form-group">
+                    <label>Nome do Clã / Equipe</label>
+                    <input type="text" id="scrim-team-name" value="LOBARK eSports" required>
+                </div>
+
+                <h3 style="margin: 15px 0 10px 0; font-size: 0.9rem; color: var(--accent);">Escalação dos 5 Jogadores</h3>
+                <div class="lineup-inputs">
+                    <input type="text" id="p1" value="FALLK_OP (IGL)" placeholder="Player 1 (IGL)" required>
+                    <input type="text" id="p2" value="Ghost_99 (Main Sniper)" placeholder="Player 2 (Sniper)" required>
+                    <input type="text" id="p3" value="Viper_CODM (Entry)" placeholder="Player 3 (Entry)" required>
+                    <input type="text" id="p4" value="Rex_SA (Support/Anchor)" placeholder="Player 4 (Support)" required>
+                    <input type="text" id="p5" value="Shadow_X (Flex)" placeholder="Player 5 (Flex)" required>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('scrim')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Criar Lobby 5v5</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DESAFIO X1 -->
+    <div class="modal-overlay" id="modal-x1">
+        <div class="modal glass-panel">
+            <h2>Desafio X1 (Sniper / Aim)</h2>
+            <form id="form-x1" onsubmit="handleCreateX1(event)">
+                <div class="form-group">
+                    <label>Seu Nick CODM</label>
+                    <input type="text" id="x1-player" value="FALLK_OP" required>
+                </div>
+                <div class="form-group">
+                    <label>Horário</label>
+                    <input type="time" id="x1-time" required>
+                </div>
+                <div class="form-group">
+                    <label>Regras do X1</label>
+                    <input type="text" id="x1-mode" placeholder="Ex: Killhouse // DL Q33 AWP Only // 20 Kills" required>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('x1')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Publicar Desafio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
