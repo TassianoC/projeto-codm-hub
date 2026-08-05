@@ -1,5 +1,5 @@
 // ==========================================================================
-// LOBARK CODM HUB - VERSÃO ESTÁVEL & INTEGRADA COM FIREBASE
+// LOBARK CODM HUB - INTEGRADO COM FIREBASE REALTIME DATABASE & ADM AUTH
 // ==========================================================================
 
 const firebaseConfig = {
@@ -25,20 +25,18 @@ try {
     lobbiesRef = db.ref('lobbies');
     rankingRef = db.ref('ranking');
 } catch (e) {
-    console.error("Erro ao conectar com Firebase:", e);
+    console.error("Erro na inicialização do Firebase:", e);
 }
 
-// Estado da Aplicação
+// Estados Locais
 let isAdmin = false;
-const ADMIN_SECRET_PASSWORD = "lobark2026"; // Senha para o Modo ADM
+const ADMIN_SECRET_PASSWORD = "lobark2026";
 
 let lobbies = [];
 let teamsRanking = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
-    initCursor();
-    initThemePicker();
     
     if (lobbiesRef) {
         listenToFirebase();
@@ -48,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Sincronização em Tempo Real
+// Sincronização em Tempo Real com o Firebase
 function listenToFirebase() {
     lobbiesRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -59,9 +57,7 @@ function listenToFirebase() {
             });
         }
         renderLobbies();
-    }, (error) => {
-        console.error("Erro na leitura dos Lobbies:", error);
-    });
+    }, (err) => console.error(err));
 
     rankingRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -72,19 +68,17 @@ function listenToFirebase() {
             });
         }
         renderRanking();
-    }, (error) => {
-        console.error("Erro na leitura do Ranking:", error);
-    });
+    }, (err) => console.error(err));
 }
 
-// Troca do Modo ADM
+// Modo ADM
 function toggleAdminMode() {
     if (!isAdmin) {
         const pass = prompt("Digite a senha de Administrador LOBARK:");
         if (pass === ADMIN_SECRET_PASSWORD) {
             isAdmin = true;
             atualizarInterfaceAdmin();
-            alert("Acesso Concedido: Modo Administrador Ativado!");
+            alert("Modo Administrador Ativado!");
         } else if (pass !== null) {
             alert("Senha incorreta!");
         }
@@ -104,12 +98,10 @@ function atualizarInterfaceAdmin() {
             label.innerText = 'ADMINISTRADOR';
             label.style.color = 'var(--crimson)';
             btn.style.borderColor = 'var(--crimson)';
-            document.body.classList.add('admin-mode');
         } else {
             label.innerText = 'JOGADOR';
             label.style.color = 'var(--accent)';
-            btn.style.borderColor = 'var(--accent)';
-            document.body.classList.remove('admin-mode');
+            btn.style.borderColor = 'var(--text-muted)';
         }
     }
 
@@ -117,40 +109,28 @@ function atualizarInterfaceAdmin() {
     renderRanking();
 }
 
-// Navegação entre Abas
+// Controle de Abas
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
     const activeTab = document.getElementById(`tab-${tabName}`);
     if (activeTab) activeTab.classList.add('active');
-    
+
     if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
     }
-}
-
-// Visualizar Perfil Pro
-function viewPlayerProfile(playerName) {
-    const cleanName = playerName.split(' ')[0];
-    const profileNameEl = document.getElementById('player-profile-name');
-    const cardNameEl = document.getElementById('card-player-name');
-
-    if (profileNameEl) profileNameEl.innerHTML = `${cleanName}<span class="glow-text">_PRO</span>`;
-    if (cardNameEl) cardNameEl.innerText = cleanName;
-
-    switchTab('profile');
 }
 
 // Renderizar Lobbies
 function renderLobbies() {
     const container = document.getElementById('lobbies-container');
     if (!container) return;
-    
+
     container.innerHTML = '';
 
     if (lobbies.length === 0) {
-        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center;">Nenhum lobby agendado no momento.</p>`;
+        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Nenhum lobby ativo no momento.</p>`;
         return;
     }
 
@@ -162,9 +142,9 @@ function renderLobbies() {
         if (lobby.lineup && lobby.lineup.length > 0) {
             lineupHTML = `
                 <div class="lineup-box">
-                    <h4>Escalação CODM (5v5):</h4>
+                    <h4>Escalação (5v5):</h4>
                     <ul>
-                        ${lobby.lineup.map(p => `<li style="cursor:pointer;" onclick="viewPlayerProfile('${p}')"><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}
+                        ${lobby.lineup.map(p => `<li><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -175,8 +155,8 @@ function renderLobbies() {
         let adminControlsHTML = '';
         if (isAdmin) {
             adminControlsHTML = `
-                <div class="admin-actions">
-                    <button class="btn-danger" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Cancelar Lobby (ADM)</button>
+                <div style="margin-top: 10px;">
+                    <button class="btn-danger btn-block" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Excluir Lobby</button>
                 </div>
             `;
         }
@@ -186,7 +166,7 @@ function renderLobbies() {
             <h3 style="font-family: var(--font-heading);">${lobby.team}</h3>
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">⏰ Horário: <strong>${lobby.time}</strong></p>
             ${lineupHTML}
-            <button class="btn-primary" onclick="acceptChallenge('${lobby.firebaseKey}')">
+            <button class="btn-primary btn-block" onclick="acceptChallenge('${lobby.firebaseKey}')">
                 ${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}
             </button>
             ${adminControlsHTML}
@@ -199,7 +179,7 @@ function renderLobbies() {
 function renderRanking() {
     const tbody = document.getElementById('ranking-body');
     if (!tbody) return;
-    
+
     tbody.innerHTML = '';
 
     teamsRanking.sort((a, b) => (b.wins || 0) - (a.wins || 0));
@@ -211,9 +191,9 @@ function renderRanking() {
         let actionsHTML = '';
         if (isAdmin) {
             actionsHTML = `
-                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; color: var(--accent);" onclick="updateScore('${team.firebaseKey}', 1, 0)">+1 Vit</button>
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="updateScore('${team.firebaseKey}', 1, 0)">+1 Vit</button>
                 <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; color: var(--crimson);" onclick="updateScore('${team.firebaseKey}', 0, 1)">+1 Der</button>
-                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="removeTeam('${team.firebaseKey}')">Remover</button>
+                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="removeTeam('${team.firebaseKey}')">Sair</button>
             `;
         } else {
             actionsHTML = `<span style="font-size:0.8rem; color:var(--text-muted);">Somente Leitura</span>`;
@@ -233,17 +213,7 @@ function renderRanking() {
     });
 }
 
-// Manipulação do Modal e Formulários
-function openModal(type) { 
-    const el = document.getElementById(`modal-${type}`);
-    if (el) el.classList.add('active'); 
-}
-
-function closeModal(type) { 
-    const el = document.getElementById(`modal-${type}`);
-    if (el) el.classList.remove('active'); 
-}
-
+// Criar Lobbies no Firebase
 function handleCreateScrim(e) {
     e.preventDefault();
     const type = document.getElementById('scrim-type').value;
@@ -265,10 +235,11 @@ function handleCreateScrim(e) {
     if (lobbiesRef) {
         lobbiesRef.push({
             type, time, team, lineup, challenger: null, badgeClass
-        });
+        }).then(() => {
+            closeModal('scrim');
+            document.getElementById('form-scrim').reset();
+        }).catch(err => alert("Erro ao salvar no banco: " + err.message));
     }
-
-    closeModal('scrim');
 }
 
 function handleCreateX1(e) {
@@ -280,24 +251,24 @@ function handleCreateX1(e) {
     if (lobbiesRef) {
         lobbiesRef.push({
             type: 'X1', time, team: `${player} (X1)`, mode, lineup: [], challenger: null, badgeClass: 'badge-x1'
-        });
+        }).then(() => {
+            closeModal('x1');
+            document.getElementById('form-x1').reset();
+        }).catch(err => alert("Erro ao salvar no banco: " + err.message));
     }
-
-    closeModal('x1');
 }
 
-// Ações do ADM / Usuários
+// Ações no Firebase
 function acceptChallenge(firebaseKey) {
-    const myTeam = prompt("Digite o nome da sua equipe/clã para aceitar o confronto:");
+    const myTeam = prompt("Digite o nome do seu time para aceitar o confronto:");
     if (myTeam && lobbiesRef) {
         lobbiesRef.child(firebaseKey).update({ challenger: myTeam });
-        alert(`Desafio confirmado! Sua equipe foi registrada no lobby.`);
     }
 }
 
 function cancelLobby(firebaseKey) {
     if (!isAdmin) return;
-    if (confirm("Tem certeza que deseja CANCELAR este lobby da nuvem?")) {
+    if (confirm("Deseja remover este lobby da nuvem?")) {
         if (lobbiesRef) {
             lobbiesRef.child(firebaseKey).remove();
         }
@@ -317,14 +288,25 @@ function updateScore(firebaseKey, winAdd, lossAdd) {
 
 function removeTeam(firebaseKey) {
     if (!isAdmin) return;
-    if (confirm("Remover esta equipe do ranking permanente?")) {
+    if (confirm("Remover clã do ranking?")) {
         if (rankingRef) {
             rankingRef.child(firebaseKey).remove();
         }
     }
 }
 
-// Efeitos Visuais
+// Modais
+function openModal(type) {
+    const modal = document.getElementById(`modal-${type}`);
+    if (modal) modal.classList.add('active');
+}
+
+function closeModal(type) {
+    const modal = document.getElementById(`modal-${type}`);
+    if (modal) modal.classList.remove('active');
+}
+
+// Fundo Dinâmico Partículas
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
@@ -353,24 +335,4 @@ function initParticles() {
         requestAnimationFrame(draw);
     }
     draw();
-}
-
-function initCursor() {
-    const cursor = document.getElementById('cursor');
-    const follower = document.getElementById('cursor-follower');
-    if (!cursor || !follower) return;
-    document.addEventListener('mousemove', e => {
-        cursor.style.left = `${e.clientX}px`; cursor.style.top = `${e.clientY}px`;
-        follower.style.left = `${e.clientX}px`; follower.style.top = `${e.clientY}px`;
-    });
-}
-
-function initThemePicker() {
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.body.className = `theme-${btn.getAttribute('data-theme')}`;
-        });
-    });
 }
