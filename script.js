@@ -1,5 +1,5 @@
 // ==========================================================================
-// LOBARK CODM HUB - AUTENTICAÇÃO E PERFIS DE USUÁRIO
+// LOBARK CODM HUB - COMPLETO COM PRESENÇA ONLINE, EQUIPES E MODERAÇÃO ADM
 // ==========================================================================
 
 const firebaseConfig = {
@@ -12,21 +12,24 @@ const firebaseConfig = {
     appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-// Instâncias Globais do Firebase
+// Instâncias Globais
 let db = null;
 let auth = null;
 let lobbiesRef = null;
 let rankingRef = null;
 let usersRef = null;
+let teamsRef = null;
 
-// Estados Globais
+// Estados Locais
 let currentUser = null;
 let currentUserProfile = null;
+let currentViewingUserUid = null;
 let isAdmin = false;
 const ADMIN_SECRET_PASSWORD = "lobark2026";
 
 let lobbies = [];
 let teamsRanking = [];
+let registeredTeams = [];
 let allProfiles = {};
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -43,16 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
             lobbiesRef = db.ref('lobbies');
             rankingRef = db.ref('ranking');
             usersRef = db.ref('users');
+            teamsRef = db.ref('teams');
 
             listenToAuth();
             listenToFirebase();
         }
     } catch (e) {
-        console.error("Erro na inicialização do Firebase:", e);
+        console.error("Erro no Firebase:", e);
     }
 });
 
-// ESCUTAR AUTENTICAÇÃO
+// ESCUTAR AUTENTICAÇÃO E PRESENÇA ONLINE
 function listenToAuth() {
     auth.onAuthStateChanged((user) => {
         currentUser = user;
@@ -64,7 +68,11 @@ function listenToAuth() {
             guestView.style.display = 'none';
             userView.style.display = 'flex';
             
-            // Carregar Perfil do Usuário Atual
+            // Marcar status Online no banco ao conectar/desconectar
+            const userStatusRef = db.ref(`users/${user.uid}/isOnline`);
+            userStatusRef.set(true);
+            userStatusRef.onDisconnect().set(false);
+
             usersRef.child(user.uid).on('value', (snapshot) => {
                 currentUserProfile = snapshot.val();
                 if (currentUserProfile && currentUserProfile.nick) {
@@ -81,134 +89,222 @@ function listenToAuth() {
     });
 }
 
-// ESCUTAR DADOS EM TEMPO REAL
+// ESCUTAR BANCO EM TEMPO REAL
 function listenToFirebase() {
     lobbiesRef.on('value', (snapshot) => {
         const data = snapshot.val();
         lobbies = [];
-        if (data) {
-            Object.keys(data).forEach(key => {
-                lobbies.push({ firebaseKey: key, ...data[key] });
-            });
-        }
+        if (data) Object.keys(data).forEach(k => lobbies.push({ firebaseKey: k, ...data[k] }));
         renderLobbies();
     });
 
     rankingRef.on('value', (snapshot) => {
         const data = snapshot.val();
         teamsRanking = [];
-        if (data) {
-            Object.keys(data).forEach(key => {
-                teamsRanking.push({ firebaseKey: key, ...data[key] });
-            });
-        }
+        if (data) Object.keys(data).forEach(k => teamsRanking.push({ firebaseKey: k, ...data[k] }));
         renderRanking();
     });
 
-    // Escutar perfis de todos os jogadores para busca rápida pelo Nick
+    teamsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        registeredTeams = [];
+        if (data) Object.keys(data).forEach(k => registeredTeams.push({ firebaseKey: k, ...data[k] }));
+        renderTeams();
+    });
+
     usersRef.on('value', (snapshot) => {
         allProfiles = snapshot.val() || {};
+        renderOnlinePlayers();
     });
 }
 
-// HANDLERS DE AUTENTICAÇÃO
-function handleGoogleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(() => {
-        closeModal('auth');
-    }).catch(err => alert("Erro no Login com Google: " + err.message));
+// RENDERIZAR JOGADORES ONLINE
+function renderOnlinePlayers() {
+    const container = document.getElementById('online-players-grid');
+    const badge = document.getElementById('online-count-badge');
+    if (!container) return;
+
+    container.innerHTML = '';
+    let onlineCount = 0;
+
+    Object.keys(allProfiles).forEach(uid => {
+        const profile = allProfiles[uid];
+        if (profile.isOnline) {
+            onlineCount++;
+            const card = document.createElement('div');
+            card.className = 'card glass-panel';
+            card.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                    <span class="status-indicator online"></span>
+                    <h3 style="font-family: var(--font-heading);">${profile.nick || 'Jogador Anônimo'}</h3>
+                </div>
+                <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px;">
+                    Função: <strong>${profile.role || 'Flex'}</strong> | K/D: <strong>${profile.kd || '0.00'}</strong>
+                </p>
+                <button class="btn-secondary btn-block" onclick="viewPlayerProfileByNick('${profile.nick}')">Ver Perfil Completo</button>
+            `;
+            container.appendChild(card);
+        }
+    });
+
+    if (badge) badge.innerText = onlineCount;
+
+    if (onlineCount === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Nenhum jogador online no momento.</p>`;
+    }
 }
 
-function handleEmailAuth(e) {
-    e.preventDefault();
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
+// RENDERIZAR EQUIPES CADASTRADAS
+function renderTeams() {
+    const container = document.getElementById('teams-grid');
+    if (!container) return;
 
-    auth.signInWithEmailAndPassword(email, password).then(() => {
-        closeModal('auth');
-    }).catch(err => alert("Erro ao entrar: " + err.message));
-}
+    container.innerHTML = '';
 
-function handleRegister() {
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
-
-    if (!email || !password) {
-        alert("Preencha o e-mail e a senha para cadastrar.");
+    if (registeredTeams.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding: 40px 0;">Nenhuma equipe cadastrada ainda.</p>`;
         return;
     }
 
-    auth.createUserWithEmailAndPassword(email, password).then((cred) => {
-        alert("Conta criada com sucesso! Configure seu Nick no perfil.");
-        closeModal('auth');
-        openModal('edit-profile');
-    }).catch(err => alert("Erro ao criar conta: " + err.message));
+    registeredTeams.forEach(team => {
+        const card = document.createElement('div');
+        card.className = 'card glass-panel';
+
+        let adminControls = '';
+        if (isAdmin) {
+            adminControls = `
+                <div style="margin-top:10px;">
+                    <button class="btn-danger btn-block" onclick="adminDeleteTeam('${team.firebaseKey}')"><i class="fa-solid fa-trash"></i> Banir/Excluir Equipe (ADM)</button>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+            <span class="badge badge-${team.tier ? team.tier.toLowerCase() : 't3'}">${team.tier || 'T3'}</span>
+            <h3 style="font-family: var(--font-heading); margin-top:5px;">${team.name}</h3>
+            <p style="color: var(--text-secondary); font-size:0.85rem; margin:8px 0;">${team.desc || 'Sem descrição.'}</p>
+            <button class="btn-primary btn-block" onclick="openTeamDetails('${team.firebaseKey}')">Detalhes & Lineup</button>
+            ${adminControls}
+        `;
+        container.appendChild(card);
+    });
 }
 
-function handleLogout() {
-    auth.signOut();
+// ABRIR MODAL DE DETALHES DA EQUIPE
+function openTeamDetails(teamKey) {
+    const team = registeredTeams.find(t => t.firebaseKey === teamKey);
+    if (!team) return;
+
+    document.getElementById('modal-team-title').innerHTML = `<i class="fa-solid fa-shield"></i> ${team.name} [${team.tier || 'T3'}]`;
+    
+    const rosterList = team.roster ? team.roster.split(',').map(nick => nick.trim()) : [];
+
+    let rosterHTML = rosterList.map(nick => `
+        <li style="padding:6px; cursor:pointer; color:var(--accent);" onclick="closeModal('team-details'); viewPlayerProfileByNick('${nick}')">
+            <i class="fa-solid fa-user-ninja"></i> ${nick}
+        </li>
+    `).join('');
+
+    const body = document.getElementById('modal-team-body');
+    body.innerHTML = `
+        <div style="margin-bottom:15px;">
+            <h4 style="color:var(--text-secondary);">Sobre o Clã:</h4>
+            <p>${team.desc || 'Nenhuma descrição detalhada.'}</p>
+        </div>
+        <div style="margin-bottom:15px;">
+            <h4 style="color:var(--text-secondary);">Principais Conquistas:</h4>
+            <p style="color:var(--accent); font-weight:bold;">${team.achievements || 'Nenhuma conquista registrada ainda.'}</p>
+        </div>
+        <div class="lineup-box">
+            <h4>Lineup Competitiva (Clique para ver o Perfil):</h4>
+            <ul>${rosterHTML || '<li>Nenhum jogador escalado</li>'}</ul>
+        </div>
+    `;
+
+    openModal('team-details');
 }
 
-// SALVAR E EDITAR PERFIL
-function handleSaveProfile(e) {
+// CADASTRAR NOVA EQUIPE
+function handleCreateTeam(e) {
     e.preventDefault();
-    if (!currentUser) {
-        alert("Você precisa estar logado para salvar seu perfil.");
-        return;
+    const name = document.getElementById('team-name').value;
+    const tier = document.getElementById('team-tier').value;
+    const desc = document.getElementById('team-desc').value;
+    const achievements = document.getElementById('team-achievements').value;
+    const roster = document.getElementById('team-roster').value;
+
+    if (teamsRef) {
+        teamsRef.push({ name, tier, desc, achievements, roster }).then(() => {
+            alert("Equipe cadastrada com sucesso!");
+            closeModal('create-team');
+        }).catch(err => alert("Erro ao salvar equipe: " + err.message));
     }
-
-    const nick = document.getElementById('edit-nick').value.trim();
-    const kd = document.getElementById('edit-kd').value.trim();
-    const winrate = document.getElementById('edit-winrate').value.trim();
-    const role = document.getElementById('edit-role').value;
-
-    const profileData = { nick, kd, winrate, role };
-
-    usersRef.child(currentUser.uid).set(profileData).then(() => {
-        alert("Perfil atualizado!");
-        closeModal('edit-profile');
-        showPlayerProfile(profileData);
-    }).catch(err => alert("Erro ao salvar perfil: " + err.message));
 }
 
-// BUSCAR E EXIBIR PERFIL AO CLICAR NO NICK
+// VISUALIZAR PERFIL INTERATIVO
 function viewPlayerProfileByNick(nick) {
+    let foundUid = null;
     let foundProfile = null;
 
-    // Procura o nick correspondente na lista de perfis do banco
     Object.keys(allProfiles).forEach(uid => {
         if (allProfiles[uid].nick && allProfiles[uid].nick.toLowerCase() === nick.toLowerCase()) {
+            foundUid = uid;
             foundProfile = allProfiles[uid];
         }
     });
 
+    currentViewingUserUid = foundUid;
+
     if (foundProfile) {
-        showPlayerProfile(foundProfile);
+        document.getElementById('view-profile-nick').innerText = foundProfile.nick;
+        document.getElementById('view-profile-kd').innerText = foundProfile.kd || '0.00';
+        document.getElementById('view-profile-winrate').innerText = foundProfile.winrate || '0%';
+        document.getElementById('view-profile-role').innerText = foundProfile.role || 'Flex';
+        document.getElementById('view-profile-bio').innerText = foundProfile.bio || 'Sem biografia cadastrada.';
+        
+        const statusDot = document.getElementById('view-profile-status-dot');
+        if (foundProfile.isOnline) {
+            statusDot.className = 'status-indicator online';
+        } else {
+            statusDot.className = 'status-indicator offline';
+        }
     } else {
-        // Exibe perfil padrão temporário se o usuário ainda não tiver conta cadastrada
-        showPlayerProfile({
-            nick: nick,
-            kd: 'N/A',
-            winrate: 'N/A',
-            role: 'Jogador Desconhecido'
-        });
+        document.getElementById('view-profile-nick').innerText = nick;
+        document.getElementById('view-profile-kd').innerText = 'N/A';
+        document.getElementById('view-profile-winrate').innerText = 'N/A';
+        document.getElementById('view-profile-role').innerText = 'Convidado';
+        document.getElementById('view-profile-bio').innerText = 'Este jogador ainda não possui conta registrada no Hub LOBARK.';
+        document.getElementById('view-profile-status-dot').className = 'status-indicator offline';
     }
+
+    const adminControls = document.getElementById('admin-player-controls');
+    if (adminControls) adminControls.style.display = (isAdmin && foundUid) ? 'block' : 'none';
 
     switchTab('profile');
 }
 
-function showPlayerProfile(profile) {
-    document.getElementById('view-profile-nick').innerText = profile.nick || 'Não configurado';
-    document.getElementById('view-profile-kd').innerText = profile.kd || '0.00';
-    document.getElementById('view-profile-winrate').innerText = profile.winrate || '0%';
-    document.getElementById('view-profile-role').innerText = profile.role || 'Flex';
+// PODER SUPREMO DO ADM (BANIR E EXCLUIR)
+function adminBanPlayer() {
+    if (!isAdmin || !currentViewingUserUid) return;
+    if (confirm("PODER SUPREMO DE ADM: Tem certeza de que deseja BANIR este jogador permanentemente do Hub LOBARK?")) {
+        usersRef.child(currentViewingUserUid).remove().then(() => {
+            alert("Jogador banido e removido do sistema!");
+            switchTab('online');
+        });
+    }
 }
 
-// RENDERIZAR LOBBIES
+function adminDeleteTeam(teamKey) {
+    if (!isAdmin) return;
+    if (confirm("PODER SUPREMO DE ADM: Deseja EXCLUIR/BANIR este clã da plataforma?")) {
+        teamsRef.child(teamKey).remove().then(() => alert("Clã excluído!"));
+    }
+}
+
+// RENDERIZAR LOBBIES E RANKING
 function renderLobbies() {
     const container = document.getElementById('lobbies-container');
     if (!container) return;
-
     container.innerHTML = '';
 
     if (lobbies.length === 0) {
@@ -224,44 +320,32 @@ function renderLobbies() {
         if (lobby.lineup && lobby.lineup.length > 0) {
             lineupHTML = `
                 <div class="lineup-box">
-                    <h4>Escalação (Clique no Nick para ver o Perfil):</h4>
-                    <ul>
-                        ${lobby.lineup.map(p => `<li style="cursor:pointer; color:var(--accent);" onclick="viewPlayerProfileByNick('${p}')"><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}
-                    </ul>
+                    <h4>Escalação (Clique no Nick para ver Perfil):</h4>
+                    <ul>${lobby.lineup.map(p => `<li style="cursor:pointer; color:var(--accent);" onclick="viewPlayerProfileByNick('${p}')"><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}</ul>
                 </div>
             `;
-        } else if (lobby.mode) {
-            lineupHTML = `<div class="lineup-box"><h4>Regras X1:</h4><p style="font-size:0.85rem">${lobby.mode}</p></div>`;
         }
 
-        let adminControlsHTML = '';
+        let adminControls = '';
         if (isAdmin) {
-            adminControlsHTML = `
-                <div style="margin-top: 10px;">
-                    <button class="btn-danger btn-block" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Excluir Lobby (ADM)</button>
-                </div>
-            `;
+            adminControls = `<button class="btn-danger btn-block" style="margin-top:10px;" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Banir/Excluir Lobby</button>`;
         }
 
         card.innerHTML = `
             <span class="badge ${lobby.badgeClass || 'badge-t3'}">${lobby.type}</span>
             <h3 style="font-family: var(--font-heading);">${lobby.team}</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">⏰ Horário: <strong>${lobby.time}</strong></p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">⏰ Horário: <strong>${lobby.time}</strong></p>
             ${lineupHTML}
-            <button class="btn-primary btn-block" onclick="acceptChallenge('${lobby.firebaseKey}')">
-                ${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}
-            </button>
-            ${adminControlsHTML}
+            <button class="btn-primary btn-block" onclick="acceptChallenge('${lobby.firebaseKey}')">${lobby.challenger ? 'Desafiado por ' + lobby.challenger : 'Aceitar Desafio'}</button>
+            ${adminControls}
         `;
         container.appendChild(card);
     });
 }
 
-// RENDERIZAR RANKING
 function renderRanking() {
     const tbody = document.getElementById('ranking-body');
     if (!tbody) return;
-
     tbody.innerHTML = '';
 
     teamsRanking.sort((a, b) => (b.wins || 0) - (a.wins || 0));
@@ -273,9 +357,9 @@ function renderRanking() {
         let actionsHTML = '';
         if (isAdmin) {
             actionsHTML = `
-                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="updateScore('${team.firebaseKey}', 1, 0)">+1 Vit</button>
-                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; color: var(--crimson);" onclick="updateScore('${team.firebaseKey}', 0, 1)">+1 Der</button>
-                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="removeTeam('${team.firebaseKey}')">Excluir</button>
+                <button class="btn-secondary" style="padding:4px 8px;" onclick="updateScore('${team.firebaseKey}', 1, 0)">+1 Vit</button>
+                <button class="btn-secondary" style="padding:4px 8px; color:var(--crimson);" onclick="updateScore('${team.firebaseKey}', 0, 1)">+1 Der</button>
+                <button class="btn-danger" style="padding:4px 8px;" onclick="removeTeam('${team.firebaseKey}')">Excluir</button>
             `;
         } else {
             actionsHTML = `<span style="font-size:0.8rem; color:var(--text-muted);">Somente Leitura</span>`;
@@ -295,92 +379,94 @@ function renderRanking() {
     });
 }
 
-// CADASTRAR SCRIM (5v5)
-function handleCreateScrim(e) {
-    if (e && e.preventDefault) e.preventDefault();
+// SALVAR MEU PERFIL
+function handleSaveProfile(e) {
+    e.preventDefault();
+    if (!currentUser) return alert("Faça login primeiro.");
 
+    const nick = document.getElementById('edit-nick').value.trim();
+    const kd = document.getElementById('edit-kd').value.trim();
+    const winrate = document.getElementById('edit-winrate').value.trim();
+    const role = document.getElementById('edit-role').value;
+    const bio = document.getElementById('edit-bio').value.trim();
+
+    usersRef.child(currentUser.uid).update({ nick, kd, winrate, role, bio, isOnline: true }).then(() => {
+        alert("Perfil atualizado!");
+        closeModal('edit-profile');
+        viewPlayerProfileByNick(nick);
+    });
+}
+
+// SCRIMS E X1
+function handleCreateScrim(e) {
+    e.preventDefault();
     const type = document.getElementById('scrim-type').value;
     const time = document.getElementById('scrim-time').value;
     const team = document.getElementById('scrim-team-name').value;
-
     const lineup = [
         document.getElementById('p1').value.trim(),
         document.getElementById('p2').value.trim(),
         document.getElementById('p3').value.trim(),
         document.getElementById('p4').value.trim(),
-        document.getElementById('p5').value.trim(),
+        document.getElementById('p5').value.trim()
     ];
 
-    let badgeClass = 'badge-t3';
-    if (type.includes('T1')) badgeClass = 'badge-t1';
-    if (type.includes('T2')) badgeClass = 'badge-t2';
-
-    if (lobbiesRef) {
-        lobbiesRef.push({
-            type, time, team, lineup, challenger: null, badgeClass
-        }).then(() => {
-            alert("Lobby criado na nuvem!");
-            closeModal('scrim');
-            document.getElementById('form-scrim').reset();
-        }).catch(err => alert("Erro ao salvar: " + err.message));
-    }
+    lobbiesRef.push({ type, time, team, lineup, challenger: null, badgeClass: type.includes('T1') ? 'badge-t1' : 'badge-t3' }).then(() => {
+        closeModal('scrim');
+        document.getElementById('form-scrim').reset();
+    });
 }
 
-// CADASTRAR DESAFIO X1
 function handleCreateX1(e) {
-    if (e && e.preventDefault) e.preventDefault();
-
+    e.preventDefault();
     const player = document.getElementById('x1-player').value.trim();
-    const time = document.getElementById('scrim-time') ? document.getElementById('x1-time').value : '';
+    const time = document.getElementById('x1-time').value;
     const mode = document.getElementById('x1-mode').value;
 
-    if (lobbiesRef) {
-        lobbiesRef.push({
-            type: 'X1', time, team: `${player} (X1)`, mode, lineup: [player], challenger: null, badgeClass: 'badge-x1'
-        }).then(() => {
-            alert("Desafio X1 publicado!");
-            closeModal('x1');
-            document.getElementById('form-x1').reset();
-        }).catch(err => alert("Erro ao salvar: " + err.message));
-    }
+    lobbiesRef.push({ type: 'X1', time, team: `${player} (X1)`, mode, lineup: [player], challenger: null, badgeClass: 'badge-x1' }).then(() => {
+        closeModal('x1');
+        document.getElementById('form-x1').reset();
+    });
 }
 
-// CONTROLE DE MODO ADM E NAVEGAÇÃO
+// AUTENTICAÇÃO
+function handleGoogleLogin() {
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeModal('auth'));
+}
+
+function handleEmailAuth(e) {
+    e.preventDefault();
+    auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value)
+        .then(() => closeModal('auth'))
+        .catch(err => alert("Erro: " + err.message));
+}
+
+function handleRegister() {
+    auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value)
+        .then(() => { closeModal('auth'); openModal('edit-profile'); });
+}
+
+function handleLogout() { auth.signOut(); }
+
+// ADM E MÓDULOS GERAIS
 function toggleAdminMode() {
     if (!isAdmin) {
-        const pass = prompt("Digite a senha de Administrador LOBARK:");
-        if (pass === ADMIN_SECRET_PASSWORD) {
+        if (prompt("Digite a senha de ADM:") === ADMIN_SECRET_PASSWORD) {
             isAdmin = true;
             atualizarInterfaceAdmin();
             alert("Modo Administrador Ativado!");
-        } else if (pass !== null) {
-            alert("Senha incorreta!");
         }
     } else {
         isAdmin = false;
         atualizarInterfaceAdmin();
-        alert("Modo Administrador Desativado.");
     }
 }
 
 function atualizarInterfaceAdmin() {
-    const label = document.getElementById('role-label');
-    const btn = document.getElementById('admin-toggle-btn');
-
-    if (label && btn) {
-        if (isAdmin) {
-            label.innerText = 'ADMINISTRADOR';
-            label.style.color = 'var(--crimson)';
-            btn.style.borderColor = 'var(--crimson)';
-        } else {
-            label.innerText = 'JOGADOR';
-            label.style.color = 'var(--accent)';
-            btn.style.borderColor = 'var(--text-muted)';
-        }
-    }
-
+    document.getElementById('role-label').innerText = isAdmin ? 'ADMINISTRADOR' : 'JOGADOR';
     renderLobbies();
     renderRanking();
+    renderTeams();
 }
 
 function switchTab(tabName) {
@@ -395,47 +481,21 @@ function switchTab(tabName) {
     }
 }
 
-function acceptChallenge(firebaseKey) {
-    const myTeam = prompt("Digite o nome da sua equipe para aceitar:");
-    if (myTeam && lobbiesRef) {
-        lobbiesRef.child(firebaseKey).update({ challenger: myTeam });
-    }
+function acceptChallenge(key) {
+    const myTeam = prompt("Nome da sua equipe:");
+    if (myTeam) lobbiesRef.child(key).update({ challenger: myTeam });
 }
 
-function cancelLobby(firebaseKey) {
+function cancelLobby(key) { if (isAdmin && confirm("Excluir lobby?")) lobbiesRef.child(key).remove(); }
+function updateScore(key, w, l) {
     if (!isAdmin) return;
-    if (confirm("Deseja excluir este lobby?")) {
-        lobbiesRef.child(firebaseKey).remove();
-    }
+    const team = teamsRanking.find(t => t.firebaseKey === key);
+    if (team) rankingRef.child(key).update({ wins: (team.wins || 0) + w, losses: (team.losses || 0) + l });
 }
+function removeTeam(key) { if (isAdmin && confirm("Remover clã?")) rankingRef.child(key).remove(); }
 
-function updateScore(firebaseKey, winAdd, lossAdd) {
-    if (!isAdmin) return;
-    const team = teamsRanking.find(t => t.firebaseKey === firebaseKey);
-    if (team && rankingRef) {
-        rankingRef.child(firebaseKey).update({
-            wins: (team.wins || 0) + winAdd,
-            losses: (team.losses || 0) + lossAdd
-        });
-    }
-}
-
-function removeTeam(firebaseKey) {
-    if (!isAdmin) return;
-    if (confirm("Remover do ranking?")) {
-        rankingRef.child(firebaseKey).remove();
-    }
-}
-
-function openModal(type) {
-    const modal = document.getElementById(`modal-${type}`);
-    if (modal) modal.classList.add('active');
-}
-
-function closeModal(type) {
-    const modal = document.getElementById(`modal-${type}`);
-    if (modal) modal.classList.remove('active');
-}
+function openModal(t) { const m = document.getElementById(`modal-${t}`); if (m) m.classList.add('active'); }
+function closeModal(t) { const m = document.getElementById(`modal-${t}`); if (m) m.classList.remove('active'); }
 
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
