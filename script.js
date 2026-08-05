@@ -1,5 +1,5 @@
 // ==========================================================================
-// LOBARK CODM HUB - INTEGRADO COM FIREBASE REALTIME DATABASE & ADM AUTH
+// LOBARK CODM HUB - SCRIPT CORRIGIDO & ALINHADO
 // ==========================================================================
 
 const firebaseConfig = {
@@ -12,42 +12,49 @@ const firebaseConfig = {
     appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-// Inicialização segura do Firebase
+// Variáveis Globais do Firebase
 let db = null;
 let lobbiesRef = null;
 let rankingRef = null;
 
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    db = firebase.database();
-    lobbiesRef = db.ref('lobbies');
-    rankingRef = db.ref('ranking');
-} catch (e) {
-    console.error("Erro na inicialização do Firebase:", e);
-}
-
-// Estados Locais
+// Estados Globais
 let isAdmin = false;
 const ADMIN_SECRET_PASSWORD = "lobark2026";
 
 let lobbies = [];
 let teamsRanking = [];
 
+// Inicialização com Verificação Segura
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
-    
-    if (lobbiesRef) {
-        listenToFirebase();
-    } else {
+
+    try {
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            lobbiesRef = db.ref('lobbies');
+            rankingRef = db.ref('ranking');
+            
+            console.log("Firebase conectado com sucesso!");
+            listenToFirebase();
+        } else {
+            console.error("SDK do Firebase não foi carregado corretamente no HTML.");
+            renderLobbies();
+            renderRanking();
+        }
+    } catch (e) {
+        console.error("Erro na inicialização do Firebase:", e);
         renderLobbies();
         renderRanking();
     }
 });
 
-// Sincronização em Tempo Real com o Firebase
+// ESCUTAR O FIREBASE EM TEMPO REAL
 function listenToFirebase() {
+    if (!lobbiesRef || !rankingRef) return;
+
     lobbiesRef.on('value', (snapshot) => {
         const data = snapshot.val();
         lobbies = [];
@@ -57,7 +64,9 @@ function listenToFirebase() {
             });
         }
         renderLobbies();
-    }, (err) => console.error(err));
+    }, (err) => {
+        console.error("Erro ao ler Lobbies do Firebase:", err);
+    });
 
     rankingRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -68,17 +77,19 @@ function listenToFirebase() {
             });
         }
         renderRanking();
-    }, (err) => console.error(err));
+    }, (err) => {
+        console.error("Erro ao ler Ranking do Firebase:", err);
+    });
 }
 
-// Modo ADM
+// MODO ADM
 function toggleAdminMode() {
     if (!isAdmin) {
         const pass = prompt("Digite a senha de Administrador LOBARK:");
         if (pass === ADMIN_SECRET_PASSWORD) {
             isAdmin = true;
             atualizarInterfaceAdmin();
-            alert("Modo Administrador Ativado!");
+            alert("Acesso Concedido: Modo Administrador Ativado!");
         } else if (pass !== null) {
             alert("Senha incorreta!");
         }
@@ -109,7 +120,7 @@ function atualizarInterfaceAdmin() {
     renderRanking();
 }
 
-// Controle de Abas
+// NAVEGAÇÃO DE ABAS
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -117,12 +128,12 @@ function switchTab(tabName) {
     const activeTab = document.getElementById(`tab-${tabName}`);
     if (activeTab) activeTab.classList.add('active');
 
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
     }
 }
 
-// Renderizar Lobbies
+// RENDERIZAR LOBBIES
 function renderLobbies() {
     const container = document.getElementById('lobbies-container');
     if (!container) return;
@@ -156,7 +167,7 @@ function renderLobbies() {
         if (isAdmin) {
             adminControlsHTML = `
                 <div style="margin-top: 10px;">
-                    <button class="btn-danger btn-block" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Excluir Lobby</button>
+                    <button class="btn-danger btn-block" onclick="cancelLobby('${lobby.firebaseKey}')"><i class="fa-solid fa-trash"></i> Excluir Lobby (ADM)</button>
                 </div>
             `;
         }
@@ -175,7 +186,7 @@ function renderLobbies() {
     });
 }
 
-// Renderizar Ranking
+// RENDERIZAR RANKING
 function renderRanking() {
     const tbody = document.getElementById('ranking-body');
     if (!tbody) return;
@@ -193,7 +204,7 @@ function renderRanking() {
             actionsHTML = `
                 <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="updateScore('${team.firebaseKey}', 1, 0)">+1 Vit</button>
                 <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; color: var(--crimson);" onclick="updateScore('${team.firebaseKey}', 0, 1)">+1 Der</button>
-                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="removeTeam('${team.firebaseKey}')">Sair</button>
+                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="removeTeam('${team.firebaseKey}')">Excluir</button>
             `;
         } else {
             actionsHTML = `<span style="font-size:0.8rem; color:var(--text-muted);">Somente Leitura</span>`;
@@ -213,9 +224,10 @@ function renderRanking() {
     });
 }
 
-// Criar Lobbies no Firebase
+// CADASTRAR SCRIM (5v5)
 function handleCreateScrim(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+
     const type = document.getElementById('scrim-type').value;
     const time = document.getElementById('scrim-time').value;
     const team = document.getElementById('scrim-team-name').value;
@@ -236,14 +248,22 @@ function handleCreateScrim(e) {
         lobbiesRef.push({
             type, time, team, lineup, challenger: null, badgeClass
         }).then(() => {
+            alert("Lobby criado e sincronizado na nuvem!");
             closeModal('scrim');
-            document.getElementById('form-scrim').reset();
-        }).catch(err => alert("Erro ao salvar no banco: " + err.message));
+            const form = document.getElementById('form-scrim');
+            if (form) form.reset();
+        }).catch(err => {
+            alert("Erro ao salvar no Firebase: " + err.message + "\nVerifique se as Regras do Realtime Database estão publicas (.read: true, .write: true).");
+        });
+    } else {
+        alert("Erro: Conexão com o Firebase não foi estabelecida.");
     }
 }
 
+// CADASTRAR DESAFIO X1
 function handleCreateX1(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+
     const player = document.getElementById('x1-player').value;
     const time = document.getElementById('x1-time').value;
     const mode = document.getElementById('x1-mode').value;
@@ -252,25 +272,37 @@ function handleCreateX1(e) {
         lobbiesRef.push({
             type: 'X1', time, team: `${player} (X1)`, mode, lineup: [], challenger: null, badgeClass: 'badge-x1'
         }).then(() => {
+            alert("Desafio X1 publicado na nuvem!");
             closeModal('x1');
-            document.getElementById('form-x1').reset();
-        }).catch(err => alert("Erro ao salvar no banco: " + err.message));
+            const form = document.getElementById('form-x1');
+            if (form) form.reset();
+        }).catch(err => {
+            alert("Erro ao salvar no Firebase: " + err.message);
+        });
+    } else {
+        alert("Erro: Conexão com o Firebase não foi estabelecida.");
     }
 }
 
-// Ações no Firebase
+// AÇÕES DO ADM E USUÁRIOS
 function acceptChallenge(firebaseKey) {
     const myTeam = prompt("Digite o nome do seu time para aceitar o confronto:");
     if (myTeam && lobbiesRef) {
-        lobbiesRef.child(firebaseKey).update({ challenger: myTeam });
+        lobbiesRef.child(firebaseKey).update({ challenger: myTeam })
+            .catch(err => alert("Erro ao aceitar desafio: " + err.message));
     }
 }
 
 function cancelLobby(firebaseKey) {
-    if (!isAdmin) return;
-    if (confirm("Deseja remover este lobby da nuvem?")) {
+    if (!isAdmin) {
+        alert("Ação permitida apenas para Administradores.");
+        return;
+    }
+    if (confirm("Tem certeza de que deseja EXCLUIR este lobby permanentemente?")) {
         if (lobbiesRef) {
-            lobbiesRef.child(firebaseKey).remove();
+            lobbiesRef.child(firebaseKey).remove()
+                .then(() => alert("Lobby removido com sucesso!"))
+                .catch(err => alert("Erro ao excluir do Firebase: " + err.message));
         }
     }
 }
@@ -282,20 +314,22 @@ function updateScore(firebaseKey, winAdd, lossAdd) {
         rankingRef.child(firebaseKey).update({
             wins: (team.wins || 0) + winAdd,
             losses: (team.losses || 0) + lossAdd
-        });
+        }).catch(err => alert("Erro ao atualizar placar: " + err.message));
     }
 }
 
 function removeTeam(firebaseKey) {
     if (!isAdmin) return;
-    if (confirm("Remover clã do ranking?")) {
+    if (confirm("Remover este clã do ranking?")) {
         if (rankingRef) {
-            rankingRef.child(firebaseKey).remove();
+            rankingRef.child(firebaseKey).remove()
+                .then(() => alert("Clã removido do ranking!"))
+                .catch(err => alert("Erro ao remover: " + err.message));
         }
     }
 }
 
-// Modais
+// MODAIS
 function openModal(type) {
     const modal = document.getElementById(`modal-${type}`);
     if (modal) modal.classList.add('active');
@@ -306,7 +340,7 @@ function closeModal(type) {
     if (modal) modal.classList.remove('active');
 }
 
-// Fundo Dinâmico Partículas
+// EFITO DE PARTÍCULAS
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
