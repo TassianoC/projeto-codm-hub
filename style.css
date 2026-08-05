@@ -1,11 +1,11 @@
 :root {
     --bg-dark: #080b10;
-    --card-bg: rgba(16, 22, 34, 0.65);
+    --card-bg: rgba(16, 22, 34, 0.7);
     --card-border: rgba(0, 243, 255, 0.2);
     --accent: #00f3ff;
     --accent-glow: rgba(0, 243, 255, 0.4);
     --crimson: #ff0055;
-    --crimson-glow: rgba(ff, 0, 85, 0.4);
+    --crimson-glow: rgba(255, 0, 85, 0.4);
     --online-green: #00ff66;
     --text-main: #ffffff;
     --text-secondary: #94a3b8;
@@ -45,7 +45,7 @@ body {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 .navbar {
@@ -163,6 +163,12 @@ body {
     color: var(--text-main);
 }
 
+.btn-outline.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 243, 255, 0.1);
+}
+
 .btn-danger {
     background: var(--crimson);
     color: #fff;
@@ -193,6 +199,11 @@ body {
     font-size: 1.5rem;
 }
 
+.mode-selector {
+    display: flex;
+    gap: 8px;
+}
+
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -220,7 +231,7 @@ body {
 .status-indicator.online { background: var(--online-green); box-shadow: 0 0 8px var(--online-green); }
 .status-indicator.offline { background: var(--text-muted); }
 
-/* ESTILOS AVANÇADOS DO PERFIL */
+/* ESTILOS ESPORTS CHARTS DO PERFIL */
 .profile-card {
     position: relative;
     overflow: hidden;
@@ -228,8 +239,8 @@ body {
 }
 
 .profile-banner {
-    height: 140px;
-    background: linear-gradient(90deg, rgba(0,243,255,0.2) 0%, rgba(255,0,85,0.2) 100%);
+    height: 160px;
+    background: linear-gradient(90deg, rgba(0,243,255,0.2) 0%, rgba(255,0,85,0.2) 100%), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80') center/cover;
     border-bottom: 1px solid var(--card-border);
 }
 
@@ -243,15 +254,15 @@ body {
 }
 
 .avatar-box {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
     background: #0d131d;
     border: 2px solid var(--accent);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     color: var(--accent);
     position: relative;
     box-shadow: 0 0 20px var(--accent-glow);
@@ -261,8 +272,8 @@ body {
     position: absolute;
     bottom: 5px;
     right: 5px;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     border: 2px solid #000;
 }
 
@@ -271,15 +282,26 @@ body {
     font-size: 1.8rem;
 }
 
+.badge-live {
+    background: var(--crimson);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+}
+
 .profile-badges {
     display: flex;
     gap: 8px;
-    margin-top: 5px;
+    margin-top: 8px;
+    flex-wrap: wrap;
 }
 
 .profile-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 15px;
     padding: 0 30px;
     margin-bottom: 25px;
@@ -293,9 +315,17 @@ body {
     align-items: center;
 }
 
-.stat-icon { font-size: 1.5rem; color: var(--accent); margin-bottom: 8px; }
-.stat-value { font-family: var(--font-heading); font-size: 1.6rem; font-weight: bold; }
-.stat-label { font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; }
+.stat-icon { font-size: 1.6rem; color: var(--accent); margin-bottom: 8px; }
+.stat-value { font-family: var(--font-heading); font-size: 1.7rem; font-weight: bold; }
+.stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; }
+
+.gears-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 0.95rem;
+}
 
 .profile-bio-box {
     margin: 0 30px;
@@ -306,22 +336,23 @@ body {
     font-family: var(--font-heading);
     font-size: 1rem;
     color: var(--accent);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
-/* MODAIS & TABELAS */
+/* BADGES & TABELAS */
 .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; font-family: var(--font-heading); }
 .badge-t1 { background: #ffaa00; color: #000; }
 .badge-t2 { background: #9d00ff; color: #fff; }
 .badge-t3 { background: #00f3ff; color: #000; }
 .badge-x1 { background: var(--crimson); color: #fff; }
+.badge-tech { background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid var(--card-border); }
 
 .lineup-box { background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 6px; margin: 12px 0; }
 .lineup-box h4 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px; }
 .lineup-box ul { list-style: none; }
 .lineup-box li { font-size: 0.9rem; padding: 2px 0; }
 
-.table-wrapper { overflow-x: auto; padding: 15px; }
+.table-wrapper { overflow-x: auto; padding: 10px 0; }
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
 .custom-table th, .custom-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 .custom-table th { font-family: var(--font-heading); font-size: 0.85rem; color: var(--text-secondary); }
@@ -329,7 +360,7 @@ body {
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 1000; justify-content: center; align-items: center; }
 .modal.active { display: flex; }
 .modal-content { width: 100%; max-width: 450px; padding: 25px; position: relative; }
-.modal-lg { max-width: 700px; }
+.modal-lg { max-width: 750px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .close-btn { font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
 .close-btn:hover { color: var(--crimson); }
@@ -340,3 +371,4 @@ body {
 .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
