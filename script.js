@@ -1,9 +1,11 @@
 // ==========================================================================
-// LOBARK CODM MANAGER & PRO PROFILE - JAVASCRIPT COM NÍVEIS DE ACESSO
+// LOBARK CODM MANAGER & PRO PROFILE - SCRIPT COM CONTROLE DE SENHA ADM
 // ==========================================================================
 
-// Estado Global de Permissão (false = Jogador, true = Administrador LOBARK)
 let isAdmin = false;
+
+// Senha mestra para o seu painel de Administrador
+const ADMIN_SECRET_PASSWORD = "fallkzin110018"; // Mude aqui se quiser outra senha
 
 let lobbies = [
     {
@@ -63,9 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
     initThemePicker();
 });
 
-// Alternar entre modo Usuário e Administrador
+// Sistema de Autenticação por Senha para ativar o modo ADM
 function toggleAdminMode() {
-    isAdmin = !isAdmin;
+    if (!isAdmin) {
+        const pass = prompt("Digite a senha de Administrador:");
+        if (pass === ADMIN_SECRET_PASSWORD) {
+            isAdmin = true;
+            atualizarInterfaceAdmin();
+            alert("Acesso Concedido: Modo Administrador Ativado!");
+        } else if (pass !== null) {
+            alert("Senha incorreta!");
+        }
+    } else {
+        isAdmin = false;
+        atualizarInterfaceAdmin();
+        alert("Modo Administrador Desativado. Voltou ao perfil de Jogador.");
+    }
+}
+
+function atualizarInterfaceAdmin() {
     const label = document.getElementById('role-label');
     const btn = document.getElementById('admin-toggle-btn');
 
@@ -74,7 +92,6 @@ function toggleAdminMode() {
         label.style.color = 'var(--crimson)';
         btn.style.borderColor = 'var(--crimson)';
         document.body.classList.add('admin-mode');
-        alert("Modo ADM Ativado: Você agora tem controle total para cancelar partidas e gerenciar o ranking.");
     } else {
         label.innerText = 'JOGADOR';
         label.style.color = 'var(--accent)';
@@ -86,7 +103,6 @@ function toggleAdminMode() {
     renderRanking();
 }
 
-// Troca de Abas
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -95,16 +111,13 @@ function switchTab(tabName) {
     event.currentTarget.classList.add('active');
 }
 
-// Visualizar perfil do Jogador
 function viewPlayerProfile(playerName) {
     const cleanName = playerName.split(' ')[0];
     document.getElementById('player-profile-name').innerHTML = `${cleanName}<span class="glow-text">_PRO</span>`;
     document.getElementById('card-player-name').innerText = cleanName;
-    
     switchTab('profile');
 }
 
-// Renderizar Lobbies com opções diferenciadas de ADM
 function renderLobbies() {
     const container = document.getElementById('lobbies-container');
     container.innerHTML = '';
@@ -127,7 +140,6 @@ function renderLobbies() {
             lineupHTML = `<div class="lineup-box"><h4>Regras X1:</h4><p style="font-size:0.85rem">${lobby.mode}</p></div>`;
         }
 
-        // Botões visíveis apenas para Administrador
         let adminControlsHTML = '';
         if (isAdmin) {
             adminControlsHTML = `
@@ -147,12 +159,10 @@ function renderLobbies() {
             </button>
             ${adminControlsHTML}
         `;
-
         container.appendChild(card);
     });
 }
 
-// Renderizar Ranking com Ações de ADM
 function renderRanking() {
     const tbody = document.getElementById('ranking-body');
     tbody.innerHTML = '';
@@ -163,7 +173,6 @@ function renderRanking() {
         const total = team.wins + team.losses;
         const winrate = total > 0 ? ((team.wins / total) * 100).toFixed(1) + '%' : '0%';
 
-        // Ações de alteração de pontos visíveis prioritariamente para ADM
         let actionsHTML = '';
         if (isAdmin) {
             actionsHTML = `
@@ -189,7 +198,6 @@ function renderRanking() {
     });
 }
 
-// --- Ações de Jogadores ---
 function acceptChallenge(id) {
     const lobby = lobbies.find(l => l.id === id);
     if (lobby) {
@@ -202,7 +210,6 @@ function acceptChallenge(id) {
     }
 }
 
-// --- Ações Exclusivas do Administrador (Você) ---
 function cancelLobby(id) {
     if (!isAdmin) return;
     if (confirm("Tem certeza que deseja CANCELAR e excluir esta Scrim/X1?")) {
@@ -229,7 +236,6 @@ function removeTeam(teamName) {
     }
 }
 
-// Modais
 function openModal(type) { document.getElementById(`modal-${type}`).classList.add('active'); }
 function closeModal(type) { document.getElementById(`modal-${type}`).classList.remove('active'); }
 
@@ -267,7 +273,6 @@ function handleCreateX1(e) {
     renderLobbies();
 }
 
-// Background & Efeitos
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     const ctx = canvas.getContext('2d');
