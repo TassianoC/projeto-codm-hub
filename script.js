@@ -1,5 +1,5 @@
 // ==========================================================================
-// LOBARK CODM HUB - SCRIPT CORRIGIDO & ALINHADO
+// LOBARK CODM HUB - AUTENTICAÇÃO E PERFIS DE USUÁRIO
 // ==========================================================================
 
 const firebaseConfig = {
@@ -12,19 +12,23 @@ const firebaseConfig = {
     appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-// Variáveis Globais do Firebase
+// Instâncias Globais do Firebase
 let db = null;
+let auth = null;
 let lobbiesRef = null;
 let rankingRef = null;
+let usersRef = null;
 
 // Estados Globais
+let currentUser = null;
+let currentUserProfile = null;
 let isAdmin = false;
 const ADMIN_SECRET_PASSWORD = "lobark2026";
 
 let lobbies = [];
 let teamsRanking = [];
+let allProfiles = {};
 
-// Inicialização com Verificação Segura
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
 
@@ -34,27 +38,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebase.initializeApp(firebaseConfig);
             }
             db = firebase.database();
+            auth = firebase.auth();
+            
             lobbiesRef = db.ref('lobbies');
             rankingRef = db.ref('ranking');
-            
-            console.log("Firebase conectado com sucesso!");
+            usersRef = db.ref('users');
+
+            listenToAuth();
             listenToFirebase();
-        } else {
-            console.error("SDK do Firebase não foi carregado corretamente no HTML.");
-            renderLobbies();
-            renderRanking();
         }
     } catch (e) {
         console.error("Erro na inicialização do Firebase:", e);
-        renderLobbies();
-        renderRanking();
     }
 });
 
-// ESCUTAR O FIREBASE EM TEMPO REAL
-function listenToFirebase() {
-    if (!lobbiesRef || !rankingRef) return;
+// ESCUTAR AUTENTICAÇÃO
+function listenToAuth() {
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        const guestView = document.getElementById('auth-guest-view');
+        const userView = document.getElementById('auth-user-view');
+        const userDisplayName = document.getElementById('user-display-name');
 
+        if (user) {
+            guestView.style.display = 'none';
+            userView.style.display = 'flex';
+            
+            // Carregar Perfil do Usuário Atual
+            usersRef.child(user.uid).on('value', (snapshot) => {
+                currentUserProfile = snapshot.val();
+                if (currentUserProfile && currentUserProfile.nick) {
+                    userDisplayName.innerText = currentUserProfile.nick;
+                } else {
+                    userDisplayName.innerText = user.email.split('@')[0];
+                }
+            });
+        } else {
+            guestView.style.display = 'block';
+            userView.style.display = 'none';
+            currentUserProfile = null;
+        }
+    });
+}
+
+// ESCUTAR DADOS EM TEMPO REAL
+function listenToFirebase() {
     lobbiesRef.on('value', (snapshot) => {
         const data = snapshot.val();
         lobbies = [];
@@ -64,8 +92,6 @@ function listenToFirebase() {
             });
         }
         renderLobbies();
-    }, (err) => {
-        console.error("Erro ao ler Lobbies do Firebase:", err);
     });
 
     rankingRef.on('value', (snapshot) => {
@@ -77,60 +103,105 @@ function listenToFirebase() {
             });
         }
         renderRanking();
-    }, (err) => {
-        console.error("Erro ao ler Ranking do Firebase:", err);
+    });
+
+    // Escutar perfis de todos os jogadores para busca rápida pelo Nick
+    usersRef.on('value', (snapshot) => {
+        allProfiles = snapshot.val() || {};
     });
 }
 
-// MODO ADM
-function toggleAdminMode() {
-    if (!isAdmin) {
-        const pass = prompt("Digite a senha de Administrador LOBARK:");
-        if (pass === ADMIN_SECRET_PASSWORD) {
-            isAdmin = true;
-            atualizarInterfaceAdmin();
-            alert("Acesso Concedido: Modo Administrador Ativado!");
-        } else if (pass !== null) {
-            alert("Senha incorreta!");
+// HANDLERS DE AUTENTICAÇÃO
+function handleGoogleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(() => {
+        closeModal('auth');
+    }).catch(err => alert("Erro no Login com Google: " + err.message));
+}
+
+function handleEmailAuth(e) {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+
+    auth.signInWithEmailAndPassword(email, password).then(() => {
+        closeModal('auth');
+    }).catch(err => alert("Erro ao entrar: " + err.message));
+}
+
+function handleRegister() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+
+    if (!email || !password) {
+        alert("Preencha o e-mail e a senha para cadastrar.");
+        return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password).then((cred) => {
+        alert("Conta criada com sucesso! Configure seu Nick no perfil.");
+        closeModal('auth');
+        openModal('edit-profile');
+    }).catch(err => alert("Erro ao criar conta: " + err.message));
+}
+
+function handleLogout() {
+    auth.signOut();
+}
+
+// SALVAR E EDITAR PERFIL
+function handleSaveProfile(e) {
+    e.preventDefault();
+    if (!currentUser) {
+        alert("Você precisa estar logado para salvar seu perfil.");
+        return;
+    }
+
+    const nick = document.getElementById('edit-nick').value.trim();
+    const kd = document.getElementById('edit-kd').value.trim();
+    const winrate = document.getElementById('edit-winrate').value.trim();
+    const role = document.getElementById('edit-role').value;
+
+    const profileData = { nick, kd, winrate, role };
+
+    usersRef.child(currentUser.uid).set(profileData).then(() => {
+        alert("Perfil atualizado!");
+        closeModal('edit-profile');
+        showPlayerProfile(profileData);
+    }).catch(err => alert("Erro ao salvar perfil: " + err.message));
+}
+
+// BUSCAR E EXIBIR PERFIL AO CLICAR NO NICK
+function viewPlayerProfileByNick(nick) {
+    let foundProfile = null;
+
+    // Procura o nick correspondente na lista de perfis do banco
+    Object.keys(allProfiles).forEach(uid => {
+        if (allProfiles[uid].nick && allProfiles[uid].nick.toLowerCase() === nick.toLowerCase()) {
+            foundProfile = allProfiles[uid];
         }
+    });
+
+    if (foundProfile) {
+        showPlayerProfile(foundProfile);
     } else {
-        isAdmin = false;
-        atualizarInterfaceAdmin();
-        alert("Modo Administrador Desativado.");
+        // Exibe perfil padrão temporário se o usuário ainda não tiver conta cadastrada
+        showPlayerProfile({
+            nick: nick,
+            kd: 'N/A',
+            winrate: 'N/A',
+            role: 'Jogador Desconhecido'
+        });
     }
+
+    switchTab('profile');
 }
 
-function atualizarInterfaceAdmin() {
-    const label = document.getElementById('role-label');
-    const btn = document.getElementById('admin-toggle-btn');
-
-    if (label && btn) {
-        if (isAdmin) {
-            label.innerText = 'ADMINISTRADOR';
-            label.style.color = 'var(--crimson)';
-            btn.style.borderColor = 'var(--crimson)';
-        } else {
-            label.innerText = 'JOGADOR';
-            label.style.color = 'var(--accent)';
-            btn.style.borderColor = 'var(--text-muted)';
-        }
-    }
-
-    renderLobbies();
-    renderRanking();
-}
-
-// NAVEGAÇÃO DE ABAS
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-    const activeTab = document.getElementById(`tab-${tabName}`);
-    if (activeTab) activeTab.classList.add('active');
-
-    if (window.event && window.event.currentTarget) {
-        window.event.currentTarget.classList.add('active');
-    }
+function showPlayerProfile(profile) {
+    document.getElementById('view-profile-nick').innerText = profile.nick || 'Não configurado';
+    document.getElementById('view-profile-kd').innerText = profile.kd || '0.00';
+    document.getElementById('view-profile-winrate').innerText = profile.winrate || '0%';
+    document.getElementById('view-profile-role').innerText = profile.role || 'Flex';
 }
 
 // RENDERIZAR LOBBIES
@@ -153,9 +224,9 @@ function renderLobbies() {
         if (lobby.lineup && lobby.lineup.length > 0) {
             lineupHTML = `
                 <div class="lineup-box">
-                    <h4>Escalação (5v5):</h4>
+                    <h4>Escalação (Clique no Nick para ver o Perfil):</h4>
                     <ul>
-                        ${lobby.lineup.map(p => `<li><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}
+                        ${lobby.lineup.map(p => `<li style="cursor:pointer; color:var(--accent);" onclick="viewPlayerProfileByNick('${p}')"><i class="fa-solid fa-user"></i> ${p}</li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -233,11 +304,11 @@ function handleCreateScrim(e) {
     const team = document.getElementById('scrim-team-name').value;
 
     const lineup = [
-        document.getElementById('p1').value,
-        document.getElementById('p2').value,
-        document.getElementById('p3').value,
-        document.getElementById('p4').value,
-        document.getElementById('p5').value,
+        document.getElementById('p1').value.trim(),
+        document.getElementById('p2').value.trim(),
+        document.getElementById('p3').value.trim(),
+        document.getElementById('p4').value.trim(),
+        document.getElementById('p5').value.trim(),
     ];
 
     let badgeClass = 'badge-t3';
@@ -248,15 +319,10 @@ function handleCreateScrim(e) {
         lobbiesRef.push({
             type, time, team, lineup, challenger: null, badgeClass
         }).then(() => {
-            alert("Lobby criado e sincronizado na nuvem!");
+            alert("Lobby criado na nuvem!");
             closeModal('scrim');
-            const form = document.getElementById('form-scrim');
-            if (form) form.reset();
-        }).catch(err => {
-            alert("Erro ao salvar no Firebase: " + err.message + "\nVerifique se as Regras do Realtime Database estão publicas (.read: true, .write: true).");
-        });
-    } else {
-        alert("Erro: Conexão com o Firebase não foi estabelecida.");
+            document.getElementById('form-scrim').reset();
+        }).catch(err => alert("Erro ao salvar: " + err.message));
     }
 }
 
@@ -264,46 +330,82 @@ function handleCreateScrim(e) {
 function handleCreateX1(e) {
     if (e && e.preventDefault) e.preventDefault();
 
-    const player = document.getElementById('x1-player').value;
-    const time = document.getElementById('x1-time').value;
+    const player = document.getElementById('x1-player').value.trim();
+    const time = document.getElementById('scrim-time') ? document.getElementById('x1-time').value : '';
     const mode = document.getElementById('x1-mode').value;
 
     if (lobbiesRef) {
         lobbiesRef.push({
-            type: 'X1', time, team: `${player} (X1)`, mode, lineup: [], challenger: null, badgeClass: 'badge-x1'
+            type: 'X1', time, team: `${player} (X1)`, mode, lineup: [player], challenger: null, badgeClass: 'badge-x1'
         }).then(() => {
-            alert("Desafio X1 publicado na nuvem!");
+            alert("Desafio X1 publicado!");
             closeModal('x1');
-            const form = document.getElementById('form-x1');
-            if (form) form.reset();
-        }).catch(err => {
-            alert("Erro ao salvar no Firebase: " + err.message);
-        });
-    } else {
-        alert("Erro: Conexão com o Firebase não foi estabelecida.");
+            document.getElementById('form-x1').reset();
+        }).catch(err => alert("Erro ao salvar: " + err.message));
     }
 }
 
-// AÇÕES DO ADM E USUÁRIOS
+// CONTROLE DE MODO ADM E NAVEGAÇÃO
+function toggleAdminMode() {
+    if (!isAdmin) {
+        const pass = prompt("Digite a senha de Administrador LOBARK:");
+        if (pass === ADMIN_SECRET_PASSWORD) {
+            isAdmin = true;
+            atualizarInterfaceAdmin();
+            alert("Modo Administrador Ativado!");
+        } else if (pass !== null) {
+            alert("Senha incorreta!");
+        }
+    } else {
+        isAdmin = false;
+        atualizarInterfaceAdmin();
+        alert("Modo Administrador Desativado.");
+    }
+}
+
+function atualizarInterfaceAdmin() {
+    const label = document.getElementById('role-label');
+    const btn = document.getElementById('admin-toggle-btn');
+
+    if (label && btn) {
+        if (isAdmin) {
+            label.innerText = 'ADMINISTRADOR';
+            label.style.color = 'var(--crimson)';
+            btn.style.borderColor = 'var(--crimson)';
+        } else {
+            label.innerText = 'JOGADOR';
+            label.style.color = 'var(--accent)';
+            btn.style.borderColor = 'var(--text-muted)';
+        }
+    }
+
+    renderLobbies();
+    renderRanking();
+}
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
+}
+
 function acceptChallenge(firebaseKey) {
-    const myTeam = prompt("Digite o nome do seu time para aceitar o confronto:");
+    const myTeam = prompt("Digite o nome da sua equipe para aceitar:");
     if (myTeam && lobbiesRef) {
-        lobbiesRef.child(firebaseKey).update({ challenger: myTeam })
-            .catch(err => alert("Erro ao aceitar desafio: " + err.message));
+        lobbiesRef.child(firebaseKey).update({ challenger: myTeam });
     }
 }
 
 function cancelLobby(firebaseKey) {
-    if (!isAdmin) {
-        alert("Ação permitida apenas para Administradores.");
-        return;
-    }
-    if (confirm("Tem certeza de que deseja EXCLUIR este lobby permanentemente?")) {
-        if (lobbiesRef) {
-            lobbiesRef.child(firebaseKey).remove()
-                .then(() => alert("Lobby removido com sucesso!"))
-                .catch(err => alert("Erro ao excluir do Firebase: " + err.message));
-        }
+    if (!isAdmin) return;
+    if (confirm("Deseja excluir este lobby?")) {
+        lobbiesRef.child(firebaseKey).remove();
     }
 }
 
@@ -314,22 +416,17 @@ function updateScore(firebaseKey, winAdd, lossAdd) {
         rankingRef.child(firebaseKey).update({
             wins: (team.wins || 0) + winAdd,
             losses: (team.losses || 0) + lossAdd
-        }).catch(err => alert("Erro ao atualizar placar: " + err.message));
+        });
     }
 }
 
 function removeTeam(firebaseKey) {
     if (!isAdmin) return;
-    if (confirm("Remover este clã do ranking?")) {
-        if (rankingRef) {
-            rankingRef.child(firebaseKey).remove()
-                .then(() => alert("Clã removido do ranking!"))
-                .catch(err => alert("Erro ao remover: " + err.message));
-        }
+    if (confirm("Remover do ranking?")) {
+        rankingRef.child(firebaseKey).remove();
     }
 }
 
-// MODAIS
 function openModal(type) {
     const modal = document.getElementById(`modal-${type}`);
     if (modal) modal.classList.add('active');
@@ -340,7 +437,6 @@ function closeModal(type) {
     if (modal) modal.classList.remove('active');
 }
 
-// EFITO DE PARTÍCULAS
 function initParticles() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
