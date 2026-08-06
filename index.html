@@ -3,456 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOBARK // CODM ESPORTS & HUB</title>
-    
-    <!-- Font Awesome & Google Fonts -->
+    <title>LOBARK // ESPORTS PLATFORM</title>
+
+    <!-- Fontes Externas e Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
+    <!-- CSS Externo -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-cyan">
+<body>
 
+    <!-- Canvas para Efeito de Partículas Interativas em Segundo Plano -->
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Header / Navbar -->
+    <!-- Barra de Navegação Superior -->
     <header class="navbar glass-panel">
-        <div class="logo-container" onclick="switchTab('home')" style="cursor: pointer;">
-            <h1 class="glow-text">LOBARK <span class="sub-logo">CHARTS</span></h1>
+        <div class="logo-container" onclick="switchTab('home')">
+            <h1 class="glow-text">LOBARK <span class="sub-logo">HUB</span></h1>
         </div>
 
         <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Início</button>
-            <button class="nav-btn" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Mais Curtidos</button>
-            <button class="nav-btn" onclick="switchTab('players')"><i class="fa-solid fa-address-card"></i> Jogadores</button>
-            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
-            <button class="nav-btn" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies</button>
-            <button class="nav-btn" onclick="switchTab('online')"><i class="fa-solid fa-users"></i> Online <span id="online-count-badge" class="counter-badge">0</span></button>
-            <button class="nav-btn" onclick="switchTab('teams')"><i class="fa-solid fa-shield-cat"></i> Equipes</button>
-            <button class="nav-btn" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking</button>
-        </nav>
-
-        <div class="user-auth-control">
-            <div id="auth-guest-view">
-                <button class="btn-outline" onclick="openModal('auth')"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
-            </div>
-            <div id="auth-user-view" style="display: none; align-items: center; gap: 10px;">
-                <span id="user-display-name" class="user-tag"></span>
-                <button class="btn-secondary" style="padding: 4px 8px;" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-outline" style="padding: 4px 8px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i></button>
-            </div>
-            <div class="admin-control" style="margin-left: 10px;">
-                <span id="role-label" class="role-badge">JOGADOR</span>
-                <button id="admin-toggle-btn" class="btn-outline" onclick="toggleAdminMode()"><i class="fa-solid fa-lock"></i> ADM</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Conteúdo Principal -->
-    <main class="main-container">
-
-        <!-- ABA 1: INÍCIO (HOME) -->
-        <section id="tab-home" class="tab-content active">
-            <div class="hero-banner glass-panel">
-                <div class="hero-content">
-                    <span class="badge badge-t3" style="font-size:0.9rem; margin-bottom:10px;">COMMUNITY HUB // CODM</span>
-                    <h1 class="hero-title">A ARENA DOS MELHORES JOGADORES DE CODM</h1>
-                    <p class="hero-description">Monitore rankings, compartilhe jogadas no seu feed, participe de Lobbies 5v5 e ganhe destaque na comunidade conforme acumula curtidas em seu perfil.</p>
-                    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:20px;">
-                        <button class="btn-primary" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Ver Jogadores Famosos</button>
-                        <button class="btn-secondary" onclick="openModal('auth')"><i class="fa-solid fa-user-plus"></i> Criar Meu Perfil</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Destaques na Home: Jogadores Mais Curtidos -->
-            <div class="section-header" style="margin-top: 40px;">
-                <h2><i class="fa-solid fa-crown" style="color: #ffaa00;"></i> Jogadores em Destaque no Hub</h2>
-                <button class="btn-outline" onclick="switchTab('top-liked')">Ver Todos</button>
-            </div>
-            <div id="home-top-players-grid" class="cards-grid"></div>
-
-            <!-- Métricas Gerais do Plataforma -->
-            <div class="stats-overview-grid" style="margin-top: 40px;">
-                <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-users stat-icon"></i>
-                    <h3 id="stat-total-players">0</h3>
-                    <span>Jogadores Registrados</span>
-                </div>
-                <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-heart stat-icon" style="color: var(--crimson);"></i>
-                    <h3 id="stat-total-likes">0</h3>
-                    <span>Curtidas Totais em Perfis</span>
-                </div>
-                <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-shield-halved stat-icon"></i>
-                    <h3 id="stat-total-teams">0</h3>
-                    <span>Equipes Cadastradas</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 2: MAIS CURTIDOS -->
-        <section id="tab-top-liked" class="tab-content">
-            <div class="section-header">
-                <h2><i class="fa-solid fa-fire" style="color: var(--crimson);"></i> Perfis Mais Curtidos da Comunidade</h2>
-                <p style="color: var(--text-secondary);">Os jogadores no topo do ranking ganham visibilidade direta no início da plataforma.</p>
-            </div>
-            <div id="top-liked-players-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- ABA 3: COMUNIDADE DE JOGADORES -->
-        <section id="tab-players" class="tab-content">
-            <div class="section-header">
-                <h2>Todos os Jogadores CODM</h2>
-                <input type="text" id="search-player-input" placeholder="Buscar por nick..." onkeyup="filterPlayersList()" style="padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 6px; color: #fff; width: 250px;">
-            </div>
-            <div id="all-players-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- ABA 4: MEU PERFIL DA CONTA -->
-        <section id="tab-profile" class="tab-content">
-            
-            <!-- Aviso quando não está logado -->
-            <div id="profile-not-logged-in" class="glass-panel" style="text-align: center; padding: 50px 20px; display: none;">
-                <i class="fa-solid fa-user-lock" style="font-size: 3.5rem; color: var(--accent); margin-bottom: 20px;"></i>
-                <h2>Perfil Privado</h2>
-                <p style="color: var(--text-secondary); max-width: 500px; margin: 10px auto 25px auto;">Você precisa fazer login na sua conta para acessar e gerenciar seu perfil pessoal e personalizar seu feed.</p>
-                <button class="btn-primary" onclick="openModal('auth')"><i class="fa-solid fa-right-to-bracket"></i> Entrar ou Criar Conta</button>
-            </div>
-
-            <!-- Card de Perfil Único (Exibido ao estar logado ou ao visualizar terceiros) -->
-            <div id="profile-main-card" class="insta-profile-card glass-panel" style="display: none;">
-                
-                <!-- Alerta de visitante -->
-                <div id="profile-visitor-banner" style="display:none; background: rgba(0,243,255,0.1); border: 1px solid var(--accent); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-                    <span><i class="fa-solid fa-eye"></i> Você está visualizando o perfil de <strong id="visitor-player-name">...</strong>. <a href="#" onclick="viewMyOwnProfile()" style="color: var(--accent); text-decoration: underline;">Clique aqui para voltar ao Seu Perfil</a></span>
-                </div>
-
-                <!-- Cabeçalho do Perfil -->
-                <div class="insta-header">
-                    <div class="insta-avatar-container">
-                        <div class="insta-avatar-ring">
-                            <div class="avatar-box" id="profile-avatar-box">
-                                <i class="fa-solid fa-user-ninja" id="profile-default-icon"></i>
-                                <img id="profile-avatar-img" src="" alt="Foto de Perfil" style="display:none;">
-                            </div>
-                        </div>
-                        <span id="view-profile-status-dot" class="status-indicator offline"></span>
-                    </div>
-
-                    <div class="insta-details">
-                        <div class="insta-user-row">
-                            <h2 id="view-profile-nick">Nick do Jogador</h2>
-                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> PRO</span>
-                            <div class="profile-header-actions">
-                                <button id="btn-like-profile" class="btn-secondary" onclick="likeCurrentProfile()"><i class="fa-solid fa-heart" style="color: var(--crimson);"></i> Curtir Perfil (<span id="profile-likes-count">0</span>)</button>
-                                <button id="btn-edit-my-profile" class="btn-secondary" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</button>
-                                <button id="btn-create-my-post" class="btn-primary" onclick="openModal('create-post')"><i class="fa-solid fa-plus"></i> Publicar Mídia</button>
-                            </div>
-                        </div>
-
-                        <div class="insta-stats-row">
-                            <div class="insta-stat">
-                                <strong id="view-profile-likes">0</strong>
-                                <span>Curtidas</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="view-profile-posts-count">0</strong>
-                                <span>Publicações</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="view-profile-peak-viewers">0</strong>
-                                <span>Pico Viewers</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="view-profile-earnings">$0</strong>
-                                <span>Premiação</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="view-profile-kd">0.00</strong>
-                                <span>K/D Global</span>
-                            </div>
-                        </div>
-
-                        <div class="insta-bio">
-                            <p id="view-profile-bio">Sua biografia aparecerá aqui.</p>
-                            <div class="insta-gears-tags">
-                                <span id="view-profile-role" class="badge badge-t1">Role: Flex</span>
-                                <span id="view-profile-device" class="badge badge-tech"><i class="fa-solid fa-mobile-screen"></i> Dispositivo N/I</span>
-                                <span id="view-profile-hud" class="badge badge-tech"><i class="fa-solid fa-hand"></i> HUD N/I</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="profile-tabs-bar">
-                    <button class="p-tab-btn active" onclick="switchProfileSubTab('feed-grid')"><i class="fa-solid fa-border-all"></i> Feed de Mídias</button>
-                    <button class="p-tab-btn" onclick="switchProfileSubTab('tournaments')"><i class="fa-solid fa-trophy"></i> Conquistas & Torneios</button>
-                    <button class="p-tab-btn" onclick="switchProfileSubTab('gears')"><i class="fa-solid fa-sliders"></i> Sensibilidade & Gears</button>
-                </div>
-
-                <div id="ptab-feed-grid" class="profile-sub-content active">
-                    <div id="my-feed-grid" class="insta-grid"></div>
-                </div>
-
-                <div id="ptab-tournaments" class="profile-sub-content">
-                    <div class="table-wrapper">
-                        <table class="custom-table">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Torneio / Evento</th>
-                                    <th>Equipe</th>
-                                    <th>Posição</th>
-                                    <th>Prêmio</th>
-                                </tr>
-                            </thead>
-                            <tbody id="view-profile-tournaments-body">
-                                <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Nenhum torneio registrado no histórico.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="ptab-gears" class="profile-sub-content">
-                    <div class="gears-card glass-panel">
-                        <h3><i class="fa-solid fa-gamepad"></i> Dispositivo & Configurações de Jogo</h3>
-                        <div class="gears-grid">
-                            <div><strong>Dispositivo Principal:</strong> <span id="gear-device">N/I</span></div>
-                            <div><strong>Layout HUD:</strong> <span id="gear-hud">N/I</span></div>
-                            <div><strong>Sensibilidade Câmera:</strong> <span id="gear-sens-cam">N/I</span></div>
-                            <div><strong>Sensibilidade Mira:</strong> <span id="gear-sens-scope">N/I</span></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- DEMAIS ABAS -->
-        <section id="tab-lobbies" class="tab-content">
-            <div class="section-header">
-                <h2>Lobbies Abertos & Desafios</h2>
-                <div class="action-buttons">
-                    <button class="btn-primary" onclick="openModal('scrim')"><i class="fa-solid fa-plus"></i> Agendar Scrim 5v5</button>
-                    <button class="btn-secondary" onclick="openModal('x1')"><i class="fa-solid fa-bolt"></i> Desafio X1</button>
-                </div>
-            </div>
-            <div id="lobbies-container" class="cards-grid"></div>
-        </section>
-
-        <section id="tab-online" class="tab-content">
-            <div class="section-header">
-                <h2>Jogadores Conectados no Hub</h2>
-            </div>
-            <div id="online-players-grid" class="cards-grid"></div>
-        </section>
-
-        <section id="tab-teams" class="tab-content">
-            <div class="section-header">
-                <h2>Equipes & Organizações</h2>
-                <button class="btn-primary" onclick="openModal('create-team')"><i class="fa-solid fa-shield-plus"></i> Registrar Nova Equipe</button>
-            </div>
-            <div id="teams-grid" class="cards-grid"></div>
-        </section>
-
-        <section id="tab-ranking" class="tab-content">
-            <div class="section-header">
-                <h2>Classificação de Clãs CODM</h2>
-            </div>
-            <div class="table-wrapper glass-panel">
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th>Posição</th>
-                            <th>Clã / Organização</th>
-                            <th>Tier</th>
-                            <th>Vitórias</th>
-                            <th>Derrotas</th>
-                            <th>Winrate</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ranking-body"></tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <!-- MODAL EDITAR PERFIL COMPLETO -->
-    <div id="modal-edit-profile" class="modal">
-        <div class="modal-content glass-panel modal-lg">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-pen"></i> Editar Meu Perfil</h3>
-                <span class="close-btn" onclick="closeModal('edit-profile')">&times;</span>
-            </div>
-            <form onsubmit="handleSaveProfile(event)">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                    <div class="form-group"><label>URL da Foto de Perfil (Avatar):</label><input type="url" id="edit-avatar-url" placeholder="https://exemplo.com/sua-foto.jpg"></div>
-                    <div class="form-group"><label>Nick Oficial no CODM:</label><input type="text" id="edit-nick" required></div>
-                    <div class="form-group"><label>Função Principal:</label>
-                        <select id="edit-role">
-                            <option value="Sniper">Sniper Principal</option>
-                            <option value="IGL">IGL (Líder)</option>
-                            <option value="Entry">Entry Fragger</option>
-                            <option value="Support">Suporte</option>
-                            <option value="Flex">Flexível</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>K/D Ratio:</label><input type="text" id="edit-kd" placeholder="Ex: 2.45"></div>
-                    <div class="form-group"><label>Dispositivo:</label><input type="text" id="edit-device" placeholder="Ex: iPad Pro 12.9 / ROG Phone"></div>
-                    <div class="form-group"><label>Layout HUD:</label><input type="text" id="edit-hud" placeholder="Ex: 4 Dedos (Garra)"></div>
-                    <div class="form-group"><label>Sensibilidade Câmera:</label><input type="text" id="edit-sens-cam" placeholder="Ex: 120"></div>
-                    <div class="form-group"><label>Sensibilidade Mira:</label><input type="text" id="edit-sens-scope" placeholder="Ex: 85"></div>
-                    <div class="form-group"><label>Pico de Viewers:</label><input type="number" id="edit-peak-viewers" placeholder="Ex: 1500"></div>
-                    <div class="form-group"><label>Premiação Total (USD):</label><input type="text" id="edit-earnings" placeholder="Ex: $5,000"></div>
-                </div>
-                <div class="form-group"><label>Biografia do Perfil:</label><input type="text" id="edit-bio" placeholder="Escreva algo sobre você..."></div>
-                <button type="submit" class="btn-primary btn-block">Salvar Perfil</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL ADICIONAR FOTO/VÍDEO AO FEED -->
-    <div id="modal-create-post" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-photo-film"></i> Publicar Mídia no Feed</h3>
-                <span class="close-btn" onclick="closeModal('create-post')">&times;</span>
-            </div>
-            <form onsubmit="handleCreatePost(event)">
-                <div class="form-group">
-                    <label>Tipo de Mídia:</label>
-                    <select id="post-type">
-                        <option value="image">Foto / Imagem</option>
-                        <option value="video">Vídeo (MP4 / Link direto)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>URL da Foto ou Vídeo:</label>
-                    <input type="url" id="post-media-url" required placeholder="https://exemplo.com/midia.jpg ou .mp4">
-                </div>
-                <div class="form-group">
-                    <label>Legenda / Descrição:</label>
-                    <input type="text" id="post-caption" required placeholder="Ex: Clutch 1v4 no Campeonato!">
-                </div>
-                <button type="submit" class="btn-primary btn-block">Publicar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL VISUALIZAR POST DO FEED -->
-    <div id="modal-view-post" class="modal">
-        <div class="modal-content glass-panel modal-lg">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-eye"></i> Detalhes da Mídia</h3>
-                <span class="close-btn" onclick="closeModal('view-post')">&times;</span>
-            </div>
-            <div id="modal-post-content-display"></div>
-        </div>
-    </div>
-
-    <!-- MODAIS DE SISTEMA -->
-    <div id="modal-auth" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-lock"></i> Autenticação LOBARK</h3>
-                <span class="close-btn" onclick="closeModal('auth')">&times;</span>
-            </div>
-            <button class="btn-primary btn-block" style="background:#4285F4; color:#fff; margin-bottom:15px;" onclick="handleGoogleLogin()">
-                <i class="fa-brands fa-google"></i> Entrar com Google
+            <button class="nav-btn active" id="btn-tab-home" onclick="switchTab('home')">
+                <i class="fa-solid fa-house"></i> Início
             </button>
-            <hr style="border:0; border-top:1px solid var(--card-border); margin:15px 0;">
-            <form onsubmit="handleEmailAuth(event)">
-                <div class="form-group"><label>E-mail:</label><input type="email" id="auth-email" required></div>
-                <div class="form-group"><label>Senha:</label><input type="password" id="auth-password" required></div>
-                <div style="display:flex; gap:10px;">
-                    <button type="submit" class="btn-primary btn-block">Entrar</button>
-                    <button type="button" class="btn-secondary btn-block" onclick="handleRegister()">Cadastrar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-scrim" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-shield-halved"></i> Agendar Scrim 5v5</h3>
-                <span class="close-btn" onclick="closeModal('scrim')">&times;</span>
-            </div>
-            <form id="form-scrim" onsubmit="handleCreateScrim(event)">
-                <div class="form-group"><label>Tipo:</label>
-                    <select id="scrim-type" required><option value="Scrim T1">Scrim T1</option><option value="Scrim T2">Scrim T2</option><option value="Scrim T3" selected>Scrim T3</option></select>
-                </div>
-                <div class="form-group"><label>Horário:</label><input type="text" id="scrim-time" required></div>
-                <div class="form-group"><label>Equipe:</label><input type="text" id="scrim-team-name" required></div>
-                <button type="submit" class="btn-primary btn-block">Criar Lobby</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-x1" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-bolt"></i> Desafio X1</h3>
-                <span class="close-btn" onclick="closeModal('x1')">&times;</span>
-            </div>
-            <form id="form-x1" onsubmit="handleCreateX1(event)">
-                <div class="form-group"><label>Seu Nick:</label><input type="text" id="x1-player" required></div>
-                <div class="form-group"><label>Horário:</label><input type="text" id="x1-time" required></div>
-                <div class="form-group"><label>Regras:</label><input type="text" id="x1-mode" required placeholder="Ex: Apenas Sniper"></div>
-                <button type="submit" class="btn-primary btn-block">Publicar Desafio</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-create-team" class="modal">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-shield-plus"></i> Registrar Equipe</h3>
-                <span class="close-btn" onclick="closeModal('create-team')">&times;</span>
-            </div>
-            <form onsubmit="handleCreateTeam(event)">
-                <div class="form-group"><label>Nome:</label><input type="text" id="team-name" required></div>
-                <div class="form-group"><label>Tier:</label><select id="team-tier"><option value="T1">T1</option><option value="T2">T2</option><option value="T3" selected>T3</option></select></div>
-                <button type="submit" class="btn-primary btn-block">Cadastrar</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
-    <script src="script.js"></script>
-    
-
-    <!-- Canvas de Partículas Futuristas no Fundo -->
-    <canvas id="particles-canvas"></canvas>
-
-    <!-- Header / Navbar -->
-    <header class="navbar glass-panel">
-        <div class="logo-container" onclick="switchTab('home')" style="cursor: pointer;">
-            <h1 class="glow-text">LOBARK <span class="sub-logo">CHARTS</span></h1>
-        </div>
-
-        <nav class="nav-links">
-            <button class="nav-btn active" id="btn-tab-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Início</button>
-            <button class="nav-btn" id="btn-tab-top-liked" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Mais Curtidos</button>
-            <button class="nav-btn" id="btn-tab-players" onclick="switchTab('players')"><i class="fa-solid fa-users"></i> Jogadores</button>
-            <button class="nav-btn hidden" id="btn-tab-profile" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
+            <button class="nav-btn" id="btn-tab-top-liked" onclick="switchTab('top-liked')">
+                <i class="fa-solid fa-fire"></i> Mais Curtidos
+            </button>
+            <button class="nav-btn" id="btn-tab-players" onclick="switchTab('players')">
+                <i class="fa-solid fa-users"></i> Jogadores
+            </button>
+            <button class="nav-btn hidden" id="btn-tab-profile" onclick="switchTab('profile')">
+                <i class="fa-solid fa-user"></i> Meu Perfil
+            </button>
         </nav>
 
         <div class="user-auth-control">
             <div id="auth-guest-view">
-                <button class="btn-primary" onclick="toggleLogin()"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
+                <button class="btn-primary" onclick="toggleLogin()">
+                    <i class="fa-solid fa-right-to-bracket"></i> Entrar
+                </button>
             </div>
-            <div id="auth-user-view" style="display: none; align-items: center; gap: 10px;">
+            <div id="auth-user-view" style="display: none;">
                 <span id="user-display-name" class="user-tag"></span>
-                <button class="btn-outline" style="padding: 6px 12px;" onclick="toggleLogin()"><i class="fa-solid fa-sign-out-alt"></i> Sair</button>
+                <button class="btn-outline" onclick="toggleLogin()">
+                    <i class="fa-solid fa-sign-out-alt"></i> Sair
+                </button>
             </div>
         </div>
     </header>
@@ -460,48 +58,52 @@
     <!-- Conteúdo Principal -->
     <main class="main-container">
 
-        <!-- ABA 1: INÍCIO (HERO & PARTÍCULAS) -->
+        <!-- ABA 1: INÍCIO -->
         <section id="tab-home" class="tab-content active">
-            
-            <!-- Hero Banner Futurista -->
             <div class="hero-banner glass-panel">
                 <div class="hero-glow-effect"></div>
                 <div class="hero-content">
-                    <span class="badge badge-t3" style="font-size:0.85rem; margin-bottom:12px; display:inline-block;">
-                        <i class="fa-solid fa-bolt"></i> ESPORTS COMMUNITY HUB
+                    <span class="badge badge-t3">
+                        <i class="fa-solid fa-bolt"></i> ESPORTS COMMUNITY
                     </span>
-                    <h1 class="hero-title">A ARENA DOS <span class="text-neon">MELHORES JOGADORES</span></h1>
-                    <p class="hero-description">Explore o ranking de destaque da comunidade, interaja com curtidas em tempo real e mostre sua relevância no cenário competitivo.</p>
-                    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:25px;">
-                        <button class="btn-primary" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Ver Ranking de Curtidas</button>
-                        <button class="btn-secondary" onclick="switchTab('players')"><i class="fa-solid fa-magnifying-glass"></i> Explorar Jogadores</button>
+                    <h1 class="hero-title">RANKING E PERFIS DE <span class="text-neon">JOGADORES</span></h1>
+                    <p class="hero-description">Vote nos perfis da comunidade em tempo real, navegue pela classificação e acompanhe os mais curtidos da plataforma.</p>
+                    <div class="hero-actions">
+                        <button class="btn-primary" onclick="switchTab('top-liked')">
+                            <i class="fa-solid fa-fire"></i> Ver Mais Curtidos
+                        </button>
+                        <button class="btn-secondary" onclick="switchTab('players')">
+                            <i class="fa-solid fa-magnifying-glass"></i> Ver Todos os Jogadores
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Métricas Gerais -->
-            <div class="stats-overview-grid" style="margin-top: 35px;">
+            <!-- Métricas Globais -->
+            <div class="stats-overview-grid">
                 <div class="card glass-panel stat-box">
                     <i class="fa-solid fa-users stat-icon"></i>
                     <h3 id="stat-total-players">0</h3>
-                    <span>Jogadores Registrados</span>
+                    <span>Jogadores</span>
                 </div>
                 <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-heart stat-icon" style="color: var(--crimson);"></i>
+                    <i class="fa-solid fa-heart stat-icon icon-crimson"></i>
                     <h3 id="stat-total-likes">0</h3>
-                    <span>Curtidas em Perfis</span>
+                    <span>Curtidas Totais</span>
                 </div>
                 <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-crown stat-icon" style="color: #ffaa00;"></i>
+                    <i class="fa-solid fa-crown stat-icon icon-gold"></i>
                     <h3 id="stat-top-player">--</h3>
-                    <span>Líder Atual do Rank</span>
+                    <span>Líder em Curtidas</span>
                 </div>
             </div>
 
-            <!-- Jogadores em Destaque na Home -->
-            <div class="section-header" style="margin-top: 45px;">
-                <h2><i class="fa-solid fa-crown" style="color: #ffaa00;"></i> Top 3 Perfis em Destaque</h2>
-                <button class="btn-outline" onclick="switchTab('top-liked')">Ver Ranking Completo <i class="fa-solid fa-arrow-right"></i></button>
+            <!-- Destaques -->
+            <div class="section-header">
+                <h2><i class="fa-solid fa-crown icon-gold"></i> Destaques no Início</h2>
+                <button class="btn-outline" onclick="switchTab('top-liked')">
+                    Ver Ranking Completo <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
             <div id="home-top-players-grid" class="cards-grid"></div>
         </section>
@@ -510,8 +112,8 @@
         <section id="tab-top-liked" class="tab-content">
             <div class="section-header">
                 <div>
-                    <h2><i class="fa-solid fa-fire" style="color: var(--crimson);"></i> Perfis Mais Curtidos</h2>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Jogadores com maior relevância e votos da comunidade.</p>
+                    <h2><i class="fa-solid fa-fire icon-crimson"></i> Perfis Mais Curtidos</h2>
+                    <p class="section-subtitle">Ordenados automaticamente por número de curtidas.</p>
                 </div>
             </div>
             <div id="top-liked-players-grid" class="cards-grid"></div>
@@ -520,19 +122,19 @@
         <!-- ABA 3: TODOS OS JOGADORES -->
         <section id="tab-players" class="tab-content">
             <div class="section-header">
-                <h2>Todos os Jogadores</h2>
+                <h2><i class="fa-solid fa-users icon-accent"></i> Todos os Jogadores</h2>
             </div>
             <div id="all-players-grid" class="cards-grid"></div>
         </section>
 
-        <!-- ABA 4: MEU PERFIL (SÓ APARECE SE LOGADO) -->
+        <!-- ABA 4: MEU PERFIL -->
         <section id="tab-profile" class="tab-content">
             <div id="profile-main-card" class="insta-profile-card glass-panel">
                 <div class="insta-header">
                     <div class="insta-avatar-container">
                         <div class="insta-avatar-ring">
                             <div class="avatar-box">
-                                <img id="my-avatar-img" src="" alt="Foto de Perfil">
+                                <img id="my-avatar-img" src="" alt="Avatar">
                             </div>
                         </div>
                     </div>
@@ -540,7 +142,7 @@
                     <div class="insta-details">
                         <div class="insta-user-row">
                             <h2 id="my-profile-nick">--</h2>
-                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> PRO PLAYER</span>
+                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> MEU PERFIL</span>
                         </div>
 
                         <div class="insta-stats-row">
@@ -559,7 +161,7 @@
                         </div>
 
                         <div class="insta-bio">
-                            <p id="my-profile-bio">Seu perfil está ativo no Hub Lobark.</p>
+                            <p id="my-profile-bio">Sua conta está autenticada e seu perfil está visível na plataforma.</p>
                         </div>
                     </div>
                 </div>
@@ -568,6 +170,7 @@
 
     </main>
 
+    <!-- JavaScript Externo -->
     <script src="script.js"></script>
 </body>
 </html>
