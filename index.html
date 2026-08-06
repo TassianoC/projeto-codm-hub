@@ -3,356 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODM eSports Hub | Elite Gaming Platform</title>
-    <!-- FontAwesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <title>Sistema de Gestão & Rastreamento - 3 Módulos</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="dark-theme">
+<body>
 
-    <!-- FX Canvas: Tiros, Armas & Partículas -->
-    <canvas id="fx-canvas"></canvas>
-    <div class="muzzle-flash-overlay" id="muzzle-flash"></div>
+    <!-- Fundo Dinâmico de Partículas -->
+    <canvas id="particles-canvas"></canvas>
 
-    <!-- BARRA DE NAVEGAÇÃO -->
-    <nav class="navbar glass-card">
-        <div class="logo">
-            <i class="fa-solid fa-crosshairs logo-icon"></i> CODM<span class="highlight">HUB</span>
-            <span class="badge-live"><i class="fa-solid fa-circle blink"></i> LIVE</span>
-        </div>
+    <!-- Estrutura Principal -->
+    <div class="app-container">
         
-        <div class="nav-links">
-            <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
-                <i class="fa-solid fa-moon"></i>
-            </button>
-
-            <button id="btn-sound-toggle" class="btn-icon active" title="Efeitos Sonoros">
-                <i class="fa-solid fa-volume-high"></i>
-            </button>
-
-            <!-- Perfil -->
-            <button id="btn-profile" class="btn-outline" style="display: none;">
-                <img id="nav-avatar" src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100" class="nav-avatar-img">
-                <span id="nav-username">Meu Perfil</span>
-            </button>
-            
-            <!-- Painel Admin -->
-            <button id="btn-admin" class="btn-outline btn-admin-style" style="display: none;">
-                <i class="fa-solid fa-shield-halved"></i> Painel Admin
-            </button>
-            
-            <!-- Auth -->
-            <button id="btn-login" class="btn-primary btn-glow">
-                <i class="fa-solid fa-right-to-bracket"></i> <span id="auth-btn-text">Entrar</span>
-            </button>
-        </div>
-    </nav>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="container">
-        
-        <!-- HERO BANNER TÁTICO -->
-        <section class="hero-section glass-card glowing-border">
-            <div class="hero-content">
-                <div class="hero-badge"><i class="fa-solid fa-fire"></i> TEMPORADA COMPETITIVA ATIVA</div>
-                <h1 class="hero-title">A ARENA DEFINITIVA DE <span class="text-neon">CALL OF DUTY: MOBILE</span></h1>
-                <p class="hero-subtitle">Agende Scrims T2/T1, participe de salas personalizadas, monte sua lineup e conquiste o topo do Ranking Geral.</p>
-                
-                <div class="hero-actions">
-                    <button class="btn-primary btn-lg pulse-glow" onclick="document.getElementById('scrim-modes').scrollIntoView({behavior: 'smooth'})">
-                        <i class="fa-solid fa-crosshairs"></i> Lançar Desafio
-                    </button>
-                    <button class="btn-outline btn-lg" onclick="document.getElementById('leaderboard-section').scrollIntoView({behavior: 'smooth'})">
-                        <i class="fa-solid fa-trophy"></i> Ver Leaderboard
-                    </button>
-                </div>
+        <!-- Cabeçalho / Navbar -->
+        <header class="navbar">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Sistema Central</span>
             </div>
+            <nav class="nav-links">
+                <a href="#home" class="active">Início</a>
+                <a href="#modulos">Módulos</a>
+                <a href="#detalhes">Visão Detalhada</a>
+            </nav>
+        </header>
 
-            <!-- CONTADORES ANIMADOS -->
-            <div class="hero-stats">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-gun"></i></div>
-                    <h2 class="counter" data-target="1420">0</h2>
-                    <span>Partidas Agendadas</span>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                    <h2 class="counter" data-target="380">0</h2>
-                    <span>Teams Cadastrados</span>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-medal"></i></div>
-                    <h2 class="counter" data-target="96">0</h2>
-                    <span>Torneios Concluídos</span>
-                </div>
+        <!-- Hero Section -->
+        <section class="hero-section" id="home">
+            <h1 class="hero-title">Painel Geral dos <span class="highlight">3 Módulos</span></h1>
+            <p class="hero-subtitle">Estrutura completa para Administração, Operação de Motoristas e Acompanhamento de Pais/Usuários.</p>
+            <button class="btn-primary" onclick="scrollToSection('modulos')">Explorar Módulos</button>
+        </section>
+
+        <!-- ITEM 1, 2 E 3: Grade de Cards Principal -->
+        <section class="content-section" id="modulos">
+            <h2 class="section-title">Visão Geral dos Itens</h2>
+
+            <div class="cards-grid">
+                <!-- ITEM 1: Painel do Administrador -->
+                <article class="card" onclick="openModal('Item 1: Painel do Administrador', 'Visão global do sistema. Recursos: Gestão de motoristas, rotas e veículos; Cadastro e vínculo de passageiros/alunos; Emissão de relatórios e métricas de desempenho; Painel de controle de permissões e segurança.')">
+                    <div class="card-badge">Módulo 1</div>
+                    <div class="card-icon">⚙️</div>
+                    <h3 class="card-title">Administrativo</h3>
+                    <p class="card-description">Gestão global de usuários, veículos, frotas, rotas, relatórios financeiros e de desempenho em tempo real.</p>
+                    <span class="card-action">Ver estrutura do código &rarr;</span>
+                </article>
+
+                <!-- ITEM 2: App/PWA do Motorista -->
+                <article class="card" onclick="openModal('Item 2: Painel do Motorista (Operacional)', 'Interface simplificada para uso mobile/PWA. Recursos: Início/Fim de rota com transmissão de GPS; Lista de presença de passageiros (Check-in/Check-out); Notificação imediata de imprevistos e emergências; Consulta de itinerário e paradas do dia.')">
+                    <div class="card-badge">Módulo 2</div>
+                    <div class="card-icon">🚌</div>
+                    <h3 class="card-title">Motorista / Operacional</h3>
+                    <p class="card-description">Interface otimizada para o condutor: controle de rotas ativas, acionamento de GPS, checklist e diário de bordo.</p>
+                    <span class="card-action">Ver estrutura do código &rarr;</span>
+                </article>
+
+                <!-- ITEM 3: Portal dos Pais / Acompanhamento -->
+                <article class="card" onclick="openModal('Item 3: Portal dos Pais / Passageiro', 'Interface de acompanhamento externo. Recursos: Rastreamento em mapa ao vivo da perua/ônibus; Alertas de proximidade e chegada do transporte; Confirmação de embarque e desembarque; Notificação de ausência programada do aluno.')">
+                    <div class="card-badge">Módulo 3</div>
+                    <div class="card-icon">🛡️</div>
+                    <h3 class="card-title">Portal dos Pais</h3>
+                    <p class="card-description">Rastreamento ao vivo do veículo no mapa, alertas de embarque/desembarque e notificações instantâneas.</p>
+                    <span class="card-action">Ver estrutura do código &rarr;</span>
+                </article>
             </div>
         </section>
 
-        <!-- MODO DE JOGO / LANÇAR DESAFIO -->
-        <section id="scrim-modes" class="section-container">
-            <div class="section-header">
-                <h2><i class="fa-solid fa-person-rifle"></i> Arena de Desafios (Scrim Finder)</h2>
-                <p>Selecione o formato e lance sua fila pública ou privada</p>
-            </div>
+        <!-- Navegação Dinâmica Interna nos 3 Itens -->
+        <section class="details-section" id="detalhes">
+            <h2 class="section-title">Conteúdo Dinâmico dos Módulos</h2>
             
-            <div class="scrim-grid">
-                <div class="scrim-card glass-card">
-                    <div class="scrim-badge">5v5 L&D / MISTO</div>
-                    <div class="scrim-icon"><i class="fa-solid fa-shield-cat"></i></div>
-                    <h3>Scrim 5v5 Completa</h3>
-                    <p>Formatos competitivos de Localizar e Destruir, Zona de Conflito e Domínio.</p>
-                    <button class="btn-primary btn-match width-100" data-mode="5v5 (Misto)" data-players="5">
-                        <i class="fa-solid fa-bolt"></i> Lançar Desafio 5v5
-                    </button>
-                </div>
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('admin')">1. Admin</button>
+                <button class="tab-btn" onclick="switchTab('driver')">2. Motorista</button>
+                <button class="tab-btn" onclick="switchTab('parent')">3. Portal Pais</button>
+            </div>
 
-                <div class="scrim-card glass-card">
-                    <div class="scrim-badge">X1 / X2 RÁPIDO</div>
-                    <div class="scrim-icon"><i class="fa-solid fa-skull"></i></div>
-                    <h3>Duelo X1 / X2</h3>
-                    <p>Confronto direto de Sniper ou AR/SMG em mapas reduzidos (Killhouse / Cage).</p>
-                    <button class="btn-primary btn-match width-100" data-mode="X1 / X2" data-players="2">
-                        <i class="fa-solid fa-skull-crossbones"></i> Lançar Duelo
-                    </button>
-                </div>
+            <div id="tab-admin" class="tab-content active">
+                <h3>Painel de Controle Administrativo</h3>
+                <p>Aqui ficam agregados os gráficos de performance da frota, alertas de manutenção preventiva e criação de cadastros de passageiros e rotas.</p>
+                <ul class="feature-list">
+                    <li>✔️ Cadastro e vinculação de alunos/passageiros às rotas.</li>
+                    <li>✔️ Gestão de veículos, consumo de combustível e revisões.</li>
+                    <li>✔️ Exportação de relatórios estatísticos e auditoria.</li>
+                </ul>
+            </div>
 
-                <div class="scrim-card glass-card">
-                    <div class="scrim-badge">BATTLE ROYALE</div>
-                    <div class="scrim-icon"><i class="fa-solid fa-helicopter"></i></div>
-                    <h3>BR Squad Custom</h3>
-                    <p>Salas privadas para treino de rotações, trocação e finais de zona no BR.</p>
-                    <button class="btn-primary btn-match width-100" data-mode="Battle Royale" data-players="4">
-                        <i class="fa-solid fa-plane-departure"></i> Lançar BR Squad
-                    </button>
-                </div>
+            <div id="tab-driver" class="tab-content">
+                <h3>Interface do Motorista (PWA)</h3>
+                <p>Projetada com botões grandes e de fácil toque para uso rápido em smartphones instalados no painel do veículo.</p>
+                <ul class="feature-list">
+                    <li>✔️ Botão "Iniciar Rota" para ativação da transmissão de localização.</li>
+                    <li>✔️ Lista de embarque por parada para confirmação de presença.</li>
+                    <li>✔️ Botão de emergência/suporte direto com a central.</li>
+                </ul>
+            </div>
+
+            <div id="tab-parent" class="tab-content">
+                <h3>Portal de Acompanhamento (Pais)</h3>
+                <p>Interface focada na segurança e tranquilidade dos responsáveis pelo transporte.</p>
+                <ul class="feature-list">
+                    <li>✔️ Rastreamento no mapa com posição atualizada do transporte.</li>
+                    <li>✔️ Notificação PUSH quando o veículo estiver a 5 minutos da residência.</li>
+                    <li>✔️ Registro do horário exato de entrada e saída do passageiro.</li>
+                </ul>
             </div>
         </section>
 
-        <!-- FILA DE DESAFIOS ABERTOS -->
-        <section class="section-container">
-            <div class="section-header">
-                <h2><i class="fa-solid fa-list-check"></i> Desafios Abertos na Fila</h2>
-                <span class="live-tag"><i class="fa-solid fa-signal"></i> Sincronizado em Tempo Real</span>
-            </div>
-            <div id="schedule-queue-container" class="queue-grid">
-                <!-- Carregado via Firebase -->
-            </div>
-        </section>
+        <!-- Rodapé -->
+        <footer class="footer">
+            <p>&copy; 2026 Plataforma de Gestão e Rastreamento. Todos os direitos reservados.</p>
+        </footer>
 
-        <!-- SEÇÃO DUPLA: LEADERBOARD + CHAT DA COMUNIDADE -->
-        <div class="dual-grid" id="leaderboard-section">
-            
-            <!-- LEADERBOARD -->
-            <section class="glass-card section-card">
-                <div class="card-title">
-                    <h3><i class="fa-solid fa-trophy highlight"></i> Top Leaderboard de Equipes</h3>
-                </div>
-                <div class="table-responsive">
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Time / Org</th>
-                                <th>K/D</th>
-                                <th>Vitórias</th>
-                                <th>Pontos</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body">
-                            <!-- Preenchido via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    </div>
 
-            <!-- FEED GLOBAL DA COMUNIDADE -->
-            <section class="glass-card section-card">
-                <div class="card-title">
-                    <h3><i class="fa-solid fa-comments highlight"></i> Feed Global & Recrutamento</h3>
-                </div>
-                <div class="post-box">
-                    <input type="text" id="post-input" placeholder="Comente algo, procure time ou poste seu clã..." maxlength="280">
-                    <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
-                <div id="posts-container" class="posts-list">
-                    <!-- Posts carregados via Firebase -->
-                </div>
-            </section>
-
-        </div>
-
-    </main>
-
-    <!-- MODAIS DO SISTEMA -->
-    <div id="auth-modal" class="modal hidden">
-        <div class="modal-content glass-card auth-card">
-            <span class="close-modal">&times;</span>
-            <h2 id="modal-title"><i class="fa-solid fa-lock"></i> Acessar CODM Hub</h2>
-            <p class="sub-text">Entre com sua conta para jogar, interagir e agendar scrims.</p>
-
-            <button id="btn-google-login" class="btn-google width-100">
-                <i class="fa-brands fa-google"></i> Entrar com o Google
-            </button>
-
-            <div class="divider"><span>OU USE EMAIL</span></div>
-
-            <form id="auth-form">
-                <div class="form-group">
-                    <label><i class="fa-solid fa-envelope"></i> E-mail</label>
-                    <input type="email" id="email" required placeholder="seuemail@exemplo.com">
-                </div>
-                <div class="form-group">
-                    <label><i class="fa-solid fa-key"></i> Senha</label>
-                    <input type="password" id="password" required placeholder="******">
-                </div>
-                <button type="submit" id="auth-submit-btn" class="btn-primary width-100">Entrar</button>
-            </form>
+    <!-- Modal Dinâmico -->
+    <div id="item-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h3 id="modal-title">Título do Item</h3>
+            <div id="modal-body">Descrição do módulo...</div>
+            <button class="btn-secondary" onclick="closeModal()">Fechar</button>
         </div>
     </div>
 
-    <!-- MODAL PERFIL ESTILO INSTAGRAM -->
-    <div id="profile-modal" class="modal hidden">
-        <div class="modal-content glass-card profile-modal-card">
-            <span class="close-profile-modal">&times;</span>
-            
-            <div class="profile-header">
-                <div class="avatar-container">
-                    <img id="display-avatar" src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150" class="profile-avatar-img">
-                    <span class="online-indicator"></span>
-                </div>
-                
-                <div class="profile-info">
-                    <div class="profile-top-bar">
-                        <h2 id="display-nickname">@Jogador_CODM</h2>
-                        <div class="profile-actions-btns">
-                            <button id="btn-like-profile" class="btn-heart"><i class="fa-solid fa-heart"></i> <span id="profile-likes-count">0</span></button>
-                            <button id="btn-edit-profile-toggle" class="btn-outline btn-sm"><i class="fa-solid fa-gear"></i> Editar</button>
-                        </div>
-                    </div>
-                    
-                    <div class="profile-stats">
-                        <div class="p-stat"><strong id="user-scrims-count">0</strong> <span>Desafios</span></div>
-                        <div class="p-stat"><strong id="user-posts-count">0</strong> <span>Posts</span></div>
-                        <div class="p-stat"><strong id="user-likes-received">0</strong> <span>Curtidas</span></div>
-                    </div>
-
-                    <div class="profile-details">
-                        <div id="display-role-tier" class="role-badge"><i class="fa-solid fa-crosshairs"></i> AR / Slayer • Tier 1</div>
-                        <p id="display-bio" class="bio-text">"Procurando duo para campeonato T1. Foco em L&D."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FORMULÁRIO DE EDIÇÃO DE PERFIL -->
-            <div id="profile-edit-form-container" class="edit-profile-box hidden">
-                <h4><i class="fa-solid fa-pen-to-square"></i> Editar Seu Perfil</h4>
-                <form id="profile-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nickname no Jogo</label>
-                            <input type="text" id="profile-nickname" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Função Principal</label>
-                            <select id="profile-role">
-                                <option value="AR / Slayer">AR / Slayer</option>
-                                <option value="Sniper Elite">Sniper Elite</option>
-                                <option value="SMG / Entry Killer">SMG / Entry Killer</option>
-                                <option value="Suporte / IGL">Suporte / IGL</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Tier Competitivo</label>
-                            <select id="profile-tier">
-                                <option value="T1 (Profissional)">T1 (Profissional)</option>
-                                <option value="T2 (Semi-Pro)">T2 (Semi-Pro)</option>
-                                <option value="T3 (Amador)">T3 (Amador)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>URL da Foto do Avatar</label>
-                            <input type="url" id="profile-avatar" placeholder="https://...">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Biografia / Status</label>
-                        <textarea id="profile-bio" rows="2"></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary width-100"><i class="fa-solid fa-floppy-disk"></i> Salvar Perfil</button>
-                </form>
-            </div>
-
-            <div class="profile-tabs">
-                <button class="p-tab active" data-tab="user-posts"><i class="fa-solid fa-grip"></i> Publicações</button>
-                <button class="p-tab" data-tab="user-messages"><i class="fa-solid fa-comments"></i> Mensagens Diretas</button>
-            </div>
-
-            <div id="tab-content-user-posts" class="p-tab-content active">
-                <div id="user-own-posts-list" class="user-posts-grid"></div>
-            </div>
-
-            <div id="tab-content-user-messages" class="p-tab-content">
-                <div class="direct-chat-box">
-                    <div id="chat-messages-container" class="chat-messages">
-                        <p class="text-muted text-center">Inicie uma conversa direta.</p>
-                    </div>
-                    <div class="chat-input-row">
-                        <input type="text" id="direct-msg-input" placeholder="Escreva uma mensagem privada...">
-                        <button id="btn-send-direct" class="btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- MODAL LANÇAR SCRIM -->
-    <div id="match-modal" class="modal hidden">
-        <div class="modal-content glass-card">
-            <span class="close-match-modal">&times;</span>
-            <h2><i class="fa-solid fa-bullseye"></i> Lançar Novo Desafio</h2>
-            
-            <form id="match-form">
-                <input type="hidden" id="match-mode-selected">
-                <div class="form-group">
-                    <label>Nome do Time / Clã</label>
-                    <input type="text" id="match-team-name" required placeholder="Ex: Black Dragons eSports">
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Tier da Scrim</label>
-                        <select id="match-tier">
-                            <option value="T1">Tier 1 (Pro)</option>
-                            <option value="T2">Tier 2 (Semi-Pro)</option>
-                            <option value="T3">Tier 3 (Amador)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Horário do Confronto</label>
-                        <input type="time" id="match-time" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>WhatsApp para Contato / Aceite</label>
-                    <input type="text" id="match-whatsapp" required placeholder="(49) 99999-0000">
-                </div>
-                <div id="players-input-container"></div>
-                <button type="submit" class="btn-primary width-100 btn-glow">
-                    <i class="fa-solid fa-rocket"></i> Publicar Desafio
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- FIREBASE SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="script.js"></script>
+    <!-- Scripts JavaScript -->
+    <script src="particles.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
