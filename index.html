@@ -3,36 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODM Hub - Plataforma Competitiva</title>
+    <title>LOBARK - CODM Hub Competitivo</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
 
-    <!-- Header Navigation -->
+    <!-- Fundo Interativo de Partículas Dynamic Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Topbar / Header -->
     <header class="navbar">
-        <div class="logo">CODM <span>HUB</span></div>
+        <div class="logo">LOBARK <span>CODM</span></div>
         <nav>
-            <button onclick="showTab('profile-tab')">Perfil</button>
-            <button onclick="showTab('teams-tab')">Lineups</button>
-            <button onclick="showTab('recruit-tab')">Recrutamento</button>
-            <button onclick="showTab('scrims-tab')">Scrims</button>
-            <button onclick="showTab('x1-tab')">Desafios X1</button>
-            <button onclick="showTab('match-tab')">Lobby da Partida</button>
-            <button onclick="showTab('ranking-tab')">Ranking</button>
-            <button onclick="showTab('media-tab')">Lives & Mídia</button>
-            <button onclick="showTab('rules-tab')">Regras</button>
-            <button id="admin-nav-btn" class="hidden btn-admin" onclick="showTab('admin-tab')">Admin</button>
+            <button onclick="showSection('profile-section')">📸 Perfil & Feed</button>
+            <button onclick="showSection('scrims-section')">⚔️ Scrims (T1/T2/T3)</button>
+            <button onclick="showSection('x1-section')">🎯 Desafios X1</button>
+            <button onclick="showSection('ranking-section')">🏆 Ranking</button>
+            <button onclick="showSection('rules-section')">📜 Regras</button>
+            <button id="admin-nav-btn" class="btn-admin hidden" onclick="showSection('admin-section')">⚡ Painel Admin</button>
         </nav>
         <div id="auth-controls">
-            <button id="login-btn" onclick="loginWithGoogle()">Entrar com Google</button>
-            <div id="user-badge" class="hidden">
-                <span id="user-display-name"></span>
-                <span id="notif-badge" onclick="showTab('notif-tab')">🔔 <b id="notif-count">0</b></span>
+            <button id="login-btn" onclick="loginWithGoogle()">Conectar Google</button>
+            <div id="user-profile" class="hidden">
+                <span id="user-name"></span>
                 <button onclick="logout()">Sair</button>
             </div>
         </div>
@@ -40,288 +37,160 @@
 
     <main class="container">
 
-        <!-- TAB 1: PERFIL COMPLETO DO JOGADOR -->
-        <section id="profile-tab" class="tab-content">
-            <h2>Perfil de Jogador Competitivo</h2>
-            <div class="card-grid">
-                <div class="card">
-                    <h3>Editar Dados</h3>
-                    <form onsubmit="saveProfile(event)">
+        <!-- 1. PERFIL COMPLETO + FEED ESTILO INSTAGRAM -->
+        <section id="profile-section" class="content-section">
+            <div class="grid-layout">
+                <!-- Card de Perfil Estilo Card de Atleta -->
+                <div class="card profile-card">
+                    <div class="avatar-header">
+                        <div class="avatar-ring">
+                            <img id="p-avatar" src="https://via.placeholder.com/100" alt="Avatar">
+                        </div>
+                        <h2 id="p-display-ign">Carregando...</h2>
+                        <span id="p-display-tier" class="badge">Tier -</span>
+                    </div>
+
+                    <form id="profile-form" onsubmit="saveProfile(event)">
                         <div class="form-group">
-                            <label>IGN (Nick no CODM):</label>
-                            <input type="text" id="p-ign" required placeholder="Ex: Ghost_CODM">
+                            <label>Nick no Game (IGN):</label>
+                            <input type="text" id="p-ign" required placeholder="Ex: LOBARK_Ghost">
                         </div>
                         <div class="form-group">
-                            <label>UID do CODM:</label>
-                            <input type="text" id="p-uid" placeholder="6748392018239482931">
-                        </div>
-                        <div class="form-group">
-                            <label>Role Principal:</label>
+                            <label>Função (Role):</label>
                             <select id="p-role">
                                 <option value="IGL">IGL (In-Game Leader)</option>
                                 <option value="Main Sniper">Main Sniper</option>
                                 <option value="Entry Fragger">Entry Fragger</option>
-                                <option value="Support">Support / Âncora</option>
+                                <option value="Support">Suporte / Âncora</option>
                                 <option value="Slayer">Slayer</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Tier Atual:</label>
+                            <label>Tier da Lineup:</label>
                             <select id="p-tier">
-                                <option value="T1">T1 (Pro)</option>
-                                <option value="T2">T2 (Semi-Pro)</option>
-                                <option value="T3">T3 (Amador)</option>
+                                <option value="T1">Tier 1 (Pro)</option>
+                                <option value="T2">Tier 2 (Semi-Pro)</option>
+                                <option value="T3">Tier 3 (Amador)</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Discord Tag:</label>
-                            <input type="text" id="p-discord" placeholder="Ex: player#1234">
+                        <div class="stats-grid">
+                            <div><span id="p-stat-kd">0.0</span><small>K/D Ratio</small></div>
+                            <div><span id="p-stat-win">0%</span><small>Win Rate</small></div>
+                            <div><span id="p-stat-mvp">0</span><small>MVPs</small></div>
                         </div>
                         <div class="form-group">
-                            <label>Arma Favorita / Meta Loadout:</label>
-                            <input type="text" id="p-loadout" placeholder="Ex: Kilo 141, Switchblade X9">
+                            <label>Loadouts / Armas Favoritas:</label>
+                            <input type="text" id="p-loadout" placeholder="Ex: DL Q33 / Kilo 141">
                         </div>
-                        <div class="form-group">
-                            <label>Bio / Apresentação:</label>
-                            <textarea id="p-bio" rows="3" placeholder="Procuro lineup T1 com rotina de treinos noturna..."></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary">Salvar Perfil</button>
+                        <button type="submit" class="btn-primary">Atualizar Estatísticas</button>
                     </form>
                 </div>
 
-                <div class="card">
-                    <h3>Cartão de Jogador</h3>
-                    <div id="profile-card-preview">
-                        <p class="text-muted">Faça login e salve seu perfil para exibir seu card.</p>
+                <!-- Feed de Mídia Estilo Instagram -->
+                <div class="feed-container">
+                    <div class="card">
+                        <h3>Nova Publicação no Feed</h3>
+                        <form onsubmit="postToFeed(event)">
+                            <div class="form-group">
+                                <input type="url" id="feed-media-url" placeholder="URL da Imagem ou Clipe (Imgur, etc)" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="feed-caption" placeholder="Legenda do jogada ou resultado..." required>
+                            </div>
+                            <button type="submit" class="btn-primary">Publicar Clipe/Foto</button>
+                        </form>
                     </div>
+
+                    <div id="feed-posts-list"></div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 2: GESTÃO DE LINEUPS -->
-        <section id="teams-tab" class="tab-content hidden">
-            <h2>Gestão de Lineups & Clãs</h2>
-            <div class="card-grid">
-                <div class="card">
-                    <h3>Criar Nova Lineup</h3>
-                    <form onsubmit="createTeam(event)">
-                        <div class="form-group">
-                            <label>Nome da Lineup/Clã:</label>
-                            <input type="text" id="team-name" required placeholder="Ex: Team Alpha">
-                        </div>
-                        <div class="form-group">
-                            <label>Tag (Clã):</label>
-                            <input type="text" id="team-tag" required placeholder="Ex: ALPHA">
-                        </div>
-                        <div class="form-group">
-                            <label>Tier Competitivo:</label>
-                            <select id="team-tier">
-                                <option value="T1">Tier 1</option>
-                                <option value="T2">Tier 2</option>
-                                <option value="T3">Tier 3</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-primary">Registrar Equipe</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h3>Equipes Registradas</h3>
-                    <div id="teams-list"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 3: RECRUTAMENTO (LFT / LFM) -->
-        <section id="recruit-tab" class="tab-content hidden">
-            <h2>Central de Recrutamento</h2>
-            <div class="tab-sub-nav">
-                <button class="btn-sub active" onclick="switchRecruitSubTab('lft')">LFT (Procurando Time)</button>
-                <button class="btn-sub" onclick="switchRecruitSubTab('lfm')">LFM (Time Procurando Jogador)</button>
-            </div>
-
-            <!-- Sub-tab LFT -->
-            <div id="lft-section" class="sub-content">
-                <div class="card">
-                    <h3>Publicar que está procurando time (LFT)</h3>
-                    <form onsubmit="postLFT(event)">
-                        <input type="text" id="lft-role" placeholder="Funções que joga (ex: Main Sniper / Entry)" required>
-                        <input type="text" id="lft-availability" placeholder="Disponibilidade (ex: Segunda a Sexta das 20h às 23h)" required>
-                        <button type="submit" class="btn-primary">Anunciar LFT</button>
-                    </form>
-                </div>
-                <div id="lft-list" class="grid-list"></div>
-            </div>
-
-            <!-- Sub-tab LFM -->
-            <div id="lfm-section" class="sub-content hidden">
-                <div class="card">
-                    <h3>Publicar vaga aberta no time (LFM)</h3>
-                    <form onsubmit="postLFM(event)">
-                        <input type="text" id="lfm-team" placeholder="Nome da sua Lineup" required>
-                        <input type="text" id="lfm-role-needed" placeholder="Role que precisa (ex: IGL)" required>
-                        <input type="text" id="lfm-reqs" placeholder="Requisitos (ex: K/D > 1.5, Exp em T2)" required>
-                        <button type="submit" class="btn-primary">Anunciar Vaga</button>
-                    </form>
-                </div>
-                <div id="lfm-list" class="grid-list"></div>
-            </div>
-        </section>
-
-        <!-- TAB 4: SCRIMS -->
-        <section id="scrims-tab" class="tab-content hidden">
-            <h2>Fila de Scrims e Treinos</h2>
+        <!-- 2. SCRIMS & TREINOS (T1/T2/T3) -->
+        <section id="scrims-section" class="content-section hidden">
             <div class="card">
-                <h3>Criar Sala de Scrim</h3>
+                <h2>Agendar Scrim / Treino de Lineups</h2>
                 <form onsubmit="createScrim(event)">
                     <div class="form-row">
-                        <input type="text" id="scrim-title" placeholder="Nome da Lineup / Host" required>
+                        <input type="text" id="scrim-title" placeholder="Nome do Clan / Time Host" required>
                         <select id="scrim-tier">
                             <option value="T1">Tier 1</option>
                             <option value="T2">Tier 2</option>
                             <option value="T3">Tier 3</option>
                         </select>
                         <select id="scrim-mode">
-                            <option value="Localizar e Destruir">Search & Destroy (S&D)</option>
-                            <option value="Ponto Quente">Hardpoint</option>
+                            <option value="S&D">Search & Destroy</option>
+                            <option value="Hardpoint">Ponto Quente</option>
                             <option value="Misto">Misto Competitivo</option>
                         </select>
                         <input type="time" id="scrim-time" required>
                     </div>
-                    <button type="submit" class="btn-primary">Abrir Vaga de Treino</button>
+                    <button type="submit" class="btn-primary">Criar Sala de Treino</button>
                 </form>
             </div>
+
+            <h2>Salas Abertas</h2>
             <div id="scrims-list" class="grid-list"></div>
         </section>
 
-        <!-- TAB 5: X1 CHALLENGES -->
-        <section id="x1-tab" class="tab-content hidden">
-            <h2>Mural de Desafios X1</h2>
+        <!-- 3. DESAFIOS X1 -->
+        <section id="x1-section" class="content-section hidden">
             <div class="card">
-                <h3>Lançar Desafio X1</h3>
+                <h2>Mural de Desafios X1</h2>
                 <form onsubmit="createX1(event)">
                     <div class="form-row">
-                        <input type="text" id="x1-map" placeholder="Mapa (ex: Killhouse, Rust)" required>
-                        <input type="text" id="x1-rules" placeholder="Regras (ex: Só Sniper, Sem Habilidade)" required>
+                        <input type="text" id="x1-map" placeholder="Mapa (ex: Killhouse / Shipment)" required>
+                        <input type="text" id="x1-rules" placeholder="Regras (ex: Só Sniper / Sem Habilidade)" required>
                     </div>
-                    <button type="submit" class="btn-primary">Publicar Desafio</button>
+                    <button type="submit" class="btn-primary">Lançar Desafio</button>
                 </form>
             </div>
+
+            <h2>Desafios Ativos</h2>
             <div id="x1-list" class="grid-list"></div>
         </section>
 
-        <!-- TAB 6: LOBBY DE PARTIDA & UPLOAD DE PROVA -->
-        <section id="match-tab" class="tab-content hidden">
-            <h2>Lobby de Partida Ativa</h2>
-            <div class="card">
-                <h3>Selecione ou Cole o ID do Confronte</h3>
-                <div class="form-row">
-                    <input type="text" id="match-id-input" placeholder="ID da Partida / Scrim">
-                    <button onclick="loadMatchLobby()" class="btn-primary">Carregar Lobby</button>
-                </div>
-            </div>
-
-            <div id="match-active-area" class="card hidden">
-                <div class="match-header">
-                    <h3 id="match-title-display">Confronto</h3>
-                    <span id="match-status-badge" class="badge">Aguardando</span>
-                </div>
-                <div class="card-grid">
-                    <div>
-                        <h4>Chat da Sala</h4>
-                        <div id="chat-messages" class="chat-box"></div>
-                        <form onsubmit="sendChatMessage(event)" class="chat-input-row">
-                            <input type="text" id="chat-text" placeholder="Digite uma mensagem para o oponente..." required>
-                            <button type="submit" class="btn-primary">Enviar</button>
-                        </form>
-                    </div>
-                    <div>
-                        <h4>Envio de Comprovante de Vitória</h4>
-                        <form onsubmit="submitMatchProof(event)">
-                            <div class="form-group">
-                                <label>Placar Final (Ex: 5 x 3):</label>
-                                <input type="text" id="match-score" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Screenshot do Placar Final (URL do Imgur/Storage):</label>
-                                <input type="url" id="match-proof-url" placeholder="https://..." required>
-                            </div>
-                            <button type="submit" class="btn-primary">Submeter Resultado</button>
-                            <button type="button" onclick="openDisputeTicket()" class="btn-danger">Abrir Ticket de Disputa</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 7: RANKING -->
-        <section id="ranking-tab" class="tab-content hidden">
-            <h2>Ranking Geral do CODM Hub</h2>
+        <!-- 4. RANKING COMPETITIVO -->
+        <section id="ranking-section" class="content-section hidden">
+            <h2>Leaderboard da Temporada</h2>
             <div class="card">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>IGN</th>
+                            <th>Posição</th>
+                            <th>Atleta / IGN</th>
                             <th>Tier</th>
                             <th>Role</th>
-                            <th>Pontos</th>
-                            <th>Reputação (Fair Play)</th>
+                            <th>Pontuação</th>
                         </tr>
                     </thead>
-                    <tbody id="ranking-table-body"></tbody>
+                    <tbody id="ranking-body"></tbody>
                 </table>
             </div>
         </section>
 
-        <!-- TAB 8: TRANSMISSÕES & MÍDIA -->
-        <section id="media-tab" class="tab-content hidden">
-            <h2>Transmissões ao Vivo & Campeonatos</h2>
-            <div class="card-grid">
-                <div class="card">
-                    <h3>Transmissão Principal</h3>
-                    <div class="video-container">
-                        <iframe src="https://www.youtube.com/embed/live_stream?channel=YOUR_CHANNEL_ID" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Regras Rápidas de Transmissão</h3>
-                    <ul>
-                        <li>Streamers de T1/T2 precisam utilizar delay mínimo de 180 segundos (3 minutos).</li>
-                        <li>Proibido xingar adversários durante a narração oficial.</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 9: REGRAS OFICIAIS -->
-        <section id="rules-tab" class="tab-content hidden">
-            <h2>Regras Oficiais do Competitivo (World Championship Standard)</h2>
+        <!-- 5. REGRAS OFICIAIS -->
+        <section id="rules-section" class="content-section hidden">
             <div class="card">
-                <h3>Itens e Habilidades Banidas</h3>
-                <ul>
-                    <li><strong>Lançadores e Explosivos:</strong> SMRS, FHJ-18, C4, Mina de Proximidade.</li>
-                    <li><strong>Scorestreaks Proibidos:</strong> VTOL, Napalm, Helicóptero de Ataque, Chopper Gunner, VSS.</li>
-                    <li><strong>Habilidades de Operador Restritas:</strong> Purificador, Balista, Cão de Guerra.</li>
-                    <li><strong>Armas/Acessórios Banidos:</strong> Munições de Termite, Munições de Dragão, Escopeta Jacaré.</li>
+                <h2>Regulamento Oficial LOBARK / CODM World Championship</h2>
+                <ul class="rules-list">
+                    <li><strong>Itens Banidos:</strong> SMRS, FHJ-18, C4, Mina de Proximidade e Granada de Gás.</li>
+                    <li><strong>Scorestreaks Proibidos:</strong> VTOL, Napalm, Helicóptero de Ataque, Chopper Gunner.</li>
+                    <li><strong>Composição S&D:</strong> Limite de 1 Main Sniper ativo simultaneamente por equipe.</li>
+                    <li><strong>Gravação Obligatória:</strong> Todos os jogadores de T1/T2 são obrigados a gravar a tela para auditoria contra cheaters.</li>
                 </ul>
             </div>
         </section>
 
-        <!-- TAB 10: CENTRAL DE NOTIFICAÇÕES -->
-        <section id="notif-tab" class="tab-content hidden">
-            <h2>Minhas Notificações</h2>
-            <div class="card">
-                <div id="notif-list"></div>
-            </div>
-        </section>
-
-        <!-- TAB 11: PAINEL ADMINISTRATIVO / MODERAÇÃO -->
-        <section id="admin-tab" class="tab-content hidden">
-            <h2>Painel de Controle e Moderação</h2>
+        <!-- 6. PAINEL ADMINISTRATIVO & MODERAÇÃO -->
+        <section id="admin-section" class="content-section hidden">
             <div class="card danger-zone">
-                <h3>Ações de Administrador</h3>
-                <div id="admin-match-control"></div>
+                <h2>Central de Moderação LOBARK</h2>
+                <p>Controle global de salas, gerenciamento de denúncias e remoção de posts/usuários em descumprimento de regras.</p>
+                <div id="admin-scrim-list"></div>
+                <hr>
+                <h3>Publicações para Moderar</h3>
+                <div id="admin-feed-list"></div>
             </div>
         </section>
 
