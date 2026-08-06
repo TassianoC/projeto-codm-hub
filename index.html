@@ -11,15 +11,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
-    <!-- CSS Externo -->
+    <!-- Estilos da Aplicação -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Canvas para Efeito de Partículas Interativas em Segundo Plano -->
+    <!-- Canvas para Partículas de Fundo -->
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Barra de Navegação Superior -->
+    <!-- Header / Navbar -->
     <header class="navbar glass-panel">
         <div class="logo-container" onclick="switchTab('home')">
             <h1 class="glow-text">LOBARK <span class="sub-logo">HUB</span></h1>
@@ -67,7 +67,7 @@
                         <i class="fa-solid fa-bolt"></i> ESPORTS COMMUNITY
                     </span>
                     <h1 class="hero-title">RANKING E PERFIS DE <span class="text-neon">JOGADORES</span></h1>
-                    <p class="hero-description">Vote nos perfis da comunidade em tempo real, navegue pela classificação e acompanhe os mais curtidos da plataforma.</p>
+                    <p class="hero-description">Vote nos perfis da comunidade em tempo real, acompanhe a classificação geral dos pro players e destaques da plataforma LOBARK.</p>
                     <div class="hero-actions">
                         <button class="btn-primary" onclick="switchTab('top-liked')">
                             <i class="fa-solid fa-fire"></i> Ver Mais Curtidos
@@ -79,17 +79,17 @@
                 </div>
             </div>
 
-            <!-- Métricas Globais -->
+            <!-- Dashboard de Estatísticas Globais -->
             <div class="stats-overview-grid">
                 <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-users stat-icon"></i>
+                    <i class="fa-solid fa-users stat-icon icon-accent"></i>
                     <h3 id="stat-total-players">0</h3>
-                    <span>Jogadores</span>
+                    <span>Jogadores Cadastrados</span>
                 </div>
                 <div class="card glass-panel stat-box">
                     <i class="fa-solid fa-heart stat-icon icon-crimson"></i>
                     <h3 id="stat-total-likes">0</h3>
-                    <span>Curtidas Totais</span>
+                    <span>Curtidas Acumuladas</span>
                 </div>
                 <div class="card glass-panel stat-box">
                     <i class="fa-solid fa-crown stat-icon icon-gold"></i>
@@ -113,7 +113,7 @@
             <div class="section-header">
                 <div>
                     <h2><i class="fa-solid fa-fire icon-crimson"></i> Perfis Mais Curtidos</h2>
-                    <p class="section-subtitle">Ordenados automaticamente por número de curtidas.</p>
+                    <p class="section-subtitle">Ordenação em tempo real pelo total de curtidas recebidas.</p>
                 </div>
             </div>
             <div id="top-liked-players-grid" class="cards-grid"></div>
@@ -123,11 +123,12 @@
         <section id="tab-players" class="tab-content">
             <div class="section-header">
                 <h2><i class="fa-solid fa-users icon-accent"></i> Todos os Jogadores</h2>
+                <p class="section-subtitle">Explore o diretório de membros e pro-players cadastrados.</p>
             </div>
             <div id="all-players-grid" class="cards-grid"></div>
         </section>
 
-        <!-- ABA 4: MEU PERFIL -->
+        <!-- ABA 4: MEU PERFIL (Restrito a usuários autenticados) -->
         <section id="tab-profile" class="tab-content">
             <div id="profile-main-card" class="insta-profile-card glass-panel">
                 <div class="insta-header">
@@ -142,7 +143,7 @@
                     <div class="insta-details">
                         <div class="insta-user-row">
                             <h2 id="my-profile-nick">--</h2>
-                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> MEU PERFIL</span>
+                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> MEU PERFIL VERIFICADO</span>
                         </div>
 
                         <div class="insta-stats-row">
@@ -161,7 +162,7 @@
                         </div>
 
                         <div class="insta-bio">
-                            <p id="my-profile-bio">Sua conta está autenticada e seu perfil está visível na plataforma.</p>
+                            <p id="my-profile-bio">Sua conta está ativa no ecossistema LOBARK. Seu perfil e estatísticas estão visíveis para votação pública.</p>
                         </div>
                     </div>
                 </div>
@@ -170,7 +171,7 @@
 
     </main>
 
-    <!-- JavaScript Externo -->
+    <!-- Script JavaScript Principal -->
     <script src="script.js"></script>
 </body>
 </html>
