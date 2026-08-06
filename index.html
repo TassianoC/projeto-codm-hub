@@ -19,13 +19,15 @@
 
     <!-- Header / Navbar -->
     <header class="navbar glass-panel">
-        <div class="logo-container">
+        <div class="logo-container" onclick="switchTab('home')" style="cursor: pointer;">
             <h1 class="glow-text">LOBARK <span class="sub-logo">CHARTS</span></h1>
         </div>
 
         <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
+            <button class="nav-btn active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Início</button>
+            <button class="nav-btn" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Mais Curtidos</button>
             <button class="nav-btn" onclick="switchTab('players')"><i class="fa-solid fa-address-card"></i> Jogadores</button>
+            <button class="nav-btn" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
             <button class="nav-btn" onclick="switchTab('lobbies')"><i class="fa-solid fa-crosshairs"></i> Lobbies</button>
             <button class="nav-btn" onclick="switchTab('online')"><i class="fa-solid fa-users"></i> Online <span id="online-count-badge" class="counter-badge">0</span></button>
             <button class="nav-btn" onclick="switchTab('teams')"><i class="fa-solid fa-shield-cat"></i> Equipes</button>
@@ -51,9 +53,78 @@
     <!-- Conteúdo Principal -->
     <main class="main-container">
 
-        <!-- ABA PERFIL DO JOGADOR (Exibe Meu Perfil ou Perfil de Terceiros) -->
-        <section id="tab-profile" class="tab-content active">
-            <div class="insta-profile-card glass-panel">
+        <!-- ABA 1: INÍCIO (HOME) -->
+        <section id="tab-home" class="tab-content active">
+            <div class="hero-banner glass-panel">
+                <div class="hero-content">
+                    <span class="badge badge-t3" style="font-size:0.9rem; margin-bottom:10px;">COMMUNITY HUB // CODM</span>
+                    <h1 class="hero-title">A ARENA DOS MELHORES JOGADORES DE CODM</h1>
+                    <p class="hero-description">Monitore rankings, compartilhe jogadas no seu feed, participe de Lobbies 5v5 e ganhe destaque na comunidade conforme acumula curtidas em seu perfil.</p>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:20px;">
+                        <button class="btn-primary" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Ver Jogadores Famosos</button>
+                        <button class="btn-secondary" onclick="openModal('auth')"><i class="fa-solid fa-user-plus"></i> Criar Meu Perfil</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destaques na Home: Jogadores Mais Curtidos -->
+            <div class="section-header" style="margin-top: 40px;">
+                <h2><i class="fa-solid fa-crown" style="color: #ffaa00;"></i> Jogadores em Destaque no Hub</h2>
+                <button class="btn-outline" onclick="switchTab('top-liked')">Ver Todos</button>
+            </div>
+            <div id="home-top-players-grid" class="cards-grid"></div>
+
+            <!-- Métricas Gerais do Plataforma -->
+            <div class="stats-overview-grid" style="margin-top: 40px;">
+                <div class="card glass-panel stat-box">
+                    <i class="fa-solid fa-users stat-icon"></i>
+                    <h3 id="stat-total-players">0</h3>
+                    <span>Jogadores Registrados</span>
+                </div>
+                <div class="card glass-panel stat-box">
+                    <i class="fa-solid fa-heart stat-icon" style="color: var(--crimson);"></i>
+                    <h3 id="stat-total-likes">0</h3>
+                    <span>Curtidas Totais em Perfis</span>
+                </div>
+                <div class="card glass-panel stat-box">
+                    <i class="fa-solid fa-shield-halved stat-icon"></i>
+                    <h3 id="stat-total-teams">0</h3>
+                    <span>Equipes Cadastradas</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: MAIS CURTIDOS -->
+        <section id="tab-top-liked" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-fire" style="color: var(--crimson);"></i> Perfis Mais Curtidos da Comunidade</h2>
+                <p style="color: var(--text-secondary);">Os jogadores no topo do ranking ganham visibilidade direta no início da plataforma.</p>
+            </div>
+            <div id="top-liked-players-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 3: COMUNIDADE DE JOGADORES -->
+        <section id="tab-players" class="tab-content">
+            <div class="section-header">
+                <h2>Todos os Jogadores CODM</h2>
+                <input type="text" id="search-player-input" placeholder="Buscar por nick..." onkeyup="filterPlayersList()" style="padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 6px; color: #fff; width: 250px;">
+            </div>
+            <div id="all-players-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 4: MEU PERFIL DA CONTA -->
+        <section id="tab-profile" class="tab-content">
+            
+            <!-- Aviso quando não está logado -->
+            <div id="profile-not-logged-in" class="glass-panel" style="text-align: center; padding: 50px 20px; display: none;">
+                <i class="fa-solid fa-user-lock" style="font-size: 3.5rem; color: var(--accent); margin-bottom: 20px;"></i>
+                <h2>Perfil Privado</h2>
+                <p style="color: var(--text-secondary); max-width: 500px; margin: 10px auto 25px auto;">Você precisa fazer login na sua conta para acessar e gerenciar seu perfil pessoal e personalizar seu feed.</p>
+                <button class="btn-primary" onclick="openModal('auth')"><i class="fa-solid fa-right-to-bracket"></i> Entrar ou Criar Conta</button>
+            </div>
+
+            <!-- Card de Perfil Único (Exibido ao estar logado ou ao visualizar terceiros) -->
+            <div id="profile-main-card" class="insta-profile-card glass-panel" style="display: none;">
                 
                 <!-- Alerta de visitante -->
                 <div id="profile-visitor-banner" style="display:none; background: rgba(0,243,255,0.1); border: 1px solid var(--accent); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
@@ -77,13 +148,17 @@
                             <h2 id="view-profile-nick">Nick do Jogador</h2>
                             <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> PRO</span>
                             <div class="profile-header-actions">
+                                <button id="btn-like-profile" class="btn-secondary" onclick="likeCurrentProfile()"><i class="fa-solid fa-heart" style="color: var(--crimson);"></i> Curtir Perfil (<span id="profile-likes-count">0</span>)</button>
                                 <button id="btn-edit-my-profile" class="btn-secondary" onclick="openModal('edit-profile')"><i class="fa-solid fa-pen-to-square"></i> Editar Perfil</button>
                                 <button id="btn-create-my-post" class="btn-primary" onclick="openModal('create-post')"><i class="fa-solid fa-plus"></i> Publicar Mídia</button>
                             </div>
                         </div>
 
-                        <!-- Métricas estilo Instagram / Esports Charts -->
                         <div class="insta-stats-row">
+                            <div class="insta-stat">
+                                <strong id="view-profile-likes">0</strong>
+                                <span>Curtidas</span>
+                            </div>
                             <div class="insta-stat">
                                 <strong id="view-profile-posts-count">0</strong>
                                 <span>Publicações</span>
@@ -103,7 +178,7 @@
                         </div>
 
                         <div class="insta-bio">
-                            <p id="view-profile-bio">Sua biografia aparecerá aqui. Faça login para personalizar suas informações.</p>
+                            <p id="view-profile-bio">Sua biografia aparecerá aqui.</p>
                             <div class="insta-gears-tags">
                                 <span id="view-profile-role" class="badge badge-t1">Role: Flex</span>
                                 <span id="view-profile-device" class="badge badge-tech"><i class="fa-solid fa-mobile-screen"></i> Dispositivo N/I</span>
@@ -113,21 +188,16 @@
                     </div>
                 </div>
 
-                <!-- Navegação Interna do Perfil -->
                 <div class="profile-tabs-bar">
-                    <button class="p-tab-btn active" onclick="switchProfileSubTab('feed-grid')"><i class="fa-solid fa-border-all"></i> Feed de Mídias (Fotos/Vídeos)</button>
+                    <button class="p-tab-btn active" onclick="switchProfileSubTab('feed-grid')"><i class="fa-solid fa-border-all"></i> Feed de Mídias</button>
                     <button class="p-tab-btn" onclick="switchProfileSubTab('tournaments')"><i class="fa-solid fa-trophy"></i> Conquistas & Torneios</button>
                     <button class="p-tab-btn" onclick="switchProfileSubTab('gears')"><i class="fa-solid fa-sliders"></i> Sensibilidade & Gears</button>
                 </div>
 
-                <!-- SUB-ABA 1: FEED EM GRID -->
                 <div id="ptab-feed-grid" class="profile-sub-content active">
-                    <div id="my-feed-grid" class="insta-grid">
-                        <!-- Posts/Mídias inseridos dinamicamente -->
-                    </div>
+                    <div id="my-feed-grid" class="insta-grid"></div>
                 </div>
 
-                <!-- SUB-ABA 2: TORNEIOS -->
                 <div id="ptab-tournaments" class="profile-sub-content">
                     <div class="table-wrapper">
                         <table class="custom-table">
@@ -141,15 +211,12 @@
                                 </tr>
                             </thead>
                             <tbody id="view-profile-tournaments-body">
-                                <tr>
-                                    <td colspan="5" style="text-align:center; color: var(--text-muted);">Nenhum torneio registrado no histórico.</td>
-                                </tr>
+                                <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Nenhum torneio registrado no histórico.</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- SUB-ABA 3: CONFIGURAÇÕES E GEARS -->
                 <div id="ptab-gears" class="profile-sub-content">
                     <div class="gears-card glass-panel">
                         <h3><i class="fa-solid fa-gamepad"></i> Dispositivo & Configurações de Jogo</h3>
@@ -165,16 +232,7 @@
             </div>
         </section>
 
-        <!-- NOVA ABA: COMUNIDADE / TODOS OS JOGADORES -->
-        <section id="tab-players" class="tab-content">
-            <div class="section-header">
-                <h2>Comunidade de Jogadores CODM</h2>
-                <input type="text" id="search-player-input" placeholder="Buscar por nick..." onkeyup="filterPlayersList()" style="padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--card-border); border-radius: 6px; color: #fff; width: 250px;">
-            </div>
-            <div id="all-players-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- DEMAIS ABAS DO SISTEMA -->
+        <!-- DEMAIS ABAS -->
         <section id="tab-lobbies" class="tab-content">
             <div class="section-header">
                 <h2>Lobbies Abertos & Desafios</h2>
@@ -296,7 +354,7 @@
         </div>
     </div>
 
-    <!-- MODAIS ADICIONAIS -->
+    <!-- MODAIS DE SISTEMA -->
     <div id="modal-auth" class="modal">
         <div class="modal-content glass-panel">
             <div class="modal-header">
