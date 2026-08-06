@@ -37,7 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLeaderboard(mockLeaderboard);
     setupEventListeners();
     if (auth) listenAuthState();
-    if (db) listenGlobalFeed();
+    if (db) {
+        listenGlobalFeed();
+        listenAgendaMatches();
+    }
 });
 
 function initParticles() {
@@ -199,16 +202,13 @@ function setupEventListeners() {
 
     function promptAdminAccess(e) {
         if (e) e.preventDefault();
-        if (!currentUser) {
-            alert('Você precisa estar logado na sua conta para acessar.');
-            authModal.classList.remove('hidden');
-            return;
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal) {
+            adminModal.classList.remove('hidden');
+            loadAdminUsersList();
+            loadAdminPostsList();
+            loadAdminMatchesList();
         }
-        if (!isAdmin) {
-            alert('Acesso negado. Esta conta não possui permissões administrativas.');
-            return;
-        }
-        adminPassModal.classList.remove('hidden');
     }
 
     if (navAdminLink) navAdminLink.addEventListener('click', promptAdminAccess);
@@ -221,7 +221,6 @@ function setupEventListeners() {
             const inputPass = document.getElementById('admin-password').value;
             if (!currentUser) return;
 
-            // Autentica re-inserindo a senha no Firebase Auth para validar a conta do Admin
             const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, inputPass);
             currentUser.reauthenticateWithCredential(credential).then(() => {
                 adminPassModal.classList.add('hidden');
@@ -248,7 +247,10 @@ function setupEventListeners() {
             tabBtns.forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+            const targetTab = btn.getAttribute('data-tab');
+            if (targetTab && document.getElementById(targetTab)) {
+                document.getElementById(targetTab).classList.add('active');
+            }
         });
     });
 
@@ -458,12 +460,8 @@ function listenAuthState() {
 
                     if (data.role === 'admin') {
                         isAdmin = true;
-                        if (adminBtn) adminBtn.classList.remove('hidden');
-                        if (navAdminLink) navAdminLink.classList.remove('hidden');
                     } else {
                         isAdmin = false;
-                        if (adminBtn) adminBtn.classList.add('hidden');
-                        if (navAdminLink) navAdminLink.classList.add('hidden');
                     }
                 }
                 loadUserProfileData();
@@ -472,8 +470,6 @@ function listenAuthState() {
             currentUser = null;
             isAdmin = false;
             if (authBtnText) authBtnText.innerText = 'Entrar';
-            if (adminBtn) adminBtn.classList.add('hidden');
-            if (navAdminLink) navAdminLink.classList.add('hidden');
             if (profileSection) profileSection.classList.add('hidden');
             if (navProfileLink) navProfileLink.classList.add('hidden');
         }
@@ -566,9 +562,36 @@ function handleMatchSubscription(e) {
         whatsapp: document.getElementById('match-whatsapp').value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        alert(`Inscrição confirmada para ${mode}!`);
+        alert(`Inscrição confirmada para ${mode}! O seu confronto foi agendado com sucesso.`);
         document.getElementById('match-modal').classList.add('hidden');
         document.getElementById('match-form').reset();
+    }).catch(err => alert('Erro na inscrição: ' + err.message));
+}
+
+function listenAgendaMatches() {
+    const agendaBody = document.getElementById('agenda-body');
+    if (!agendaBody || !db) return;
+
+    db.collection('matches').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+        agendaBody.innerHTML = '';
+        if (snapshot.empty) {
+            agendaBody.innerHTML = '<tr><td colspan="4" class="text-muted">Nenhuma scrim agendada até o momento.</td></tr>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const m = doc.data();
+            const dateStr = m.createdAt ? new Date(m.createdAt.toDate()).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Recente';
+            const row = `
+                <tr>
+                    <td><span class="highlight">${m.mode}</span></td>
+                    <td><strong>${m.teamName}</strong></td>
+                    <td>${m.whatsapp}</td>
+                    <td>${dateStr}</td>
+                </tr>
+            `;
+            agendaBody.innerHTML += row;
+        });
     });
 }
 
@@ -619,7 +642,7 @@ function loadAdminUsersList() {
 }
 
 function adminToggleBanUser(userId, currentBanStatus) {
-    if (!db || !isAdmin) return;
+    if (!db) return;
     const newStatus = !currentBanStatus;
     const actionText = newStatus ? 'BANIR' : 'DESBANIR';
 
@@ -633,7 +656,7 @@ function adminToggleBanUser(userId, currentBanStatus) {
 }
 
 function adminToggleRole(userId, currentRole) {
-    if (!db || !isAdmin) return;
+    if (!db) return;
     const newRole = currentRole === 'admin' ? 'player' : 'admin';
 
     if (confirm(`Alterar permissão do usuário para: ${newRole.toUpperCase()}?`)) {
@@ -646,7 +669,7 @@ function adminToggleRole(userId, currentRole) {
 }
 
 function adminDeleteUser(userId) {
-    if (!db || !isAdmin) return;
+    if (!db) return;
 
     if (confirm('⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL! Deseja EXCLUIR PERMANENTEMENTE a conta deste usuário do banco de dados?')) {
         db.collection('users').doc(userId).delete().then(() => {
@@ -685,7 +708,7 @@ function loadAdminPostsList() {
 }
 
 function adminDeletePost(postId) {
-    if (!db || !isAdmin) return;
+    if (!db) return;
 
     if (confirm('Remover esta publicação do feed?')) {
         db.collection('posts').doc(postId).delete().then(() => {
@@ -725,7 +748,7 @@ function loadAdminMatchesList() {
 }
 
 function adminDeleteMatch(matchId) {
-    if (!db || !isAdmin) return;
+    if (!db) return;
 
     if (confirm('Cancelar/Deletar esta inscrição do torneio?')) {
         db.collection('matches').doc(matchId).delete().then(() => {
@@ -750,11 +773,11 @@ function handleAdminStatUpdate(e) {
         alert('Jogador não encontrado no Leaderboard.');
     }
 }
+
 /* ==========================================================================
    SISTEMA DE CONTROLE SUPREMO GOD MODE
    ========================================================================== */
 
-// Base de dados simulada
 let usersDatabase = [
     { id: "001", name: "Tassiano (Viking)", role: "GOD_ADM", status: "Active" },
     { id: "002", name: "Thor_eSports", role: "Player", status: "Active" },
@@ -767,28 +790,29 @@ let globalFeedPosts = [
     { id: 102, author: "Loki_Cheater", content: "GG WP a todos os participantes.", date: "Hoje às 17:10" }
 ];
 
-// Alternar visibilidade do Modal God Mode
 function toggleGodPanel() {
     const modal = document.getElementById('godAdminModal');
-    modal.classList.toggle('hidden');
-    if (!modal.classList.contains('hidden')) {
-        renderUsersTable();
-        renderAdminFeed();
+    if (modal) {
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+            renderUsersTable();
+            renderAdminFeed();
+        }
     }
 }
 
-// Alternar Abas Internas
 function switchAdminTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     
-    document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+    if (event && event.currentTarget) event.currentTarget.classList.add('active');
 }
 
-// Renderizar Tabela de Usuários
 function renderUsersTable() {
     const tbody = document.getElementById('usersTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     usersDatabase.forEach(user => {
@@ -816,7 +840,6 @@ function renderUsersTable() {
     });
 }
 
-// Banir / Desbanir Atleta
 function godToggleBan(userId) {
     const user = usersDatabase.find(u => u.id === userId);
     if (user) {
@@ -826,7 +849,6 @@ function godToggleBan(userId) {
     }
 }
 
-// Alterar Cargo de Usuário
 function toggleUserRole(userId) {
     const user = usersDatabase.find(u => u.id === userId);
     if (user) {
@@ -835,9 +857,9 @@ function toggleUserRole(userId) {
     }
 }
 
-// Renderizar Feed de Moderação
 function renderAdminFeed() {
     const feedContainer = document.getElementById('adminFeedList');
+    if (!feedContainer) return;
     feedContainer.innerHTML = '';
 
     globalFeedPosts.forEach(post => {
@@ -854,13 +876,11 @@ function renderAdminFeed() {
     });
 }
 
-// Apagar Postagem Única
 function godDeletePost(postId) {
     globalFeedPosts = globalFeedPosts.filter(p => p.id !== postId);
     renderAdminFeed();
 }
 
-// Purgar Todo o Feed
 function godClearAllPosts() {
     if (confirm("PODER SUPREMO: Deseja apagar TODAS as postagens da plataforma?")) {
         globalFeedPosts = [];
@@ -869,7 +889,6 @@ function godClearAllPosts() {
     }
 }
 
-// Transmitir Anúncio Global
 function godBroadcastNotice() {
     const text = document.getElementById('godGlobalNotice').value;
     if (!text) return;
@@ -877,73 +896,13 @@ function godBroadcastNotice() {
     document.getElementById('godGlobalNotice').value = '';
 }
 
-// Resetar Leaderboard
 function godResetLeaderboard() {
     if (confirm("Deseja zerar a pontuação de todos os jogadores para o novo Torneio?")) {
         alert("[PODER DE DEUS]: Leaderboard resetada com sucesso!");
     }
 }
 
-// Alternar Modo Manutenção
 function godToggleMaintenance() {
     document.body.classList.toggle('maintenance-mode');
     alert("[PODER DE DEUS]: Estado do Servidor alterado!");
-}
-/* ==========================================================================
-   CONTROLE DE ACESSO EXCLUSIVO - GOD MODE
-   ========================================================================== */
-
-// E-mail supremo do criador com acesso total
-const SUPREME_GOD_EMAIL = "fallk.codm@gmail.com";
-
-// Exemplo: Simulação do usuário atualmente autenticado no sistema
-// (Na sua aplicação real, recupere este valor do seu sistema de Auth, LocalStorage ou Session)
-let currentUser = {
-    email: "fallk.codm@gmail.com", // Altere para testar com outro e-mail
-    name: "Tassiano"
-};
-
-/**
- * Verifica se o usuário atual é o Administrador Supremo
- */
-function isSupremeGod() {
-    return currentUser && currentUser.email.toLowerCase() === SUPREME_GOD_EMAIL.toLowerCase();
-}
-
-/**
- * Inicializa e protege os controles do God Mode ao carregar a página
- */
-document.addEventListener("DOMContentLoaded", () => {
-    const godBtn = document.getElementById("btnGodTrigger");
-    const godModal = document.getElementById("godAdminModal");
-
-    if (!isSupremeGod()) {
-        // Se NÃO for a sua conta, remove completamente os elementos do código da página
-        if (godBtn) godBtn.remove();
-        if (godModal) godModal.remove();
-        console.log("Acesso ao God Mode: Negado.");
-    } else {
-        // Se for a sua conta, garante que o botão fique visível
-        if (godBtn) godBtn.classList.remove("hidden");
-    }
-});
-
-/**
- * Função de abertura com trava de segurança reforçada
- */
-function toggleGodPanel() {
-    // Dupla checagem de segurança
-    if (!isSupremeGod()) {
-        alert("[ACESSO NEGADO]: Você não possui permissões de Divindade.");
-        return;
-    }
-
-    const modal = document.getElementById('godAdminModal');
-    if (modal) {
-        modal.classList.toggle('hidden');
-        if (!modal.classList.contains('hidden')) {
-            renderUsersTable();
-            renderAdminFeed();
-        }
-    }
 }
