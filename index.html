@@ -3,39 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODM eSports Hub</title>
-    <!-- FontAwesome para Ícones -->
+    <title>CODM eSports Hub | Elite Gaming Platform</title>
+    <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Estilos Personalizados (Ajuste o caminho se necessário) -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-theme">
 
-    <!-- Fundo de Partículas -->
-    <div id="particles-js"></div>
+    <!-- FX Canvas: Tiros, Armas & Partículas -->
+    <canvas id="fx-canvas"></canvas>
+    <div class="muzzle-flash-overlay" id="muzzle-flash"></div>
 
     <!-- BARRA DE NAVEGAÇÃO -->
     <nav class="navbar glass-card">
-        <div class="logo">CODM<span>HUB</span></div>
+        <div class="logo">
+            <i class="fa-solid fa-crosshairs logo-icon"></i> CODM<span class="highlight">HUB</span>
+            <span class="badge-live"><i class="fa-solid fa-circle blink"></i> LIVE</span>
+        </div>
         
         <div class="nav-links">
-            <!-- Alternar Tema -->
-            <button id="theme-toggle" class="btn-outline" style="padding: 6px 12px;">
+            <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
                 <i class="fa-solid fa-moon"></i>
             </button>
 
-            <!-- Botão de Perfil (Mostrado quando Logado) -->
+            <button id="btn-sound-toggle" class="btn-icon active" title="Efeitos Sonoros">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Perfil -->
             <button id="btn-profile" class="btn-outline" style="display: none;">
-                <i class="fa-solid fa-user"></i> Meu Perfil
+                <img id="nav-avatar" src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100" class="nav-avatar-img">
+                <span id="nav-username">Meu Perfil</span>
             </button>
             
-            <!-- Botão de Administrador (Mostrado apenas para Admin) -->
-            <button id="btn-admin" class="btn-outline" style="display: none; border-color: #ff0055; color: #ff0055;">
-                <i class="fa-solid fa-shield-halved"></i> Admin
+            <!-- Painel Admin -->
+            <button id="btn-admin" class="btn-outline btn-admin-style" style="display: none;">
+                <i class="fa-solid fa-shield-halved"></i> Painel Admin
             </button>
             
-            <!-- Botão Login / Sair -->
-            <button id="btn-login" class="btn-primary">
+            <!-- Auth -->
+            <button id="btn-login" class="btn-primary btn-glow">
                 <i class="fa-solid fa-right-to-bracket"></i> <span id="auth-btn-text">Entrar</span>
             </button>
         </div>
@@ -44,90 +54,130 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="container">
         
-        <!-- SEÇÃO HERO / METRICAS -->
-        <section class="hero-section glass-card" style="margin-top: 20px; padding: 30px; text-align: center;">
-            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Plataforma Competitiva <span style="color: var(--primary-neon,#00f0ff);">CODM</span></h1>
-            <p style="color: var(--text-secondary, #aaa); margin-bottom: 25px;">Agende Scrims, participe de campeonatos e acompanhe o ranking das equipes.</p>
-            
-            <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
-                <div>
-                    <h2 class="counter" data-target="1250" style="font-size: 2rem; margin: 0;">0</h2>
-                    <small style="color: #888;">Partidas Agendadas</small>
+        <!-- HERO BANNER TÁTICO -->
+        <section class="hero-section glass-card glowing-border">
+            <div class="hero-content">
+                <div class="hero-badge"><i class="fa-solid fa-fire"></i> TEMPORADA COMPETITIVA ATIVA</div>
+                <h1 class="hero-title">A ARENA DEFINITIVA DE <span class="text-neon">CALL OF DUTY: MOBILE</span></h1>
+                <p class="hero-subtitle">Agende Scrims T2/T1, participe de salas personalizadas, monte sua lineup e conquiste o topo do Ranking Geral.</p>
+                
+                <div class="hero-actions">
+                    <button class="btn-primary btn-lg pulse-glow" onclick="document.getElementById('scrim-modes').scrollIntoView({behavior: 'smooth'})">
+                        <i class="fa-solid fa-crosshairs"></i> Lançar Desafio
+                    </button>
+                    <button class="btn-outline btn-lg" onclick="document.getElementById('leaderboard-section').scrollIntoView({behavior: 'smooth'})">
+                        <i class="fa-solid fa-trophy"></i> Ver Leaderboard
+                    </button>
                 </div>
-                <div>
-                    <h2 class="counter" data-target="340" style="font-size: 2rem; margin: 0;">0</h2>
-                    <small style="color: #888;">Times Ativos</small>
+            </div>
+
+            <!-- CONTADORES ANIMADOS -->
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-gun"></i></div>
+                    <h2 class="counter" data-target="1420">0</h2>
+                    <span>Partidas Agendadas</span>
                 </div>
-                <div>
-                    <h2 class="counter" data-target="85" style="font-size: 2rem; margin: 0;">0</h2>
-                    <small style="color: #888;">Torneios Realizados</small>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <h2 class="counter" data-target="380">0</h2>
+                    <span>Teams Cadastrados</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-medal"></i></div>
+                    <h2 class="counter" data-target="96">0</h2>
+                    <span>Torneios Concluídos</span>
                 </div>
             </div>
         </section>
 
-        <!-- SEÇÃO SCRIM FINDER / MARCAÇÃO DE JOGOS -->
-        <section style="margin-top: 30px;">
-            <h2 style="margin-bottom: 15px;"><i class="fa-solid fa-crosshairs"></i> Lançar Desafio (Scrim Finder)</h2>
+        <!-- MODO DE JOGO / LANÇAR DESAFIO -->
+        <section id="scrim-modes" class="section-container">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-person-rifle"></i> Arena de Desafios (Scrim Finder)</h2>
+                <p>Selecione o formato e lance sua fila pública ou privada</p>
+            </div>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-                <div class="glass-card" style="padding: 20px; text-align: center;">
-                    <h3>Lançar Scrim 5v5</h3>
-                    <p style="font-size: 13px; color: #aaa; margin: 10px 0;">Modo Localizar e Destruir ou Misto</p>
-                    <button class="btn-primary btn-match" data-mode="5v5 (Misto)" data-players="5">Lançar Desafio 5v5</button>
+            <div class="scrim-grid">
+                <div class="scrim-card glass-card">
+                    <div class="scrim-badge">5v5 L&D / MISTO</div>
+                    <div class="scrim-icon"><i class="fa-solid fa-shield-cat"></i></div>
+                    <h3>Scrim 5v5 Completa</h3>
+                    <p>Formatos competitivos de Localizar e Destruir, Zona de Conflito e Domínio.</p>
+                    <button class="btn-primary btn-match width-100" data-mode="5v5 (Misto)" data-players="5">
+                        <i class="fa-solid fa-bolt"></i> Lançar Desafio 5v5
+                    </button>
                 </div>
 
-                <div class="glass-card" style="padding: 20px; text-align: center;">
-                    <h3>Lançar X1 / X2</h3>
-                    <p style="font-size: 13px; color: #aaa; margin: 10px 0;">Desafio Rápido de Habilidade</p>
-                    <button class="btn-primary btn-match" data-mode="X1 / X2" data-players="2">Lançar Desafio 1v1/2v2</button>
+                <div class="scrim-card glass-card">
+                    <div class="scrim-badge">X1 / X2 RÁPIDO</div>
+                    <div class="scrim-icon"><i class="fa-solid fa-skull"></i></div>
+                    <h3>Duelo X1 / X2</h3>
+                    <p>Confronto direto de Sniper ou AR/SMG em mapas reduzidos (Killhouse / Cage).</p>
+                    <button class="btn-primary btn-match width-100" data-mode="X1 / X2" data-players="2">
+                        <i class="fa-solid fa-skull-crossbones"></i> Lançar Duelo
+                    </button>
                 </div>
 
-                <div class="glass-card" style="padding: 20px; text-align: center;">
-                    <h3>Battle Royale (Squad)</h3>
-                    <p style="font-size: 13px; color: #aaa; margin: 10px 0;">Salas Personalizadas de BR</p>
-                    <button class="btn-primary btn-match" data-mode="Battle Royale" data-players="4">Lançar BR Squad</button>
+                <div class="scrim-card glass-card">
+                    <div class="scrim-badge">BATTLE ROYALE</div>
+                    <div class="scrim-icon"><i class="fa-solid fa-helicopter"></i></div>
+                    <h3>BR Squad Custom</h3>
+                    <p>Salas privadas para treino de rotações, trocação e finais de zona no BR.</p>
+                    <button class="btn-primary btn-match width-100" data-mode="Battle Royale" data-players="4">
+                        <i class="fa-solid fa-plane-departure"></i> Lançar BR Squad
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- AGENDAMENTOS ATIVOS (PERSISTENTE PÓS-F5) -->
-        <section style="margin-top: 40px;">
-            <h2><i class="fa-solid fa-calendar-days"></i> Fila de Desafios Aberta</h2>
-            <div id="schedule-queue-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
-                <!-- Carregado via Firebase no script.js -->
+        <!-- FILA DE DESAFIOS ABERTOS -->
+        <section class="section-container">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-list-check"></i> Desafios Abertos na Fila</h2>
+                <span class="live-tag"><i class="fa-solid fa-signal"></i> Sincronizado em Tempo Real</span>
+            </div>
+            <div id="schedule-queue-container" class="queue-grid">
+                <!-- Carregado via Firebase -->
             </div>
         </section>
 
-        <!-- LEADERBOARD E FEED -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 40px;">
+        <!-- SEÇÃO DUPLA: LEADERBOARD + CHAT DA COMUNIDADE -->
+        <div class="dual-grid" id="leaderboard-section">
             
-            <!-- Tabela de Classificação -->
-            <section class="glass-card" style="padding: 20px;">
-                <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-trophy"></i> Top Leaderboard</h3>
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <th style="padding: 8px;">Rank</th>
-                            <th>Time</th>
-                            <th>K/D</th>
-                            <th>Vitórias</th>
-                            <th>Pontos</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        <!-- Carregado via script.js -->
-                    </tbody>
-                </table>
+            <!-- LEADERBOARD -->
+            <section class="glass-card section-card">
+                <div class="card-title">
+                    <h3><i class="fa-solid fa-trophy highlight"></i> Top Leaderboard de Equipes</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Time / Org</th>
+                                <th>K/D</th>
+                                <th>Vitórias</th>
+                                <th>Pontos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
-            <!-- Feed da Comunidade -->
-            <section class="glass-card" style="padding: 20px;">
-                <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-comments"></i> Feed da Comunidade</h3>
-                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                    <input type="text" id="post-input" placeholder="O que está acontecendo?" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #333; background: rgba(0,0,0,0.5); color: #fff;">
-                    <button id="btn-post" class="btn-primary" style="padding: 8px 12px;"><i class="fa-solid fa-paper-plane"></i></button>
+            <!-- FEED GLOBAL DA COMUNIDADE -->
+            <section class="glass-card section-card">
+                <div class="card-title">
+                    <h3><i class="fa-solid fa-comments highlight"></i> Feed Global & Recrutamento</h3>
                 </div>
-                <div id="posts-container" style="max-height: 350px; overflow-y: auto;">
+                <div class="post-box">
+                    <input type="text" id="post-input" placeholder="Comente algo, procure time ou poste seu clã..." maxlength="280">
+                    <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+                <div id="posts-container" class="posts-list">
                     <!-- Posts carregados via Firebase -->
                 </div>
             </section>
@@ -136,171 +186,173 @@
 
     </main>
 
-    <!-- ==========================================================================
-       MODAIS DO SISTEMA
-       ========================================================================== -->
-
-    <!-- 1. MODAL DE AUTENTICAÇÃO COM BOTÃO GOOGLE -->
+    <!-- MODAIS DO SISTEMA -->
     <div id="auth-modal" class="modal hidden">
-        <div class="modal-content glass-card" style="max-width: 400px; text-align: center;">
+        <div class="modal-content glass-card auth-card">
             <span class="close-modal">&times;</span>
-            <h2 id="modal-title">Acessar CODM Hub</h2>
-            
-            <!-- Entrar com o Google -->
-            <button id="btn-google-login" class="btn-outline btn-full" style="margin: 15px 0; border-color: #4285F4; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <i class="fa-brands fa-google" style="color: #4285F4;"></i> Entrar com o Google
+            <h2 id="modal-title"><i class="fa-solid fa-lock"></i> Acessar CODM Hub</h2>
+            <p class="sub-text">Entre com sua conta para jogar, interagir e agendar scrims.</p>
+
+            <button id="btn-google-login" class="btn-google width-100">
+                <i class="fa-brands fa-google"></i> Entrar com o Google
             </button>
 
-            <div style="margin: 10px 0; color: #888; font-size: 12px;">--- OU ENTRE COM E-MAIL ---</div>
+            <div class="divider"><span>OU USE EMAIL</span></div>
 
             <form id="auth-form">
-                <div class="input-group" style="margin-bottom: 10px; text-align: left;">
-                    <label style="font-size: 12px;">E-mail</label>
-                    <input type="email" id="email" required placeholder="seuemail@exemplo.com" style="width: 100%; padding: 8px; margin-top: 4px;">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-envelope"></i> E-mail</label>
+                    <input type="email" id="email" required placeholder="seuemail@exemplo.com">
                 </div>
-                <div class="input-group" style="margin-bottom: 15px; text-align: left;">
-                    <label style="font-size: 12px;">Senha</label>
-                    <input type="password" id="password" required placeholder="******" style="width: 100%; padding: 8px; margin-top: 4px;">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-key"></i> Senha</label>
+                    <input type="password" id="password" required placeholder="******">
                 </div>
-                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+                <button type="submit" id="auth-submit-btn" class="btn-primary width-100">Entrar</button>
             </form>
-            
-            <p style="margin-top: 15px; font-size: 13px;">
-                <a href="#" id="toggle-auth-mode" style="color: var(--primary-neon, #00f0ff);">Não tem conta? Cadastre-se</a>
-            </p>
         </div>
     </div>
 
-    <!-- 2. MODAL PERFIL ESTILO INSTAGRAM -->
+    <!-- MODAL PERFIL ESTILO INSTAGRAM -->
     <div id="profile-modal" class="modal hidden">
-        <div class="modal-content glass-card" style="max-width: 550px; padding: 25px;">
+        <div class="modal-content glass-card profile-modal-card">
             <span class="close-profile-modal">&times;</span>
             
-            <!-- Header Estilo Instagram -->
-            <div style="display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
-                <div>
-                    <img id="display-avatar" src="https://via.placeholder.com/100" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid #00f0ff; object-fit: cover;">
+            <div class="profile-header">
+                <div class="avatar-container">
+                    <img id="display-avatar" src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150" class="profile-avatar-img">
+                    <span class="online-indicator"></span>
                 </div>
                 
-                <div style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2 id="display-nickname" style="margin: 0; font-size: 20px;">@Jogador</h2>
-                        <button id="btn-edit-profile-toggle" class="btn-outline" style="padding: 4px 10px; font-size: 11px;">Editar Perfil</button>
+                <div class="profile-info">
+                    <div class="profile-top-bar">
+                        <h2 id="display-nickname">@Jogador_CODM</h2>
+                        <div class="profile-actions-btns">
+                            <button id="btn-like-profile" class="btn-heart"><i class="fa-solid fa-heart"></i> <span id="profile-likes-count">0</span></button>
+                            <button id="btn-edit-profile-toggle" class="btn-outline btn-sm"><i class="fa-solid fa-gear"></i> Editar</button>
+                        </div>
                     </div>
                     
-                    <div style="display: flex; gap: 15px; margin: 10px 0;">
-                        <div><strong id="user-scrims-count">0</strong> <small style="color: #aaa;">Desafios</small></div>
-                        <div><strong id="user-posts-count">0</strong> <small style="color: #aaa;">Posts</small></div>
-                        <div><strong style="color: #00f0ff;">Ativo</strong> <small style="color: #aaa;">Status</small></div>
+                    <div class="profile-stats">
+                        <div class="p-stat"><strong id="user-scrims-count">0</strong> <span>Desafios</span></div>
+                        <div class="p-stat"><strong id="user-posts-count">0</strong> <span>Posts</span></div>
+                        <div class="p-stat"><strong id="user-likes-received">0</strong> <span>Curtidas</span></div>
                     </div>
 
-                    <p id="display-role-tier" style="margin: 0; font-size: 12px; color: var(--primary-neon, #00f0ff); font-weight: bold;">AR / Slayer • T1</p>
-                    <p id="display-bio" style="margin: 4px 0 0 0; font-size: 12px; color: #ddd; font-style: italic;">Bio do jogador...</p>
+                    <div class="profile-details">
+                        <div id="display-role-tier" class="role-badge"><i class="fa-solid fa-crosshairs"></i> AR / Slayer • Tier 1</div>
+                        <p id="display-bio" class="bio-text">"Procurando duo para campeonato T1. Foco em L&D."</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Formulário de Edição Oculto por Padrão -->
-            <div id="profile-edit-form-container" class="hidden" style="margin-top: 15px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px;">
+            <!-- FORMULÁRIO DE EDIÇÃO DE PERFIL -->
+            <div id="profile-edit-form-container" class="edit-profile-box hidden">
+                <h4><i class="fa-solid fa-pen-to-square"></i> Editar Seu Perfil</h4>
                 <form id="profile-form">
-                    <div class="input-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 12px;">Nickname / Tag no Jogo</label>
-                        <input type="text" id="profile-nickname" required style="width: 100%; padding: 6px;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nickname no Jogo</label>
+                            <input type="text" id="profile-nickname" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Função Principal</label>
+                            <select id="profile-role">
+                                <option value="AR / Slayer">AR / Slayer</option>
+                                <option value="Sniper Elite">Sniper Elite</option>
+                                <option value="SMG / Entry Killer">SMG / Entry Killer</option>
+                                <option value="Suporte / IGL">Suporte / IGL</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="input-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 12px;">Função Principal</label>
-                        <select id="profile-role" style="width: 100%; padding: 6px; background: #222; color: #fff;">
-                            <option value="AR / Slayer">AR / Slayer</option>
-                            <option value="Sniper">Sniper</option>
-                            <option value="SMG / Entry">SMG / Entry</option>
-                            <option value="Suporte / IGL">Suporte / IGL</option>
-                        </select>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Tier Competitivo</label>
+                            <select id="profile-tier">
+                                <option value="T1 (Profissional)">T1 (Profissional)</option>
+                                <option value="T2 (Semi-Pro)">T2 (Semi-Pro)</option>
+                                <option value="T3 (Amador)">T3 (Amador)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>URL da Foto do Avatar</label>
+                            <input type="url" id="profile-avatar" placeholder="https://...">
+                        </div>
                     </div>
-                    <div class="input-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 12px;">Tier Competitivo</label>
-                        <select id="profile-tier" style="width: 100%; padding: 6px; background: #222; color: #fff;">
-                            <option value="T1 (Profissional)">T1 (Profissional)</option>
-                            <option value="T2 (Semi-Pro)">T2 (Semi-Pro)</option>
-                            <option value="T3 (Amador)">T3 (Amador)</option>
-                        </select>
+                    <div class="form-group">
+                        <label>Biografia / Status</label>
+                        <textarea id="profile-bio" rows="2"></textarea>
                     </div>
-                    <div class="input-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 12px;">URL da Foto de Perfil</label>
-                        <input type="url" id="profile-avatar" style="width: 100%; padding: 6px;">
-                    </div>
-                    <div class="input-group" style="margin-bottom: 12px;">
-                        <label style="font-size: 12px;">Biografia</label>
-                        <textarea id="profile-bio" rows="2" style="width: 100%; padding: 6px;"></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary btn-full">Salvar Alterações</button>
+                    <button type="submit" class="btn-primary width-100"><i class="fa-solid fa-floppy-disk"></i> Salvar Perfil</button>
                 </form>
             </div>
+
+            <div class="profile-tabs">
+                <button class="p-tab active" data-tab="user-posts"><i class="fa-solid fa-grip"></i> Publicações</button>
+                <button class="p-tab" data-tab="user-messages"><i class="fa-solid fa-comments"></i> Mensagens Diretas</button>
+            </div>
+
+            <div id="tab-content-user-posts" class="p-tab-content active">
+                <div id="user-own-posts-list" class="user-posts-grid"></div>
+            </div>
+
+            <div id="tab-content-user-messages" class="p-tab-content">
+                <div class="direct-chat-box">
+                    <div id="chat-messages-container" class="chat-messages">
+                        <p class="text-muted text-center">Inicie uma conversa direta.</p>
+                    </div>
+                    <div class="chat-input-row">
+                        <input type="text" id="direct-msg-input" placeholder="Escreva uma mensagem privada...">
+                        <button id="btn-send-direct" class="btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- 3. MODAL LANÇAR SCRIM / DESAFIO (FECHA AUTOMATICAMENTE APÓS ENVIO) -->
+    <!-- MODAL LANÇAR SCRIM -->
     <div id="match-modal" class="modal hidden">
-        <div class="modal-content glass-card" style="max-width: 480px;">
+        <div class="modal-content glass-card">
             <span class="close-match-modal">&times;</span>
-            <h2>Lançar Novo Desafio</h2>
+            <h2><i class="fa-solid fa-bullseye"></i> Lançar Novo Desafio</h2>
             
-            <form id="match-form" style="margin-top: 15px;">
+            <form id="match-form">
                 <input type="hidden" id="match-mode-selected">
-                
-                <div class="input-group" style="margin-bottom: 10px;">
-                    <label style="font-size: 12px;">Nome do Time / Tag</label>
-                    <input type="text" id="match-team-name" required placeholder="Ex: Alpha Squad" style="width: 100%; padding: 8px;">
+                <div class="form-group">
+                    <label>Nome do Time / Clã</label>
+                    <input type="text" id="match-team-name" required placeholder="Ex: Black Dragons eSports">
                 </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div>
-                        <label style="font-size: 12px;">Tier do Confronto</label>
-                        <select id="match-tier" style="width: 100%; padding: 8px; background: #222; color: #fff;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tier da Scrim</label>
+                        <select id="match-tier">
                             <option value="T1">Tier 1 (Pro)</option>
                             <option value="T2">Tier 2 (Semi-Pro)</option>
                             <option value="T3">Tier 3 (Amador)</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="font-size: 12px;">Horário Pretendido</label>
-                        <input type="time" id="match-time" required style="width: 100%; padding: 8px; background: #222; color: #fff;">
+                    <div class="form-group">
+                        <label>Horário do Confronto</label>
+                        <input type="time" id="match-time" required>
                     </div>
                 </div>
-
-                <div class="input-group" style="margin-bottom: 10px;">
-                    <label style="font-size: 12px;">WhatsApp de Contato</label>
-                    <input type="text" id="match-whatsapp" required placeholder="(00) 90000-0000" style="width: 100%; padding: 8px;">
+                <div class="form-group">
+                    <label>WhatsApp para Contato / Aceite</label>
+                    <input type="text" id="match-whatsapp" required placeholder="(49) 99999-0000">
                 </div>
-
-                <!-- Container Dinâmico da Escalação (Preenchido no JS) -->
-                <div id="players-input-container" style="margin: 15px 0;"></div>
-
-                <button type="submit" class="btn-primary btn-full">Publicar e Abrir Desafio</button>
+                <div id="players-input-container"></div>
+                <button type="submit" class="btn-primary width-100 btn-glow">
+                    <i class="fa-solid fa-rocket"></i> Publicar Desafio
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- 4. MODAL PAINEL ADMINISTRADOR -->
-    <div id="admin-modal" class="modal hidden">
-        <div class="modal-content glass-card" style="max-width: 600px;">
-            <span class="close-modal-admin">&times;</span>
-            <h2 style="color: #ff0055;"><i class="fa-solid fa-shield-halved"></i> Painel de Administração</h2>
-            <p style="font-size: 13px; color: #aaa; margin-bottom: 15px;">Gerenciamento de todas as scrims e desafios do sistema:</p>
-            
-            <div id="admin-schedules-list">
-                <!-- Dados carregados via script.js -->
-            </div>
-        </div>
-    </div>
-
-    <!-- SDKs do Firebase (Versão Compatível 8.x.x) -->
+    <!-- FIREBASE SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-    <!-- Biblioteca de Partículas (Opcional) -->
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-
-    <!-- Script Principal -->
     <script src="script.js"></script>
 </body>
 </html>
