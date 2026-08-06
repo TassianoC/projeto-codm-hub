@@ -36,6 +36,9 @@
             <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
                 <i class="fa-solid fa-moon"></i>
             </button>
+            <button id="btn-profile" class="btn-outline hidden">
+                <i class="fa-solid fa-id-card"></i> Meu Perfil
+            </button>
             <button id="btn-login" class="btn-primary">
                 <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
             </button>
@@ -85,7 +88,7 @@
                 <div class="glass-card">
                     <i class="fa-solid fa-stopwatch rule-icon"></i>
                     <h3>Tempo & Tolerância</h3>
-                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. Aausência resulta em W.O. automático na rodada.</p>
+                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. A ausência resulta em W.O. automático na rodada.</p>
                 </div>
                 <div class="glass-card">
                     <i class="fa-solid fa-camera rule-icon"></i>
@@ -103,19 +106,19 @@
                     <div class="mode-badge">DUELO</div>
                     <h3>1v1 Sniper / Gunfight</h3>
                     <p>Modo puramente mecânico. Teste sua precisão, movimentação e tempo de reação no confronto direto.</p>
-                    <button class="btn-outline btn-full">Inscrever-se 1v1</button>
+                    <button class="btn-outline btn-full btn-match" data-mode="1v1 Sniper">Inscrever-se 1v1</button>
                 </div>
                 <div class="mode-card">
                     <div class="mode-badge">DUO</div>
                     <h3>2v2 Buscar & Destruir</h3>
                     <p>Sincronia e tática em dupla. Mapas reduzidos e rodadas rápidas sem respawn.</p>
-                    <button class="btn-outline btn-full">Inscrever Dupla</button>
+                    <button class="btn-outline btn-full btn-match" data-mode="2v2 Buscar & Destruir">Inscrever Dupla</button>
                 </div>
                 <div class="mode-card">
                     <div class="mode-badge highlight-bg">SQUAD</div>
                     <h3>5v5 Competitive Series</h3>
                     <p>O formato oficial do CODM World Championship. Rotação de Hardpoint, Search & Destroy e Control.</p>
-                    <button class="btn-primary btn-full">Inscrever Squad</button>
+                    <button class="btn-primary btn-full btn-match" data-mode="5v5 Squad Competitive">Inscrever Squad</button>
                 </div>
             </div>
         </section>
@@ -158,7 +161,7 @@
                     <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
                 </div>
                 <div id="posts-container" class="posts-list">
-                    <!-- Posts dinâmicos via Firebase -->
+                    <!-- Posts dinâmicos com curtidas via Firebase -->
                 </div>
             </div>
         </section>
@@ -181,6 +184,61 @@
                 <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
             </form>
             <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Perfil Editável do Jogador -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-profile-modal">&times;</span>
+            <h2><i class="fa-solid fa-user-gear"></i> Perfil do Atleta</h2>
+            <form id="profile-form">
+                <div class="input-group">
+                    <label for="profile-nickname">Nick / Tag CODM</label>
+                    <input type="text" id="profile-nickname" required placeholder="Ex: Ghost_Viper#123">
+                </div>
+                <div class="input-group">
+                    <label for="profile-role">Função Principal</label>
+                    <select id="profile-role" style="background: rgba(0,0,0,0.3); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <option value="Sniper">Sniper</option>
+                        <option value="Rusher">Rusher / Entry</option>
+                        <option value="Support">Support / Anchor</option>
+                        <option value="IGL">IGL (Capitão)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="profile-bio">Biografia / Descrição</label>
+                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, time atual, etc.">
+                </div>
+                <div class="input-group">
+                    <label for="profile-avatar">URL Foto de Perfil (Avatar)</label>
+                    <input type="url" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Salvar Perfil</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Inscrição em Partida -->
+    <div id="match-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-match-modal">&times;</span>
+            <h2><i class="fa-solid fa-crosshair"></i> Inscrever em Partida</h2>
+            <form id="match-form">
+                <div class="input-group">
+                    <label>Modo Escolhido</label>
+                    <input type="text" id="match-mode-selected" readonly style="color: var(--primary-neon); font-weight: bold;">
+                </div>
+                <div class="input-group">
+                    <label for="match-team-name">Nome do Time / Nick do Duo/Squad</label>
+                    <input type="text" id="match-team-name" required placeholder="Ex: Clan Alpha / Viper & Ghost">
+                </div>
+                <div class="input-group">
+                    <label for="match-whatsapp">WhatsApp para Contato/Sala</label>
+                    <input type="tel" id="match-whatsapp" required placeholder="(00) 90000-0000">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Confirmar Inscrição</button>
+            </form>
         </div>
     </div>
 
