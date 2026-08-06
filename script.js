@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica Principal e Administração Suprema
+   VIKING eSports Hub - Lógica Principal e Administração Suprema
    ========================================================================== */
 
 const firebaseConfig = {
@@ -24,10 +24,10 @@ let isSignUpMode = false;
 let isAdmin = false;
 
 const mockLeaderboard = [
-    { rank: 1, name: "Viper_CODM", kd: "3.42", wins: 320, points: 2850 },
+    { rank: 1, name: "Viking_Viper", kd: "3.42", wins: 320, points: 2850 },
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
-    { rank: 3, name: "Ghost_Reaper", kd: "2.75", wins: 245, points: 2150 },
-    { rank: 4, name: "Shadow_Clan", kd: "2.50", wins: 210, points: 1980 },
+    { rank: 3, name: "Valhalla_Ghost", kd: "2.75", wins: 245, points: 2150 },
+    { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 210, points: 1980 },
     { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
 ];
 
@@ -132,7 +132,7 @@ function setupEventListeners() {
         toggleAuthMode.addEventListener('click', (e) => {
             e.preventDefault();
             isSignUpMode = !isSignUpMode;
-            document.getElementById('modal-title').innerText = isSignUpMode ? 'Cadastrar no CODM Hub' : 'Acessar CODM Hub';
+            document.getElementById('modal-title').innerText = isSignUpMode ? 'Cadastrar no Viking Hub' : 'Acessar Viking Hub';
             document.getElementById('auth-submit-btn').innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
             toggleAuthMode.innerText = isSignUpMode ? 'Já tem conta? Entre aqui' : 'Cadastre-se';
         });
@@ -220,7 +220,7 @@ function setupEventListeners() {
 }
 
 /* ==========================================================================
-   Perfil do Jogador
+   Perfil do Jogador / Guerreiro
    ========================================================================== */
 function loadUserProfileData() {
     if (!currentUser || !db) return;
@@ -535,7 +535,6 @@ function handleMatchSubscription(e) {
    FUNCIONALIDADES DA ABA DE ADMINISTRAÇÃO SUPREMA
    ========================================================================== */
 
-// 1. Carregar e Gerenciar Usuários (Banir, Excluir, Promover)
 function loadAdminUsersList() {
     const container = document.getElementById('admin-users-list');
     if (!container || !db) return;
@@ -615,7 +614,6 @@ function adminDeleteUser(userId) {
     }
 }
 
-// 2. Moderação do Feed Global
 function loadAdminPostsList() {
     const container = document.getElementById('admin-posts-list');
     if (!container || !db) return;
@@ -655,7 +653,6 @@ function adminDeletePost(postId) {
     }
 }
 
-// 3. Gestão de Inscrições em Partidas
 function loadAdminMatchesList() {
     const container = document.getElementById('admin-matches-list');
     if (!container || !db) return;
@@ -696,7 +693,6 @@ function adminDeleteMatch(matchId) {
     }
 }
 
-// 4. Gestão de Leaderboard
 function handleAdminStatUpdate(e) {
     e.preventDefault();
     const playerName = document.getElementById('admin-player-name').value;
