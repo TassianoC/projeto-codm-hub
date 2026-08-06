@@ -732,3 +732,156 @@ function listenFeedUpdates() {
         });
     });
 }
+// CONFIGURAÇÃO FIREBASE
+const firebaseConfig = {
+    apiKey: "Sua_API_Key_Firebase",
+    authDomain: "codm-esports-hub.firebaseapp.com",
+    projectId: "codm-esports-hub",
+    storageBucket: "codm-esports-hub.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let soundEnabled = true;
+
+// EFEITOS SONOROS DE TIRO COM WEB AUDIO API
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playGunshotSound() {
+    if (!soundEnabled) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    } catch(e){}
+}
+
+// ANIMAÇÃO DE TIROS NO CANVAS
+let bullets = [];
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('fx-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    window.addEventListener('click', (e) => {
+        playGunshotSound();
+        const flash = document.getElementById('muzzle-flash');
+        flash.style.opacity = '1';
+        setTimeout(() => flash.style.opacity = '0', 50);
+
+        for (let i = 0; i < 8; i++) {
+            bullets.push({
+                x: e.clientX, y: e.clientY,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
+                life: 1.0, color: i % 2 === 0 ? '#00f0ff' : '#ff0055'
+            });
+        }
+    });
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        bullets.forEach((b, index) => {
+            b.x += b.vx; b.y += b.vy; b.life -= 0.03;
+            ctx.beginPath(); ctx.arc(b.x, b.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = b.color; ctx.globalAlpha = Math.max(0, b.life); ctx.fill();
+            if (b.life <= 0) bullets.splice(index, 1);
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+    setupEventListeners();
+    listenAuth();
+    listenQueue();
+    listenFeed();
+    loadLeaderboard();
+});
+
+function setupEventListeners() {
+    document.getElementById('theme-toggle').addEventListener('click', () => document.body.classList.toggle('light-theme'));
+    document.getElementById('btn-login').addEventListener('click', () => currentUser ? auth.signOut() : showModal('auth-modal'));
+    document.querySelectorAll('.close-modal, .close-profile-modal, .close-match-modal').forEach(b => b.addEventListener('click', hideAllModals));
+    document.getElementById('btn-profile').addEventListener('click', () => showProfileModal(currentUser.uid));
+    document.getElementById('btn-post').addEventListener('click', handleCreatePost);
+}
+
+function listenAuth() {
+    auth.onAuthStateChanged(user => {
+        currentUser = user;
+        const btnAuthText = document.getElementById('auth-btn-text');
+        const btnProfile = document.getElementById('btn-profile');
+        if (user) {
+            btnAuthText.innerText = 'Sair';
+            btnProfile.style.display = 'inline-flex';
+            document.getElementById('nav-username').innerText = user.displayName || user.email.split('@')[0];
+        } else {
+            btnAuthText.innerText = 'Entrar';
+            btnProfile.style.display = 'none';
+        }
+    });
+}
+
+function showProfileModal(uid) {
+    db.collection('users').doc(uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('display-nickname').innerText = `@${data.nickname}`;
+            document.getElementById('profile-likes-count').innerText = data.likes || 0;
+            showModal('profile-modal');
+        }
+    });
+}
+
+function handleCreatePost() {
+    const input = document.getElementById('post-input');
+    if (!input.value.trim() || !currentUser) return;
+    db.collection('posts').add({
+        uid: currentUser.uid,
+        author: currentUser.displayName || 'Operador',
+        text: input.value.trim(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => input.value = '');
+}
+
+function listenFeed() {
+    db.collection('posts').orderBy('createdAt', 'desc').limit(20).onSnapshot(s => {
+        const container = document.getElementById('posts-container');
+        container.innerHTML = '';
+        s.forEach(doc => {
+            const p = doc.data();
+            container.innerHTML += `<div class="post-card"><strong>@${p.author}</strong><p>${p.text}</p></div>`;
+        });
+    });
+}
+
+function listenQueue() {
+    db.collection('matches').orderBy('createdAt', 'desc').onSnapshot(s => {
+        const container = document.getElementById('schedule-queue-container');
+        container.innerHTML = '';
+        s.forEach(doc => {
+            const m = doc.data();
+            container.innerHTML += `<div class="match-card glass-card"><h3>${m.teamName}</h3><p>${m.mode} • ${m.time}</p></div>`;
+        });
+    });
+}
+
+function loadLeaderboard() {
+    const body = document.getElementById('leaderboard-body');
+    body.innerHTML = `<tr><td>#1</td><td><strong>LOBARK eSports</strong></td><td>3.42</td><td>142</td><td>2850</td></tr>`;
+}
+
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); }
