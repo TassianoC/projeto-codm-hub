@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CSS Principal (Apontando para style.css) -->
+    <!-- CSS Principal -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-theme">
@@ -29,15 +29,12 @@
             <a href="#rules">Regras</a>
             <a href="#modes">Modos</a>
             <a href="#leaderboard">Ranking</a>
-            <a href="#trophies">Troféus</a>
             <a href="#feed">Comunidade</a>
+            <a href="#profile-section" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
         </nav>
         <div class="nav-actions">
             <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
                 <i class="fa-solid fa-moon"></i>
-            </button>
-            <button id="btn-profile" class="btn-outline hidden">
-                <i class="fa-solid fa-id-card"></i> Perfil
             </button>
             <button id="btn-login" class="btn-primary">
                 <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
@@ -88,6 +85,52 @@
                     <a href="#rules" class="btn-outline btn-large">
                         <i class="fa-solid fa-scroll"></i> Ver Regras
                     </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Perfil Completo do Jogador (Aba Exclusiva) -->
+        <section id="profile-section" class="container-section profile-page hidden">
+            <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Atleta</span></h2>
+            
+            <div class="profile-layout">
+                <!-- Cartão Lateral: Dados de Perfil -->
+                <div class="glass-card profile-sidebar">
+                    <div class="avatar-container">
+                        <img id="user-avatar-preview" src="https://via.placeholder.com/150/00f0ff/000000?text=CODM" alt="Avatar Atleta">
+                    </div>
+                    <h3 id="display-nickname">Seu Nickname</h3>
+                    <span class="role-badge" id="display-role">Sniper</span>
+                    <p id="display-bio" class="user-bio">Sua biografia aparecerá aqui...</p>
+                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top">
+                        <i class="fa-solid fa-user-pen"></i> Editar Perfil
+                    </button>
+                </div>
+
+                <!-- Conteúdo Principal da Aba de Perfil -->
+                <div class="profile-main-content">
+                    <!-- Gerenciador de Conquistas -->
+                    <div class="glass-card margin-bottom-card">
+                        <div class="card-header-flex">
+                            <h3><i class="fa-solid fa-trophy highlight"></i> Minhas Conquistas</h3>
+                            <button id="btn-add-achievement" class="btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar Conquista</button>
+                        </div>
+                        <div id="user-achievements-grid" class="user-trophy-grid">
+                            <!-- Conquistas carregadas via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Feed Exclusivo de Publicações do Jogador -->
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-rss highlight"></i> Minhas Publicações</h3>
+                        <div class="post-creator margin-top">
+                            <textarea id="user-post-input" placeholder="O que você está aprontando no CODM hoje?"></textarea>
+                            <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar no Meu Feed</button>
+                        </div>
+                        <div id="user-posts-list" class="posts-list margin-top">
+                            <!-- Posts pessoais carregados via JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -154,21 +197,13 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body">
-                        <!-- Preenchido via JavaScript -->
+                        <!-- Preenchido via JS -->
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Seção Galeria de Troféus -->
-        <section id="trophies" class="container-section">
-            <h2 class="section-title"><i class="fa-solid fa-award"></i> Galeria de <span class="highlight">Conquistas</span></h2>
-            <div class="trophy-grid" id="trophy-container">
-                <!-- Preenchido via JavaScript -->
-            </div>
-        </section>
-
-        <!-- Seção Feed da Comunidade -->
+        <!-- Seção Feed Global da Comunidade -->
         <section id="feed" class="container-section">
             <h2 class="section-title"><i class="fa-solid fa-comments"></i> Feed da <span class="highlight">Comunidade</span></h2>
             <div class="glass-card feed-box">
@@ -183,31 +218,11 @@
         </section>
     </main>
 
-    <!-- Modal de Autenticação / Login -->
-    <div id="auth-modal" class="modal hidden">
-        <div class="modal-content glass-card">
-            <span class="close-modal">&times;</span>
-            <h2 id="modal-title">Acessar CODM Hub</h2>
-            <form id="auth-form">
-                <div class="input-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" required placeholder="seu@email.com">
-                </div>
-                <div class="input-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" required placeholder="••••••••">
-                </div>
-                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
-            </form>
-            <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
-        </div>
-    </div>
-
-    <!-- Modal de Perfil Editável do Jogador -->
+    <!-- Modal de Edição de Perfil -->
     <div id="profile-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <span class="close-profile-modal close-modal-btn">&times;</span>
-            <h2><i class="fa-solid fa-user-gear"></i> Perfil do Atleta</h2>
+            <h2><i class="fa-solid fa-user-gear"></i> Editar Perfil</h2>
             <form id="profile-form">
                 <div class="input-group">
                     <label for="profile-nickname">Nick / Tag CODM</label>
@@ -224,7 +239,7 @@
                 </div>
                 <div class="input-group">
                     <label for="profile-bio">Biografia / Descrição</label>
-                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, time atual, etc.">
+                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, time atual...">
                 </div>
                 <div class="input-group">
                     <label for="profile-avatar">URL Foto de Perfil (Avatar)</label>
@@ -232,6 +247,55 @@
                 </div>
                 <button type="submit" class="btn-primary btn-full">Salvar Perfil</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Adicionar Conquista -->
+    <div id="achievement-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-achievement-modal close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-award"></i> Adicionar Conquista</h2>
+            <form id="achievement-form">
+                <div class="input-group">
+                    <label for="ach-title">Título da Conquista</label>
+                    <input type="text" id="ach-title" required placeholder="Ex: MVP da Liga 5v5">
+                </div>
+                <div class="input-group">
+                    <label for="ach-desc">Descrição / Detalhes</label>
+                    <input type="text" id="ach-desc" required placeholder="Ex: Vencedor do torneio semanal sem derrotas">
+                </div>
+                <div class="input-group">
+                    <label for="ach-icon">Ícone</label>
+                    <select id="ach-icon" class="custom-select">
+                        <option value="fa-crown">Coroa (Campeão)</option>
+                        <option value="fa-crosshair">Mira (Sniper/Duelo)</option>
+                        <option value="fa-medal">Medalha</option>
+                        <option value="fa-star">Estrela</option>
+                        <option value="fa-skull">Caveira (Most Kills)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Adicionar Conquista</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Autenticação -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Acessar CODM Hub</h2>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required placeholder="seu@email.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+            </form>
+            <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
         </div>
     </div>
 
@@ -269,9 +333,7 @@
             </div>
             <div class="tab-content active" id="users-tab">
                 <h3>Gerenciar Atletas</h3>
-                <div id="admin-users-list">
-                    <!-- Lista de usuários carregada via JS -->
-                </div>
+                <div id="admin-users-list"></div>
             </div>
             <div class="tab-content" id="stats-tab">
                 <h3>Atualizar Placar Global</h3>
@@ -295,7 +357,7 @@
         <p>&copy; 2026 CODM eSports Hub. Todos os direitos reservados.</p>
     </footer>
 
-    <!-- Scripts CDN (Particles.js & Firebase) -->
+    <!-- Scripts CDN -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
