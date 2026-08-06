@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIKING eSports Hub - God Mode</title>
+    <title>VIKING eSports Hub - Sistema de Conta & God Mode</title>
     <!-- Fontes & Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -30,8 +30,6 @@
             --gold-glow: rgba(212, 175, 55, 0.22);
             --gold-border: rgba(212, 175, 55, 0.35);
             --danger-red: #dc2626;
-            
-            --grad-gold: linear-gradient(135deg, #f3e5ab 0%, #d4af37 50%, #aa7c11 100%);
             
             --radius-sm: 6px;
             --radius-md: 12px;
@@ -72,29 +70,57 @@
 
         /* Botões */
         .btn-primary {
-            background: #ffffff; color: #000000; padding: 8px 20px;
+            background: #ffffff; color: #000000; padding: 8px 18px;
             border-radius: var(--radius-sm); font-weight: 800; transition: var(--transition-fast);
-            border: 1px solid #ffffff; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            border: 1px solid #ffffff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;
         }
         .btn-primary:hover { background: var(--gold-primary); border-color: var(--gold-primary); box-shadow: 0 0 20px var(--gold-glow); }
-        .btn-secondary { background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); border: 1px solid var(--gold-border); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700; }
+        .btn-secondary { background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); border: 1px solid var(--gold-border); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 12px; }
         .btn-secondary:hover { background: var(--gold-primary); color: #000000; }
-        .btn-danger { background: rgba(220, 38, 38, 0.15); color: var(--danger-red); border: 1px solid rgba(220, 38, 38, 0.4); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700; }
+        .btn-danger { background: rgba(220, 38, 38, 0.15); color: var(--danger-red); border: 1px solid rgba(220, 38, 38, 0.4); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 12px; }
         .btn-danger:hover { background: var(--danger-red); color: #ffffff; }
-        .btn-exit-god { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid var(--border-card); padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 700; transition: var(--transition-fast); }
-        .btn-exit-god:hover { background: rgba(220, 38, 38, 0.2); color: var(--danger-red); border-color: var(--danger-red); }
+        .btn-outline { background: transparent; color: #ffffff; border: 1px solid var(--border-card); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 600; font-size: 12px; }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.1); border-color: #ffffff; }
         .btn-sm { padding: 5px 10px; font-size: 12px; }
         .btn-full { width: 100%; }
 
-        /* Demo Header */
-        .demo-navbar {
-            height: 70px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border-card); background: rgba(0, 0, 0, 0.9);
+        /* ==========================================================================
+           2. BARRA DE NAVEGAÇÃO SUPERIOR & CONTROLES DA CONTA
+           ========================================================================== */
+        .app-navbar {
+            height: 70px; padding: 0 4%; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-card); background: rgba(0, 0, 0, 0.95);
+            position: sticky; top: 0; z-index: 100;
         }
-        .demo-content { padding: 50px 5%; text-align: center; }
+
+        .brand-logo {
+            font-family: var(--font-heading); font-weight: 900; font-size: 18px; color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .brand-logo span { color: var(--gold-primary); }
+
+        .account-bar {
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .user-pill {
+            display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-card); padding: 6px 14px; border-radius: 50px; font-size: 13px;
+        }
+
+        .user-pill i { color: var(--gold-primary); }
+
+        /* MODO ATLETA (CONTEÚDO DO SITE PARA JOGADORES) */
+        .player-dashboard {
+            max-width: 1100px; margin: 40px auto; padding: 0 20px;
+        }
+
+        .player-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 25px;
+        }
 
         /* ==========================================================================
-           2. ESTILOS PAINEL GOD MODE EXCLUSIVO
+           3. ESTILOS PAINEL GOD MODE EXCLUSIVO
            ========================================================================== */
         .btn-god-trigger {
             position: fixed;
@@ -129,18 +155,18 @@
         }
 
         .modal-content { width: 90%; max-width: 900px; position: relative; padding: 35px; border-color: var(--border-card); max-height: 85vh; overflow-y: auto; }
-        .close-modal-btn { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: var(--text-muted); transition: var(--transition-fast); }
-        .close-modal-btn:hover { color: var(--gold-primary); }
-
+        
         .god-card {
             border: 1px solid var(--gold-primary) !important;
             box-shadow: 0 0 40px var(--gold-glow), inset 0 0 15px rgba(212, 175, 55, 0.05) !important;
         }
 
-        .god-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-card); position: relative; }
-        .god-header h2 { font-size: 24px; color: #ffffff; margin-top: 6px; }
+        .god-top-actions {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+        }
 
-        .god-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .god-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-card); }
+        .god-header h2 { font-size: 24px; color: #ffffff; margin-top: 6px; }
 
         .god-badge {
             display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 800;
@@ -190,7 +216,6 @@
         .status-banned { background: rgba(220, 38, 38, 0.2); color: var(--danger-red); border: 1px solid var(--danger-red); }
 
         .admin-actions-flex { display: flex; gap: 6px; align-items: center; }
-
         .admin-feed-list { display: flex; flex-direction: column; gap: 10px; }
         .admin-feed-item { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; display: flex; justify-content: space-between; align-items: center; }
 
@@ -205,40 +230,83 @@
 </head>
 <body>
 
-    <!-- NAVBAR DEMONSTRAÇÃO -->
-    <header class="demo-navbar">
-        <div style="font-family: var(--font-heading); font-weight: 900; color: #fff;">VIKING <span style="color: var(--gold-primary);">eSports</span></div>
-        <div id="userAccountDisplay" style="font-size: 14px; color: var(--text-secondary);"></div>
+    <!-- NAVBAR COM GESTÃO DE CONTA E MODO DE ACESSO -->
+    <header class="app-navbar">
+        <div class="brand-logo">
+            <i class="fas fa-shield-halved"></i> VIKING <span>eSports</span>
+        </div>
+
+        <div class="account-bar">
+            <!-- Indicador do usuário ativo -->
+            <div class="user-pill" id="userPillDisplay">
+                <i class="fas fa-user-circle"></i>
+                <span id="currentEmailText">fallk.codm@gmail.com</span>
+            </div>
+
+            <!-- Botão de Acesso Direto ao God Mode (Visível apenas para fallk.codm@gmail.com) -->
+            <button class="btn-secondary hidden" id="godNavBtn" onclick="toggleGodPanel()">
+                <i class="fas fa-crown"></i> Painel DEUS
+            </button>
+
+            <!-- Botão de Trocar de Conta -->
+            <button class="btn-outline" onclick="switchAccountPrompt()">
+                <i class="fas fa-arrows-rotate"></i> Trocar Conta
+            </button>
+
+            <!-- Botão de Sair -->
+            <button class="btn-danger btn-sm" onclick="logoutUser()">
+                <i class="fas fa-right-from-bracket"></i> Sair
+            </button>
+        </div>
     </header>
 
-    <!-- CONTEÚDO DEMO -->
-    <main class="demo-content">
-        <h1>VIKING HUB PLATFORM</h1>
-        <p style="color: var(--text-secondary); margin-top: 10px;">Modo de visualização normal da plataforma eSports.</p>
+    <!-- CONTEÚDO NORMAL DO SITE PARA ATLETAS/JOGADORES (INCLUINDO A SUA CONTA) -->
+    <main class="player-dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2>Área do Atleta / Feed Central</h2>
+                <p style="color: var(--text-secondary); font-size: 14px;">Você está acessando as funcionalidades normais de jogador da plataforma.</p>
+            </div>
+            <button class="btn-primary" onclick="createNewPostPrompt()"><i class="fas fa-pen-to-square"></i> Nova Publicação</button>
+        </div>
+
+        <div class="player-grid">
+            <div class="glass-card">
+                <h3><i class="fas fa-trophy" style="color: var(--gold-primary);"></i> Seus Torneios</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Você está inscrito na Liga Viking Call of Duty - 2026.</p>
+            </div>
+
+            <div class="glass-card">
+                <h3><i class="fas fa-chart-line" style="color: var(--gold-primary);"></i> Suas Estatísticas</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">K/D Ratio: 3.45 | Vitórias: 128 | Rank: Supremo</p>
+            </div>
+        </div>
     </main>
 
-    <!-- BOTÃO FLUTUANTE GOD MODE (INICIA OCULTO 'hidden') -->
+    <!-- BOTÃO FLUTUANTE GOD MODE (PARA ATIVAÇÃO RÁPIDA) -->
     <button class="btn-god-trigger hidden" id="btnGodTrigger" onclick="toggleGodPanel()">
         <i class="fas fa-crown"></i>
         <span>GOD MODE</span>
     </button>
 
-    <!-- PAINEL MODAL GOD MODE (INICIA OCULTO 'hidden') -->
+    <!-- PAINEL MODAL GOD MODE -->
     <div class="modal hidden" id="godAdminModal">
         <div class="modal-content glass-card god-card">
             
+            <!-- BARRA SUPERIOR DO MODO GOD (Sair do Modo God e Voltar para Jogador) -->
+            <div class="god-top-actions">
+                <button class="btn-outline" onclick="toggleGodPanel()">
+                    <i class="fas fa-arrow-left"></i> Sair do Modo DEUS (Voltar ao Site)
+                </button>
+                <span style="font-size: 12px; color: var(--text-muted);">SESSÃO DEUS ATIVA</span>
+            </div>
+
             <div class="god-header">
-                <div class="god-top-bar">
-                    <div class="god-badge">
-                        <span class="pulse-dot-gold"></span> SUPREME AUTHORITY
-                    </div>
-                    <!-- BOTÃO DE SAÍDA DO MODO GOD -->
-                    <button class="btn-exit-god" onclick="exitGodMode()">
-                        <i class="fas fa-sign-out-alt"></i> SAIR DO GOD MODE
-                    </button>
+                <div class="god-badge">
+                    <span class="pulse-dot-gold"></span> SUPREME AUTHORITY
                 </div>
                 <h2><i class="fas fa-eye"></i> PAINEL SUPREMO DE MODERAÇÃO</h2>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Acesso exclusivo: fallk.codm@gmail.com</p>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Acesso irrestrito exclusivo para fallk.codm@gmail.com</p>
             </div>
 
             <!-- METRICAS -->
@@ -261,7 +329,7 @@
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO INTERNA -->
+            <!-- NAVEGAÇÃO INTERNA DO ADM -->
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="switchAdminTab('usersTab', event)"><i class="fas fa-users-cog"></i> Controle de Jogadores</button>
                 <button class="tab-btn" onclick="switchAdminTab('feedTab', event)"><i class="fas fa-stream"></i> Moderação do Feed</button>
@@ -326,21 +394,23 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE SEGURANÇA E LÓGICA -->
+    <!-- SCRIPT DE NAVEGAÇÃO, SESSÃO E DEUS MODE -->
     <script>
         /* ==========================================================================
-           LÓGICA E SEGURANÇA EXCLUSIVA DE ACESSO AO GOD MODE
+           1. CONTROLE DE AUTENTICAÇÃO E PERMISSÕES
            ========================================================================== */
 
         const SUPREME_GOD_EMAIL = "fallk.codm@gmail.com";
 
-        let currentUser = {
+        // Recupera o usuário logado do LocalStorage ou define a sua conta como padrão
+        let currentUser = JSON.parse(localStorage.getItem('viking_active_user')) || {
             email: "fallk.codm@gmail.com",
-            name: "Tassiano"
+            name: "Tassiano (Fallk)"
         };
 
+        // Lista de usuários simulados
         let usersDatabase = [
-            { id: "001", name: "Tassiano (Viking)", role: "GOD_ADM", status: "Active" },
+            { id: "001", name: "Fallk (Viking)", role: "GOD_ADM", status: "Active" },
             { id: "002", name: "Thor_eSports", role: "Player", status: "Active" },
             { id: "003", name: "Loki_Cheater", role: "Player", status: "Banned" },
             { id: "004", name: "Odin_Master", role: "Admin", status: "Active" }
@@ -355,34 +425,44 @@
             return currentUser && currentUser.email && currentUser.email.toLowerCase() === SUPREME_GOD_EMAIL.toLowerCase();
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const userDisplay = document.getElementById("userAccountDisplay");
-            if (userDisplay) userDisplay.innerHTML = `<i class="fas fa-user-circle"></i> Logado como: <strong>${currentUser.email}</strong>`;
-
+        /**
+         * Atualiza a Interface conforme a conta ativa
+         */
+        function updateUIState() {
+            const currentEmailText = document.getElementById("currentEmailText");
             const godBtn = document.getElementById("btnGodTrigger");
+            const godNavBtn = document.getElementById("godNavBtn");
             const godModal = document.getElementById("godAdminModal");
 
-            if (!isSupremeGod()) {
-                if (godBtn) godBtn.remove();
-                if (godModal) godModal.remove();
-            } else {
-                if (godBtn) godBtn.classList.remove("hidden");
+            if (currentEmailText) {
+                currentEmailText.textContent = currentUser ? currentUser.email : "Visitante";
             }
-        });
 
-        /**
-         * FUNÇÃO PARA SAIR DO GOD MODE E RETORNAR AO NAVEGAÇÃO PADRÃO DO SITE
-         */
-        function exitGodMode() {
-            const modal = document.getElementById('godAdminModal');
-            if (modal) {
-                modal.classList.add('hidden');
+            if (!isSupremeGod()) {
+                // Se NÃO for a sua conta suprema, esconde e bloqueia totalmente os botões de God Mode
+                if (godBtn) godBtn.classList.add("hidden");
+                if (godNavBtn) godNavBtn.classList.add("hidden");
+                if (godModal && !godModal.classList.contains("hidden")) godModal.classList.add("hidden");
+            } else {
+                // Se for a sua conta fallk.codm@gmail.com, exibe o acesso ao God Mode
+                if (godBtn) godBtn.classList.remove("hidden");
+                if (godNavBtn) godNavBtn.classList.remove("hidden");
             }
         }
 
+        // Inicializar aplicação
+        document.addEventListener("DOMContentLoaded", () => {
+            updateUIState();
+        });
+
+        /* ==========================================================================
+           2. AÇÕES DE CONTA (TROCAR CONTA, SAIR, SAIR DO MODO GOD)
+           ========================================================================== */
+
+        // Alternar Visibilidade do Painel God Mode (Entrar e Sair do Modo Deus)
         function toggleGodPanel() {
             if (!isSupremeGod()) {
-                alert("[ACESSO NEGADO]: Você não possui permissões de Divindade.");
+                alert("[ACESSO NEGADO]: Esta conta não possui privilégios de Divindade.");
                 return;
             }
 
@@ -395,6 +475,42 @@
                 }
             }
         }
+
+        // Trocar de Conta (Simulador para testes)
+        function switchAccountPrompt() {
+            const newEmail = prompt("Informe o e-mail da conta que deseja acessar:", "atleta@viking.com");
+            if (newEmail && newEmail.trim() !== "") {
+                currentUser = {
+                    email: newEmail.trim(),
+                    name: newEmail.split("@")[0]
+                };
+                localStorage.setItem('viking_active_user', JSON.stringify(currentUser));
+                updateUIState();
+                alert(`Sessão alterada para: ${currentUser.email}`);
+            }
+        }
+
+        // Sair da Conta (Logout)
+        function logoutUser() {
+            if (confirm("Deseja realmente sair da sua conta?")) {
+                currentUser = { email: "desconectado", name: "Convidado" };
+                localStorage.removeItem('viking_active_user');
+                updateUIState();
+                alert("Você saiu da sua conta.");
+            }
+        }
+
+        // Função de uso normal do site
+        function createNewPostPrompt() {
+            const content = prompt("Escreva sua mensagem para o Feed de Jogadores:");
+            if (content) {
+                alert("Publicação enviada com sucesso!");
+            }
+        }
+
+        /* ==========================================================================
+           3. LÓGICA DO MODO GOD
+           ========================================================================== */
 
         function switchAdminTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
