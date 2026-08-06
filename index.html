@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODM eSports Hub | Profile & Tournament Management</title>
+    <title>VIKING eSports Hub | CODM Competitive League</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,8 +21,9 @@
     <!-- Header / Navbar -->
     <header class="navbar">
         <div class="logo">
-            <i class="fa-solid fa-crosshair neon-icon"></i>
-            <span>CODM<span class="highlight">HUB</span></span>
+            <!-- Logo Reduzida / Ícone Viking -->
+            <img src="studio_20260730_195359_0000.png" alt="Viking Icon" class="logo-reduced">
+            <span>VIKING <span class="highlight">HUB</span></span>
         </div>
         <nav class="nav-links">
             <a href="#hero">Início</a>
@@ -53,12 +54,18 @@
             <div class="hero-glow hero-glow-2"></div>
             
             <div class="hero-content">
+                <!-- Sublogo Viking -->
+                <div class="hero-brand-container">
+                    <img src="studio_20260804_165644_0000.jpg" alt="Viking Sublogo" class="viking-sublogo">
+                </div>
+
                 <div class="hero-badge-container">
                     <span class="pulse-dot"></span>
-                    <span class="badge-neon">CODM COMPETITIVE LEAGUE 2026</span>
+                    <span class="badge-neon">VIKING COMPETITIVE LEAGUE 2026</span>
                 </div>
+                
                 <h1>DOMINE O <br><span class="text-gradient">CAMPO DE BATALHA</span></h1>
-                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, gestão de equipes e o ranking supremo dos melhores atletas de Call of Duty: Mobile.</p>
+                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, gestão de equipes e o ranking supremo dos atalaias e guerreiros do Call of Duty: Mobile.</p>
 
                 <div class="hero-stats">
                     <div class="stat-card">
@@ -91,12 +98,12 @@
 
         <!-- Seção de Perfil Completo do Jogador -->
         <section id="profile-section" class="container-section profile-page hidden">
-            <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Atleta</span></h2>
+            <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Guerreiro</span></h2>
             
             <div class="profile-layout">
                 <div class="glass-card profile-sidebar">
                     <div class="avatar-container">
-                        <img id="user-avatar-preview" src="https://via.placeholder.com/150/00f0ff/000000?text=CODM" alt="Avatar Atleta">
+                        <img id="user-avatar-preview" src="studio_20260730_195359_0000.png" alt="Avatar Atleta">
                     </div>
                     <h3 id="display-nickname">Seu Nickname</h3>
                     <span class="role-badge" id="display-role">Sniper</span>
@@ -182,7 +189,7 @@
                     <thead>
                         <tr>
                             <th>Posição</th>
-                            <th>Jogador / Lineup</th>
+                            <th>Guerreiro / Lineup</th>
                             <th>K/D</th>
                             <th>Vitórias</th>
                             <th>Pontos</th>
@@ -214,7 +221,7 @@
             <form id="profile-form">
                 <div class="input-group">
                     <label for="profile-nickname">Nick / Tag CODM</label>
-                    <input type="text" id="profile-nickname" required placeholder="Ex: Ghost_Viper#123">
+                    <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper#123">
                 </div>
                 <div class="input-group">
                     <label for="profile-role">Função Principal</label>
@@ -227,7 +234,7 @@
                 </div>
                 <div class="input-group">
                     <label for="profile-bio">Biografia / Descrição</label>
-                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, time atual...">
+                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, clan atual...">
                 </div>
                 <div class="input-group">
                     <label for="profile-avatar">URL Foto de Perfil (Avatar)</label>
@@ -246,7 +253,7 @@
             <form id="achievement-form">
                 <div class="input-group">
                     <label for="ach-title">Título da Conquista</label>
-                    <input type="text" id="ach-title" required placeholder="Ex: MVP da Liga 5v5">
+                    <input type="text" id="ach-title" required placeholder="Ex: MVP do Torneio Valhalla">
                 </div>
                 <div class="input-group">
                     <label for="ach-desc">Descrição / Detalhes</label>
@@ -271,7 +278,7 @@
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <span class="close-modal">&times;</span>
-            <h2 id="modal-title">Acessar CODM Hub</h2>
+            <h2 id="modal-title">Acessar Viking Hub</h2>
             <form id="auth-form">
                 <div class="input-group">
                     <label for="email">E-mail</label>
@@ -298,8 +305,8 @@
                     <input type="text" id="match-mode-selected" readonly style="color: var(--primary-neon); font-weight: bold;">
                 </div>
                 <div class="input-group">
-                    <label for="match-team-name">Nome do Time / Nick do Duo/Squad</label>
-                    <input type="text" id="match-team-name" required placeholder="Ex: Clan Alpha / Viper & Ghost">
+                    <label for="match-team-name">Nome do Clan / Nick do Duo/Squad</label>
+                    <input type="text" id="match-team-name" required placeholder="Ex: Viking Clan / Viper & Ghost">
                 </div>
                 <div class="input-group">
                     <label for="match-whatsapp">WhatsApp para Contato/Sala</label>
@@ -323,7 +330,7 @@
                 <button class="tab-btn" data-tab="stats-tab"><i class="fa-solid fa-trophy"></i> Leaderboard</button>
             </div>
 
-            <!-- Aba 1: Usuários (Banir, Excluir, Promover) -->
+            <!-- Aba 1: Usuários -->
             <div class="tab-content active" id="users-tab">
                 <h3>Gerenciar Atletas Registrados</h3>
                 <p class="text-muted margin-bottom-sm">Controle de banimento, exclusão e permissões de acesso do sistema.</p>
@@ -338,9 +345,7 @@
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-users-list">
-                            <!-- Preenchido via JS -->
-                        </tbody>
+                        <tbody id="admin-users-list"></tbody>
                     </table>
                 </div>
             </div>
@@ -349,9 +354,7 @@
             <div class="tab-content" id="posts-tab">
                 <h3>Moderação de Conteúdo do Feed</h3>
                 <p class="text-muted margin-bottom-sm">Exclua publicações impróprias, ofensivas ou violadoras das regras.</p>
-                <div id="admin-posts-list" class="admin-feed-list">
-                    <!-- Preenchido via JS -->
-                </div>
+                <div id="admin-posts-list" class="admin-feed-list"></div>
             </div>
 
             <!-- Aba 3: Inscrições em Partidas -->
@@ -368,9 +371,7 @@
                                 <th>Ação</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-matches-list">
-                            <!-- Preenchido via JS -->
-                        </tbody>
+                        <tbody id="admin-matches-list"></tbody>
                     </table>
                 </div>
             </div>
@@ -381,7 +382,7 @@
                 <form id="admin-update-stats">
                     <div class="input-group">
                         <label>Nome do Jogador / Time</label>
-                        <input type="text" id="admin-player-name" required placeholder="Ex: Viper_CODM">
+                        <input type="text" id="admin-player-name" required placeholder="Ex: Viking_Warrior">
                     </div>
                     <div class="input-group">
                         <label>Pontos Adicionais</label>
@@ -395,7 +396,11 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2026 CODM eSports Hub. Todos os direitos reservados.</p>
+        <!-- Logo Viking no Rodapé -->
+        <div style="margin-bottom: 12px;">
+            <img src="studio_20260730_195359_0000.png" alt="Viking Main Logo" style="height: 45px; filter: drop-shadow(0 0 10px rgba(0,240,255,0.4));">
+        </div>
+        <p>&copy; 2026 VIKING eSports Hub. Todos os direitos reservados.</p>
     </footer>
 
     <!-- Scripts CDN -->
