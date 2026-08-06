@@ -3,239 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODM Hub - Plataforma Competitiva</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <title>CODM eSports Hub | Profile & Tournament Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-theme">
 
-    <!-- Fundo de Partículas Dinâmicas (Canvas) -->
-    <canvas id="particles-canvas"></canvas>
+    <!-- Fundo de Partículas -->
+    <div id="particles-js"></div>
 
-    <!-- Barra de Navegação -->
+    <!-- Header / Navbar -->
     <header class="navbar">
-        <div class="logo">CODM <span>HUB</span></div>
-        <nav>
-            <button onclick="switchTab('profile-tab')">Meu Perfil & Feed</button>
-            <button onclick="switchTab('scrims-tab')">Scrims (T1/T2/T3)</button>
-            <button onclick="switchTab('x1-tab')">Desafios X1</button>
-            <button onclick="switchTab('ranking-tab')">Ranking & Pontuação</button>
-            <button onclick="switchTab('rules-tab')">Regras Oficiais</button>
-            <button id="admin-nav-btn" class="btn-admin hidden" onclick="switchTab('admin-tab')">Painel Admin</button>
+        <div class="logo">
+            <i class="fa-solid fa-crosshair neon-icon"></i>
+            <span>CODM<span class="highlight">HUB</span></span>
+        </div>
+        <nav class="nav-links">
+            <a href="#hero">Início</a>
+            <a href="#rules">Regras</a>
+            <a href="#modes">Modos</a>
+            <a href="#leaderboard">Ranking</a>
+            <a href="#trophies">Troféus</a>
+            <a href="#feed">Comunidade</a>
         </nav>
-        <div id="auth-controls">
-            <button id="open-auth-btn" onclick="openAuthModal()">Entrar / Registrar</button>
-            <div id="user-info" class="hidden">
-                <span id="user-name"></span>
-                <button onclick="logout()">Sair</button>
-            </div>
+        <div class="nav-actions">
+            <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button id="btn-profile" class="btn-outline hidden">
+                <i class="fa-solid fa-id-card"></i> Meu Perfil
+            </button>
+            <button id="btn-login" class="btn-primary">
+                <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
+            </button>
+            <button id="btn-admin" class="btn-secondary hidden">
+                <i class="fa-solid fa-shield-halved"></i> Admin
+            </button>
         </div>
     </header>
 
-    <!-- Modal de Autenticação (Google + Email/Senha) -->
-    <div id="auth-modal" class="modal hidden">
-        <div class="modal-content card">
-            <span class="close-btn" onclick="closeAuthModal()">&times;</span>
-            <h2>Acessar CODM Hub</h2>
-            <div class="auth-tabs">
-                <button class="btn-sub active" onclick="switchAuthMode('login')">Entrar</button>
-                <button class="btn-sub" onclick="switchAuthMode('register')">Criar Conta</button>
-            </div>
-            
-            <form id="email-auth-form" onsubmit="handleEmailAuth(event)">
-                <div class="form-group">
-                    <label>E-mail:</label>
-                    <input type="email" id="auth-email" required placeholder="seu@email.com">
-                </div>
-                <div class="form-group">
-                    <label>Senha:</label>
-                    <input type="password" id="auth-password" required placeholder="Sua senha secreta">
-                </div>
-                <button type="submit" id="auth-submit-btn" class="btn-primary">Entrar com E-mail</button>
-            </form>
-
-            <div class="divider">OU</div>
-            <button onclick="loginWithGoogle()" class="btn-google">Conectar com Google</button>
-        </div>
-    </div>
-
-    <main class="container">
-
-        <!-- 1. PERFIL EDITÁVEL COM FEED DE MÍDIA (FOTOS E VÍDEOS) -->
-        <section id="profile-tab" class="tab-content">
-            <div id="profile-guest-msg" class="card">
-                <h2>Área de Membros</h2>
-                <p>Faça login na plataforma para visualizar seu perfil customizável e interagir no feed de mídias.</p>
-                <button onclick="openAuthModal()" class="btn-primary">Fazer Login Agora</button>
-            </div>
-
-            <div id="profile-member-area" class="hidden">
-                <div class="profile-layout">
-                    <!-- Configurações do Perfil -->
-                    <div class="card">
-                        <h2>Meu Perfil Competitivo</h2>
-                        <form onsubmit="saveProfile(event)">
-                            <div class="form-group">
-                                <label>IGN (Nickname no Jogo):</label>
-                                <input type="text" id="p-ign" required placeholder="Ex: Ghost_CODM">
-                            </div>
-                            <div class="form-group">
-                                <label>Função Principal (Role):</label>
-                                <select id="p-role">
-                                    <option value="IGL">IGL (In-Game Leader)</option>
-                                    <option value="Main Sniper">Main Sniper</option>
-                                    <option value="Entry Fragger">Entry Fragger</option>
-                                    <option value="Support">Suporte / Âncora</option>
-                                    <option value="Slayer">Slayer</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Tier Competitivo:</label>
-                                <select id="p-tier">
-                                    <option value="T1">Tier 1 (Pro)</option>
-                                    <option value="T2">Tier 2 (Semi-Pro)</option>
-                                    <option value="T3">Tier 3 (Amador)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Arma / Loadout Principal:</label>
-                                <input type="text" id="p-loadout" placeholder="Ex: DL Q33 / Kilo 141">
-                            </div>
-                            <button type="submit" class="btn-primary">Salvar Perfil</button>
-                        </form>
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content">
+                <span class="badge-neon">CODM COMPETITIVE HUB</span>
+                <h1>DOMINE O <span class="text-gradient">CAMPO DE BATALHA</span></h1>
+                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, regras oficiais e gestão de perfis eSports.</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <h3 class="counter" data-target="1450">0</h3>
+                        <p>Vitórias Totais</p>
                     </div>
-
-                    <!-- Feed de Mídia (Imagens e Vídeos) -->
-                    <div class="feed-section">
-                        <div class="card">
-                            <h3>Publicar no Feed de Mídia</h3>
-                            <form onsubmit="postToFeed(event)">
-                                <div class="form-group">
-                                    <label>URL da Imagem ou Vídeo (YouTube, Imgur, MP4):</label>
-                                    <input type="url" id="feed-media-url" required placeholder="https://...">
-                                </div>
-                                <div class="form-group">
-                                    <label>Legenda / Descrição da Jogada:</label>
-                                    <input type="text" id="feed-caption" required placeholder="Ex: Ace clutch na final da scrim!">
-                                </div>
-                                <button type="submit" class="btn-primary">Publicar Mídia</button>
-                            </form>
-                        </div>
-
-                        <h2>Feed da Comunidade</h2>
-                        <div id="feed-list"></div>
+                    <div class="stat-card">
+                        <h3 class="counter" data-target="3820">0</h3>
+                        <p>Kills em Torneios</p>
                     </div>
+                    <div class="stat-card">
+                        <h3 class="counter" data-target="48">0</h3>
+                        <p>Troféus Obtidos</p>
+                    </div>
+                </div>
+                <div class="hero-cta">
+                    <a href="#modes" class="btn-primary btn-large">Entrar em Partida</a>
+                    <a href="#rules" class="btn-outline btn-large">Ver Regras</a>
                 </div>
             </div>
         </section>
 
-        <!-- 2. AGENDAMENTO DE SCRIMS (T1/T2/T3) -->
-        <section id="scrims-tab" class="tab-content hidden">
-            <div class="card">
-                <h2>Criar Agendamento de Scrim</h2>
-                <form onsubmit="createScrim(event)">
-                    <div class="form-group">
-                        <label>Nome / Lineup Host:</label>
-                        <input type="text" id="scrim-title" required placeholder="Ex: Treino T1 - Lineup Alpha">
-                    </div>
-                    <div class="form-group">
-                        <label>Tier:</label>
-                        <select id="scrim-tier">
-                            <option value="T1">Tier 1</option>
-                            <option value="T2">Tier 2</option>
-                            <option value="T3">Tier 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Modo de Jogo:</label>
-                        <select id="scrim-mode">
-                            <option value="Search & Destroy">Search & Destroy (S&D)</option>
-                            <option value="Hardpoint">Ponto Quente</option>
-                            <option value="Misto">Misto Competitivo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Horário:</label>
-                        <input type="time" id="scrim-time" required>
-                    </div>
-                    <button type="submit" class="btn-primary">Publicar Vaga de Scrim</button>
-                </form>
+        <!-- Seção de Regras Competitivas -->
+        <section id="rules" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-book-bookmark"></i> Regras <span class="highlight">Oficiais</span></h2>
+            <div class="rules-grid">
+                <div class="glass-card">
+                    <i class="fa-solid fa-ban rule-icon"></i>
+                    <h3>Itens Banidos</h3>
+                    <p>Armas de apoio sem precisão, operadores de escudo excessivo e pontuações de racha específicas são proibidas em ambiente competitivo.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-stopwatch rule-icon"></i>
+                    <h3>Tempo & Tolerância</h3>
+                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. A ausência resulta em W.O. automático na rodada.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-camera rule-icon"></i>
+                    <h3>Comprovação</h3>
+                    <p>Todos os capitães devem enviar a captura de tela (print) da pontuação final ao término de cada mapa disputado.</p>
+                </div>
             </div>
-
-            <h2>Scrims Disponíveis</h2>
-            <div id="scrims-list" class="grid"></div>
         </section>
 
-        <!-- 3. DESAFIOS X1 -->
-        <section id="x1-tab" class="tab-content hidden">
-            <div class="card">
-                <h2>Lançar Desafio X1</h2>
-                <form onsubmit="createX1(event)">
-                    <div class="form-group">
-                        <label>Mapa:</label>
-                        <input type="text" id="x1-map" required placeholder="Ex: Killhouse, Rust">
-                    </div>
-                    <div class="form-group">
-                        <label>Regras Específicas:</label>
-                        <input type="text" id="x1-rules" required placeholder="Ex: Apenas Sniper, Sem Habilidade de Operador">
-                    </div>
-                    <button type="submit" class="btn-primary">Criar Desafio X1</button>
-                </form>
+        <!-- Seção Modos de Jogo -->
+        <section id="modes" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-gamepad"></i> Modos de <span class="highlight">Confronto</span></h2>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <div class="mode-badge">DUELO</div>
+                    <h3>1v1 Sniper / Gunfight</h3>
+                    <p>Modo puramente mecânico. Teste sua precisão, movimentação e tempo de reação no confronto direto.</p>
+                    <button class="btn-outline btn-full btn-match" data-mode="1v1 Sniper">Inscrever-se 1v1</button>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-badge">DUO</div>
+                    <h3>2v2 Buscar & Destruir</h3>
+                    <p>Sincronia e tática em dupla. Mapas reduzidos e rodadas rápidas sem respawn.</p>
+                    <button class="btn-outline btn-full btn-match" data-mode="2v2 Buscar & Destruir">Inscrever Dupla</button>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-badge highlight-bg">SQUAD</div>
+                    <h3>5v5 Competitive Series</h3>
+                    <p>O formato oficial do CODM World Championship. Rotação de Hardpoint, Search & Destroy e Control.</p>
+                    <button class="btn-primary btn-full btn-match" data-mode="5v5 Squad Competitive">Inscrever Squad</button>
+                </div>
             </div>
-
-            <h2>Mural de Desafios X1</h2>
-            <div id="x1-list" class="grid"></div>
         </section>
 
-        <!-- 4. TABELA DE RANKING E PONTUAÇÃO -->
-        <section id="ranking-tab" class="tab-content hidden">
-            <div class="card">
-                <h2>Ranking e Sistema de Pontuação</h2>
-                <table class="data-table">
+        <!-- Seção Leaderboard / Ranking -->
+        <section id="leaderboard" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Leaderboard <span class="highlight">Competitivo</span></h2>
+            <div class="glass-card table-container">
+                <table class="leaderboard-table">
                     <thead>
                         <tr>
                             <th>Posição</th>
-                            <th>Jogador (IGN)</th>
-                            <th>Tier</th>
-                            <th>Role</th>
+                            <th>Jogador / Lineup</th>
+                            <th>K/D</th>
+                            <th>Vitórias</th>
                             <th>Pontos</th>
                         </tr>
                     </thead>
-                    <tbody id="ranking-body"></tbody>
+                    <tbody id="leaderboard-body">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- 5. REGRAS OFICIAIS -->
-        <section id="rules-tab" class="tab-content hidden">
-            <div class="card">
-                <h2>Regras Oficiais do Competitivo</h2>
-                <ul class="rules-list">
-                    <li><strong>Armas e Equipamentos Proibidos:</strong> Lançadores (SMRS/FHJ), C4 e Mina de Proximidade.</li>
-                    <li><strong>Scorestreaks Restritos:</strong> VTOL, Napalm, Helicóptero de Ataque e Chopper Gunner.</li>
-                    <li><strong>Limites em S&D:</strong> Permitido apenas 1 Main Sniper ativo por equipe simultaneamente.</li>
-                    <li><strong>Fair Play:</strong> Qualquer forma de manipulação de resultado ou uso de trapaças resultará em banimento permanente do Hub.</li>
-                </ul>
+        <!-- Seção Galeria de Troféus -->
+        <section id="trophies" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-award"></i> Galeria de <span class="highlight">Conquistas</span></h2>
+            <div class="trophy-grid" id="trophy-container">
+                <!-- Preenchido via JavaScript -->
             </div>
         </section>
 
-        <!-- 6. PAINEL ADMINISTRATIVO DE MODERAÇÃO -->
-        <section id="admin-tab" class="tab-content hidden">
-            <div class="card admin-card">
-                <h2>Painel Administrativo de Moderação</h2>
-                <p>Gerenciamento de salas ativas e moderação de conteúdo da comunidade.</p>
-                <div id="admin-scrims-list"></div>
-                <hr style="border-color: var(--border); margin: 1.5rem 0;">
-                <h3>Moderação do Feed</h3>
-                <div id="admin-feed-list"></div>
+        <!-- Seção Feed da Comunidade -->
+        <section id="feed" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-comments"></i> Feed da <span class="highlight">Comunidade</span></h2>
+            <div class="glass-card feed-box">
+                <div class="post-creator">
+                    <textarea id="post-input" placeholder="Compartilhe uma jogada, estratégia ou resultado de treino..."></textarea>
+                    <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
+                </div>
+                <div id="posts-container" class="posts-list">
+                    <!-- Posts dinâmicos com curtidas via Firebase -->
+                </div>
             </div>
         </section>
-
     </main>
 
-    <script src="app.js"></script>
+    <!-- Modal de Autenticação / Login -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Acessar CODM Hub</h2>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required placeholder="seu@email.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+            </form>
+            <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Perfil Editável do Jogador -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-profile-modal">&times;</span>
+            <h2><i class="fa-solid fa-user-gear"></i> Perfil do Atleta</h2>
+            <form id="profile-form">
+                <div class="input-group">
+                    <label for="profile-nickname">Nick / Tag CODM</label>
+                    <input type="text" id="profile-nickname" required placeholder="Ex: Ghost_Viper#123">
+                </div>
+                <div class="input-group">
+                    <label for="profile-role">Função Principal</label>
+                    <select id="profile-role" style="background: rgba(0,0,0,0.3); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <option value="Sniper">Sniper</option>
+                        <option value="Rusher">Rusher / Entry</option>
+                        <option value="Support">Support / Anchor</option>
+                        <option value="IGL">IGL (Capitão)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="profile-bio">Biografia / Descrição</label>
+                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, time atual, etc.">
+                </div>
+                <div class="input-group">
+                    <label for="profile-avatar">URL Foto de Perfil (Avatar)</label>
+                    <input type="url" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Salvar Perfil</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Inscrição em Partida -->
+    <div id="match-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-match-modal">&times;</span>
+            <h2><i class="fa-solid fa-crosshair"></i> Inscrever em Partida</h2>
+            <form id="match-form">
+                <div class="input-group">
+                    <label>Modo Escolhido</label>
+                    <input type="text" id="match-mode-selected" readonly style="color: var(--primary-neon); font-weight: bold;">
+                </div>
+                <div class="input-group">
+                    <label for="match-team-name">Nome do Time / Nick do Duo/Squad</label>
+                    <input type="text" id="match-team-name" required placeholder="Ex: Clan Alpha / Viper & Ghost">
+                </div>
+                <div class="input-group">
+                    <label for="match-whatsapp">WhatsApp para Contato/Sala</label>
+                    <input type="tel" id="match-whatsapp" required placeholder="(00) 90000-0000">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Confirmar Inscrição</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal do Painel de Administração -->
+    <div id="admin-modal" class="modal hidden">
+        <div class="modal-content glass-card modal-large">
+            <span class="close-modal-admin">&times;</span>
+            <h2><i class="fa-solid fa-user-shield"></i> Painel de Moderação & Gestão</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="users-tab">Usuários</button>
+                <button class="tab-btn" data-tab="stats-tab">Estatísticas do Torneio</button>
+            </div>
+            <div class="tab-content active" id="users-tab">
+                <h3>Gerenciar Atletas</h3>
+                <div id="admin-users-list">
+                    <!-- Lista de usuários carregada via JS -->
+                </div>
+            </div>
+            <div class="tab-content" id="stats-tab">
+                <h3>Atualizar Placar Global</h3>
+                <form id="admin-update-stats">
+                    <div class="input-group">
+                        <label>Nome do Jogador/Time</label>
+                        <input type="text" id="admin-player-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Pontos Adicionais</label>
+                        <input type="number" id="admin-player-points" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Atualizar Leaderboard</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CODM eSports Hub. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Scripts CDN (Particles.js & Firebase) -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Script Principal -->
+    <script src="script.js"></script>
 </body>
 </html>
