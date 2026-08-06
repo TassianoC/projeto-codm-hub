@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica Principal e Integrações Firebase
+   CODM eSports Hub - Lógica Principal e Administração Suprema
    ========================================================================== */
 
 const firebaseConfig = {
@@ -65,13 +65,11 @@ function initParticles() {
 function initCounters() {
     const counters = document.querySelectorAll('.counter');
     const speed = 150;
-
     counters.forEach(counter => {
         const updateCount = () => {
             const target = +counter.getAttribute('data-target');
             const count = +counter.innerText;
             const inc = target / speed;
-
             if (count < target) {
                 counter.innerText = Math.ceil(count + inc);
                 setTimeout(updateCount, 15);
@@ -86,7 +84,6 @@ function initCounters() {
 function renderLeaderboard(data) {
     const tbody = document.getElementById('leaderboard-body');
     if (!tbody) return;
-
     tbody.innerHTML = '';
     data.forEach((item) => {
         const rankClass = item.rank === 1 ? 'top-1' : item.rank === 2 ? 'top-2' : item.rank === 3 ? 'top-3' : '';
@@ -104,7 +101,7 @@ function renderLeaderboard(data) {
 }
 
 function setupEventListeners() {
-    // Alternar tema
+    // Alternar Tema
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -114,7 +111,7 @@ function setupEventListeners() {
         });
     }
 
-    // Auth Modal
+    // Modal de Login
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
@@ -144,7 +141,7 @@ function setupEventListeners() {
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
-    // Perfil Modais & Ações
+    // Modal Perfil
     const editProfileBtn = document.getElementById('btn-edit-profile-modal');
     const profileModal = document.getElementById('profile-modal');
     const closeProfile = document.querySelector('.close-profile-modal');
@@ -154,7 +151,7 @@ function setupEventListeners() {
     if (closeProfile) closeProfile.addEventListener('click', () => profileModal.classList.add('hidden'));
     if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
 
-    // Conquistas Modais & Ações
+    // Modal Conquistas
     const addAchBtn = document.getElementById('btn-add-achievement');
     const achModal = document.getElementById('achievement-modal');
     const closeAch = document.querySelector('.close-achievement-modal');
@@ -164,15 +161,14 @@ function setupEventListeners() {
     if (closeAch) closeAch.addEventListener('click', () => achModal.classList.add('hidden'));
     if (achForm) achForm.addEventListener('submit', handleAddAchievement);
 
-    // Publicação Pessoal
+    // Publicações
     const userPostBtn = document.getElementById('btn-user-post');
     if (userPostBtn) userPostBtn.addEventListener('click', handleNewUserPost);
 
-    // Publicação Global
     const globalPostBtn = document.getElementById('btn-post');
     if (globalPostBtn) globalPostBtn.addEventListener('click', handleNewGlobalPost);
 
-    // Inscrição em Partidas
+    // Inscrição em Partida
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
     const closeMatch = document.querySelector('.close-match-modal');
@@ -182,7 +178,7 @@ function setupEventListeners() {
         btn.addEventListener('click', (e) => {
             const mode = e.target.getAttribute('data-mode');
             if (!currentUser) {
-                alert('Faça login na sua conta para se inscrever!');
+                alert('Faça login para se inscrever!');
                 authModal.classList.remove('hidden');
                 return;
             }
@@ -194,12 +190,19 @@ function setupEventListeners() {
     if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // Painel Admin
+    // Modal Admin e Abas
     const adminBtn = document.getElementById('btn-admin');
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
 
-    if (adminBtn && adminModal) adminBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
+    if (adminBtn && adminModal) {
+        adminBtn.addEventListener('click', () => {
+            adminModal.classList.remove('hidden');
+            loadAdminUsersList();
+            loadAdminPostsList();
+            loadAdminMatchesList();
+        });
+    }
     if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -217,12 +220,11 @@ function setupEventListeners() {
 }
 
 /* ==========================================================================
-   Sincronização do Perfil do Jogador
+   Perfil do Jogador
    ========================================================================== */
 function loadUserProfileData() {
     if (!currentUser || !db) return;
 
-    // Carregar Informações Pessoais
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
@@ -235,10 +237,7 @@ function loadUserProfileData() {
         }
     });
 
-    // Carregar Conquistas do Usuário
     listenUserAchievements();
-
-    // Carregar Feed do Usuário
     listenUserFeed();
 }
 
@@ -262,16 +261,11 @@ function handleProfileSave(e) {
     e.preventDefault();
     if (!currentUser || !db) return;
 
-    const nickname = document.getElementById('profile-nickname').value;
-    const gameRole = document.getElementById('profile-role').value;
-    const bio = document.getElementById('profile-bio').value;
-    const avatarUrl = document.getElementById('profile-avatar').value;
-
     db.collection('users').doc(currentUser.uid).set({
-        nickname: nickname,
-        gameRole: gameRole,
-        bio: bio,
-        avatarUrl: avatarUrl,
+        nickname: document.getElementById('profile-nickname').value,
+        gameRole: document.getElementById('profile-role').value,
+        bio: document.getElementById('profile-bio').value,
+        avatarUrl: document.getElementById('profile-avatar').value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(() => {
         alert('Perfil atualizado com sucesso!');
@@ -284,20 +278,16 @@ function handleAddAchievement(e) {
     e.preventDefault();
     if (!currentUser || !db) return;
 
-    const title = document.getElementById('ach-title').value;
-    const desc = document.getElementById('ach-desc').value;
-    const icon = document.getElementById('ach-icon').value;
-
     db.collection('users').doc(currentUser.uid).collection('achievements').add({
-        title: title,
-        desc: desc,
-        icon: icon,
+        title: document.getElementById('ach-title').value,
+        desc: document.getElementById('ach-desc').value,
+        icon: document.getElementById('ach-icon').value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         alert('Conquista adicionada!');
         document.getElementById('achievement-modal').classList.add('hidden');
         document.getElementById('achievement-form').reset();
-    }).catch(err => alert('Erro ao adicionar conquista: ' + err.message));
+    }).catch(err => alert('Erro: ' + err.message));
 }
 
 function listenUserAchievements() {
@@ -308,20 +298,18 @@ function listenUserAchievements() {
         .onSnapshot(snapshot => {
             container.innerHTML = '';
             if (snapshot.empty) {
-                container.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nenhuma conquista cadastrada ainda. Clique no botão acima para adicionar!</p>';
+                container.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nenhuma conquista cadastrada ainda.</p>';
                 return;
             }
-
             snapshot.forEach(doc => {
                 const data = doc.data();
-                const card = `
+                container.innerHTML += `
                     <div class="user-trophy-card">
                         <i class="fa-solid ${data.icon || 'fa-award'}"></i>
                         <h4>${data.title}</h4>
                         <p>${data.desc}</p>
                     </div>
                 `;
-                container.innerHTML += card;
             });
         });
 }
@@ -338,9 +326,7 @@ function handleNewUserPost() {
         likes: 0,
         likedBy: [],
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        input.value = '';
-    }).catch(err => alert('Erro ao publicar: ' + err.message));
+    }).then(() => { input.value = ''; });
 }
 
 function listenUserFeed() {
@@ -356,12 +342,10 @@ function listenUserFeed() {
                 container.innerHTML = '<p class="text-muted">Você ainda não possui publicações.</p>';
                 return;
             }
-
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
-                
-                const post = `
+                container.innerHTML += `
                     <div class="post-card">
                         <div class="post-header">
                             <span class="post-author">@${data.author}</span>
@@ -373,13 +357,12 @@ function listenUserFeed() {
                         </div>
                     </div>
                 `;
-                container.innerHTML += post;
             });
         });
 }
 
 /* ==========================================================================
-   Feed Global & Autenticação
+   Autenticação & Feed Global
    ========================================================================== */
 function handleAuthSubmit(e) {
     e.preventDefault();
@@ -395,6 +378,7 @@ function handleAuthSubmit(e) {
                 return db.collection('users').doc(user.uid).set({
                     email: user.email,
                     role: 'player',
+                    banned: false,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             })
@@ -425,17 +409,24 @@ function listenAuthState() {
             if (profileSection) profileSection.classList.remove('hidden');
             if (navProfileLink) navProfileLink.classList.remove('hidden');
 
-            loadUserProfileData();
-
             db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists && doc.data().role === 'admin') {
-                    isAdmin = true;
-                    if (adminBtn) adminBtn.classList.remove('hidden');
-                    loadAdminUsersList();
-                } else {
-                    isAdmin = false;
-                    if (adminBtn) adminBtn.classList.add('hidden');
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.banned) {
+                        alert('SUA CONTA FOI BANIDA PELO ADMINISTRADOR POR VIOLAÇÃO DAS REGRAS.');
+                        auth.signOut();
+                        return;
+                    }
+
+                    if (data.role === 'admin') {
+                        isAdmin = true;
+                        if (adminBtn) adminBtn.classList.remove('hidden');
+                    } else {
+                        isAdmin = false;
+                        if (adminBtn) adminBtn.classList.add('hidden');
+                    }
                 }
+                loadUserProfileData();
             });
         } else {
             currentUser = null;
@@ -449,11 +440,7 @@ function listenAuthState() {
 }
 
 function handleNewGlobalPost() {
-    if (!currentUser) {
-        alert('Você precisa estar logado para publicar!');
-        return;
-    }
-
+    if (!currentUser) { alert('Faça login para publicar!'); return; }
     const input = document.getElementById('post-input');
     const content = input.value.trim();
     if (!content) return;
@@ -465,9 +452,7 @@ function handleNewGlobalPost() {
         likes: 0,
         likedBy: [],
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        input.value = '';
-    }).catch(err => alert('Erro ao publicar: ' + err.message));
+    }).then(() => { input.value = ''; });
 }
 
 function listenGlobalFeed() {
@@ -478,17 +463,16 @@ function listenGlobalFeed() {
         .onSnapshot((snapshot) => {
             postsContainer.innerHTML = '';
             if (snapshot.empty) {
-                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada no feed global.</p>';
+                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada.</p>';
                 return;
             }
-
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
                 const likesCount = data.likes || 0;
                 const isLiked = currentUser && data.likedBy && data.likedBy.includes(currentUser.uid);
 
-                const postElement = `
+                postsContainer.innerHTML += `
                     <div class="post-card">
                         <div class="post-header">
                             <span class="post-author">@${data.author}</span>
@@ -502,25 +486,18 @@ function listenGlobalFeed() {
                         </div>
                     </div>
                 `;
-                postsContainer.innerHTML += postElement;
             });
         });
 }
 
 function toggleLikePost(postId) {
-    if (!currentUser) {
-        alert('Faça login para curtir!');
-        return;
-    }
-
+    if (!currentUser) { alert('Faça login para curtir!'); return; }
     const postRef = db.collection('posts').doc(postId);
     postRef.get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
             const likedBy = data.likedBy || [];
-            const hasLiked = likedBy.includes(currentUser.uid);
-
-            if (hasLiked) {
+            if (likedBy.includes(currentUser.uid)) {
                 postRef.update({
                     likes: firebase.firestore.FieldValue.increment(-1),
                     likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
@@ -540,58 +517,186 @@ function handleMatchSubscription(e) {
     if (!currentUser || !db) return;
 
     const mode = document.getElementById('match-mode-selected').value;
-    const teamName = document.getElementById('match-team-name').value;
-    const whatsapp = document.getElementById('match-whatsapp').value;
-
     db.collection('matches').add({
         userId: currentUser.uid,
         userEmail: currentUser.email,
         mode: mode,
-        teamName: teamName,
-        whatsapp: whatsapp,
+        teamName: document.getElementById('match-team-name').value,
+        whatsapp: document.getElementById('match-whatsapp').value,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        alert(`Inscrição confirmada para o modo ${mode}!`);
+        alert(`Inscrição confirmada para ${mode}!`);
         document.getElementById('match-modal').classList.add('hidden');
         document.getElementById('match-form').reset();
-    }).catch(err => alert('Erro na inscrição: ' + err.message));
+    });
 }
 
+/* ==========================================================================
+   FUNCIONALIDADES DA ABA DE ADMINISTRAÇÃO SUPREMA
+   ========================================================================== */
+
+// 1. Carregar e Gerenciar Usuários (Banir, Excluir, Promover)
 function loadAdminUsersList() {
     const container = document.getElementById('admin-users-list');
     if (!container || !db) return;
 
-    db.collection('users').get().then((snapshot) => {
+    db.collection('users').onSnapshot((snapshot) => {
         container.innerHTML = '';
         snapshot.forEach((doc) => {
             const u = doc.data();
-            const userRow = `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-card);">
-                    <span>${u.email} (${u.role || 'player'})</span>
-                    <button onclick="toggleBanUser('${doc.id}')" class="btn-secondary" style="padding:4px 10px; font-size:12px;">
-                        ${u.banned ? 'Desbanir' : 'Banir'}
-                    </button>
-                </div>
+            const userId = doc.id;
+            const isBanned = u.banned || false;
+            const userRole = u.role || 'player';
+
+            const row = `
+                <tr>
+                    <td><strong>${u.email}</strong></td>
+                    <td>${u.nickname || 'Não configurado'}</td>
+                    <td>
+                        <span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">
+                            ${isBanned ? 'BANIDO' : 'ATIVO'}
+                        </span>
+                    </td>
+                    <td><span class="role-tag ${userRole === 'admin' ? 'role-admin' : 'role-player'}">${userRole}</span></td>
+                    <td>
+                        <div class="admin-actions-flex">
+                            <button onclick="adminToggleBanUser('${userId}', ${isBanned})" class="btn-secondary btn-sm">
+                                <i class="fa-solid fa-ban"></i> ${isBanned ? 'Desbanir' : 'Banir'}
+                            </button>
+                            <button onclick="adminToggleRole('${userId}', '${userRole}')" class="btn-outline btn-sm">
+                                <i class="fa-solid fa-shield"></i> ${userRole === 'admin' ? 'Virar Player' : 'Virar Admin'}
+                            </button>
+                            <button onclick="adminDeleteUser('${userId}')" class="btn-danger btn-sm" title="Excluir Definitivamente">
+                                <i class="fa-solid fa-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             `;
-            container.innerHTML += userRow;
+            container.innerHTML += row;
         });
     });
 }
 
-function toggleBanUser(userId) {
-    if (!db) return;
-    const userRef = db.collection('users').doc(userId);
-    userRef.get().then((doc) => {
-        if (doc.exists) {
-            const currentBanStatus = doc.data().banned || false;
-            userRef.update({ banned: !currentBanStatus }).then(() => {
-                alert('Status alterado!');
-                loadAdminUsersList();
-            });
+function adminToggleBanUser(userId, currentBanStatus) {
+    if (!db || !isAdmin) return;
+    const newStatus = !currentBanStatus;
+    const actionText = newStatus ? 'BANIR' : 'DESBANIR';
+
+    if (confirm(`Tem certeza que deseja ${actionText} este usuário?`)) {
+        db.collection('users').doc(userId).update({
+            banned: newStatus
+        }).then(() => {
+            alert(`Usuário ${newStatus ? 'banido' : 'desbanido'} com sucesso!`);
+        }).catch(err => alert('Erro: ' + err.message));
+    }
+}
+
+function adminToggleRole(userId, currentRole) {
+    if (!db || !isAdmin) return;
+    const newRole = currentRole === 'admin' ? 'player' : 'admin';
+
+    if (confirm(`Alterar permissão do usuário para: ${newRole.toUpperCase()}?`)) {
+        db.collection('users').doc(userId).update({
+            role: newRole
+        }).then(() => {
+            alert('Cargo atualizado!');
+        }).catch(err => alert('Erro: ' + err.message));
+    }
+}
+
+function adminDeleteUser(userId) {
+    if (!db || !isAdmin) return;
+
+    if (confirm('⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL! Deseja EXCLUIR PERMANENTEMENTE a conta deste usuário do banco de dados?')) {
+        db.collection('users').doc(userId).delete().then(() => {
+            alert('Conta de usuário excluída com sucesso!');
+        }).catch(err => alert('Erro ao excluir: ' + err.message));
+    }
+}
+
+// 2. Moderação do Feed Global
+function loadAdminPostsList() {
+    const container = document.getElementById('admin-posts-list');
+    if (!container || !db) return;
+
+    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+        container.innerHTML = '';
+        if (snapshot.empty) {
+            container.innerHTML = '<p class="text-muted">Nenhum post registrado no feed.</p>';
+            return;
         }
+
+        snapshot.forEach((doc) => {
+            const post = doc.data();
+            const item = `
+                <div class="admin-feed-item">
+                    <div>
+                        <strong>@${post.author}</strong>
+                        <p style="font-size:15px; color:var(--text-secondary); margin-top:4px;">${post.content}</p>
+                    </div>
+                    <button onclick="adminDeletePost('${doc.id}')" class="btn-danger btn-sm">
+                        <i class="fa-solid fa-trash"></i> Apagar
+                    </button>
+                </div>
+            `;
+            container.innerHTML += item;
+        });
     });
 }
 
+function adminDeletePost(postId) {
+    if (!db || !isAdmin) return;
+
+    if (confirm('Remover esta publicação do feed?')) {
+        db.collection('posts').doc(postId).delete().then(() => {
+            alert('Publicação removida!');
+        }).catch(err => alert('Erro: ' + err.message));
+    }
+}
+
+// 3. Gestão de Inscrições em Partidas
+function loadAdminMatchesList() {
+    const container = document.getElementById('admin-matches-list');
+    if (!container || !db) return;
+
+    db.collection('matches').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+        container.innerHTML = '';
+        if (snapshot.empty) {
+            container.innerHTML = '<tr><td colspan="4" class="text-muted">Nenhuma inscrição até o momento.</td></tr>';
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const m = doc.data();
+            const row = `
+                <tr>
+                    <td><span class="highlight">${m.mode}</span></td>
+                    <td><strong>${m.teamName}</strong> (${m.userEmail})</td>
+                    <td>${m.whatsapp}</td>
+                    <td>
+                        <button onclick="adminDeleteMatch('${doc.id}')" class="btn-danger btn-sm">
+                            <i class="fa-solid fa-trash"></i> Deletar
+                        </button>
+                    </td>
+                </tr>
+            `;
+            container.innerHTML += row;
+        });
+    });
+}
+
+function adminDeleteMatch(matchId) {
+    if (!db || !isAdmin) return;
+
+    if (confirm('Cancelar/Deletar esta inscrição do torneio?')) {
+        db.collection('matches').doc(matchId).delete().then(() => {
+            alert('Inscrição removida!');
+        }).catch(err => alert('Erro: ' + err.message));
+    }
+}
+
+// 4. Gestão de Leaderboard
 function handleAdminStatUpdate(e) {
     e.preventDefault();
     const playerName = document.getElementById('admin-player-name').value;
@@ -602,7 +707,7 @@ function handleAdminStatUpdate(e) {
         existingPlayer.points += pointsToAdd;
         mockLeaderboard.sort((a, b) => b.points - a.points);
         renderLeaderboard(mockLeaderboard);
-        alert(`Pontuação de ${playerName} atualizada!`);
+        alert(`Placar de ${playerName} atualizado!`);
         document.getElementById('admin-update-stats').reset();
     } else {
         alert('Jogador não encontrado no Leaderboard.');
