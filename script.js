@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CODM eSports Hub - Script Completo com Admin & Perfil Instagram
+   CODM eSports Hub - Script Completo Atualizado
    ========================================================================== */
 
 // Configuração Firebase
@@ -122,7 +122,9 @@ function setupEventListeners() {
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
             const icon = themeBtn.querySelector('i');
-            icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            if (icon) {
+                icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            }
         });
     }
 
@@ -131,6 +133,7 @@ function setupEventListeners() {
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
     const toggleAuthMode = document.getElementById('toggle-auth-mode');
+    const googleLoginBtn = document.getElementById('btn-google-login');
 
     if (loginBtn && authModal) {
         loginBtn.addEventListener('click', () => {
@@ -158,17 +161,19 @@ function setupEventListeners() {
 
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
+    if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleLogin);
 
-    // Perfil
+    // Modal de Perfil Estilo Instagram
     const btnProfile = document.getElementById('btn-profile');
     const profileModal = document.getElementById('profile-modal');
     const closeProfileModal = document.querySelector('.close-profile-modal');
     const profileForm = document.getElementById('profile-form');
+    const btnEditProfileToggle = document.getElementById('btn-edit-profile-toggle');
 
     if (btnProfile) {
         btnProfile.addEventListener('click', () => {
             if (!currentUser) {
-                alert('Acesso negado. Faça login para acessar seu perfil!');
+                alert('Faça login para acessar seu perfil!');
                 if (authModal) authModal.classList.remove('hidden');
                 return;
             }
@@ -184,7 +189,16 @@ function setupEventListeners() {
         profileForm.addEventListener('submit', handleProfileSave);
     }
 
-    // Inscrição de Desafios / Squads
+    if (btnEditProfileToggle) {
+        btnEditProfileToggle.addEventListener('click', () => {
+            const formContainer = document.getElementById('profile-edit-form-container');
+            if (formContainer) {
+                formContainer.classList.toggle('hidden');
+            }
+        });
+    }
+
+    // Inscrição de Desafios / Scrims
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
     const closeMatchModal = document.querySelector('.close-match-modal');
@@ -199,7 +213,7 @@ function setupEventListeners() {
             }
 
             const mode = btn.getAttribute('data-mode');
-            const numPlayers = parseInt(btn.getAttribute('data-players'));
+            const numPlayers = parseInt(btn.getAttribute('data-players')) || 5;
 
             document.getElementById('match-mode-selected').value = mode;
             generatePlayersInputs(numPlayers);
@@ -234,11 +248,119 @@ function setupEventListeners() {
     const postBtn = document.getElementById('btn-post');
     if (postBtn) postBtn.addEventListener('click', handleNewPost);
 
+    // Fechar modais ao clicar fora
     window.addEventListener('click', (e) => {
         if (e.target === authModal) authModal.classList.add('hidden');
         if (e.target === profileModal) profileModal.classList.add('hidden');
         if (e.target === matchModal) matchModal.classList.add('hidden');
         if (e.target === adminModal) adminModal.classList.add('hidden');
+    });
+}
+
+/* ==========================================================================
+   AUTENTICAÇÃO (E-MAIL E GOOGLE)
+   ========================================================================== */
+
+function handleAuthSubmit(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (isSignUpMode) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                return db.collection('users').doc(user.uid).set({
+                    email: user.email,
+                    role: 'player',
+                    nickname: email.split('@')[0],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            })
+            .then(() => {
+                alert('Conta criada com sucesso!');
+                document.getElementById('auth-modal').classList.add('hidden');
+            })
+            .catch((error) => alert('Erro no cadastro: ' + error.message));
+    } else {
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                document.getElementById('auth-modal').classList.add('hidden');
+            })
+            .catch((error) => alert('Erro no login: ' + error.message));
+    }
+}
+
+function handleGoogleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            const user = result.user;
+            return db.collection('users').doc(user.uid).get().then((doc) => {
+                if (!doc.exists) {
+                    return db.collection('users').doc(user.uid).set({
+                        email: user.email,
+                        nickname: user.displayName ? user.displayName.replace(/\s+/g, '_') : user.email.split('@')[0],
+                        avatarUrl: user.photoURL || '',
+                        role: 'player',
+                        tier: 'T3 (Amador)',
+                        gameRole: 'AR / Slayer',
+                        bio: 'Jogador de CODM registrado via Google.',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            });
+        })
+        .then(() => {
+            alert('Login com Google realizado com sucesso!');
+            document.getElementById('auth-modal').classList.add('hidden');
+        })
+        .catch((error) => {
+            console.error(error);
+            alert('Erro na autenticação com o Google: ' + error.message);
+        });
+}
+
+function listenAuthState() {
+    auth.onAuthStateChanged((user) => {
+        const authBtnText = document.getElementById('auth-btn-text');
+        const adminBtn = document.getElementById('btn-admin');
+        const profileBtn = document.getElementById('btn-profile');
+
+        if (user) {
+            currentUser = user;
+            if (authBtnText) authBtnText.innerText = 'Sair';
+            if (profileBtn) profileBtn.style.display = 'inline-flex';
+
+            // Verifica ou cria dados do usuário no Firestore
+            db.collection('users').doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    if (userData.role === 'admin') {
+                        isAdmin = true;
+                        if (adminBtn) adminBtn.style.display = 'inline-flex';
+                    } else {
+                        isAdmin = false;
+                        if (adminBtn) adminBtn.style.display = 'none';
+                    }
+                } else {
+                    // Se não existe documento, cria automaticamente
+                    db.collection('users').doc(user.uid).set({
+                        email: user.email,
+                        nickname: user.email.split('@')[0],
+                        role: 'player',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    if (adminBtn) adminBtn.style.display = 'none';
+                }
+            }).catch(err => console.error("Erro ao verificar permissões de admin:", err));
+        } else {
+            currentUser = null;
+            isAdmin = false;
+            if (authBtnText) authBtnText.innerText = 'Entrar';
+            if (profileBtn) profileBtn.style.display = 'none';
+            if (adminBtn) adminBtn.style.display = 'none';
+        }
     });
 }
 
@@ -252,14 +374,18 @@ function openProfileModal() {
 
     profileModal.classList.remove('hidden');
 
+    // Carrega dados do perfil em tempo real
     db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const defaultNick = currentUser.displayName || currentUser.email.split('@')[0];
+        const defaultAvatar = currentUser.photoURL || 'https://via.placeholder.com/100';
+
         if (doc.exists) {
             const data = doc.data();
-            const nickname = data.nickname || currentUser.email.split('@')[0];
-            const role = data.gameRole || 'Sniper';
+            const nickname = data.nickname || defaultNick;
+            const role = data.gameRole || 'AR / Slayer';
             const tier = data.tier || 'T1 (Profissional)';
             const bio = data.bio || 'Atleta competitivo de CODM.';
-            const avatar = data.avatarUrl || 'https://via.placeholder.com/100';
+            const avatar = data.avatarUrl || defaultAvatar;
 
             document.getElementById('profile-nickname').value = nickname;
             document.getElementById('profile-role').value = role;
@@ -268,19 +394,26 @@ function openProfileModal() {
             document.getElementById('profile-avatar').value = avatar;
 
             document.getElementById('display-nickname').innerText = `@${nickname}`;
-            document.getElementById('display-role').innerText = role;
-            document.getElementById('display-tier').innerText = tier;
+            document.getElementById('display-role-tier').innerText = `${role} • ${tier}`;
             document.getElementById('display-bio').innerText = bio;
             document.getElementById('display-avatar').src = avatar;
         } else {
-            const defaultNick = currentUser.email.split('@')[0];
             document.getElementById('profile-nickname').value = defaultNick;
             document.getElementById('display-nickname').innerText = `@${defaultNick}`;
-            document.getElementById('display-role').innerText = "Sniper";
-            document.getElementById('display-tier').innerText = "T3 (Amador)";
-            document.getElementById('display-bio').innerText = "Edite seu perfil para personalizar sua biografia!";
+            document.getElementById('display-role-tier').innerText = "Sniper • T3";
+            document.getElementById('display-bio').innerText = "Personalize sua biografia de atleta!";
+            document.getElementById('display-avatar').src = defaultAvatar;
         }
-    }).catch(err => console.error("Erro ao carregar perfil:", err));
+    });
+
+    // Carrega contadores (Desafios criados e Posts)
+    db.collection('schedules').where('captainId', '==', currentUser.uid).get().then(snap => {
+        document.getElementById('user-scrims-count').innerText = snap.size;
+    });
+
+    db.collection('posts').where('userId', '==', currentUser.uid).get().then(snap => {
+        document.getElementById('user-posts-count').innerText = snap.size;
+    });
 }
 
 function handleProfileSave(e) {
@@ -301,19 +434,32 @@ function handleProfileSave(e) {
         avatarUrl: avatarUrl,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(() => {
-        alert('Seu perfil foi atualizado com sucesso!');
+        alert('Perfil atualizado!');
         document.getElementById('display-nickname').innerText = `@${nickname}`;
-        document.getElementById('display-role').innerText = gameRole;
-        document.getElementById('display-tier').innerText = tier;
+        document.getElementById('display-role-tier').innerText = `${gameRole} • ${tier}`;
         document.getElementById('display-bio').innerText = bio;
         if (avatarUrl) document.getElementById('display-avatar').src = avatarUrl;
 
-        document.getElementById('profile-modal').classList.add('hidden');
+        const formContainer = document.getElementById('profile-edit-form-container');
+        if (formContainer) formContainer.classList.add('hidden');
     }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
 }
 
+function switchProfileTab(tabName) {
+    const postsTab = document.getElementById('ig-tab-posts');
+    const scrimsTab = document.getElementById('ig-tab-scrims');
+
+    if (tabName === 'posts') {
+        if (postsTab) postsTab.classList.remove('hidden');
+        if (scrimsTab) scrimsTab.classList.add('hidden');
+    } else {
+        if (postsTab) postsTab.classList.add('hidden');
+        if (scrimsTab) scrimsTab.classList.remove('hidden');
+    }
+}
+
 /* ==========================================================================
-   PERSISTÊNCIA DA FILA DE DESAFIOS (SCRIM FINDER)
+   PERSISTÊNCIA E FECHAMENTO AUTOMÁTICO DE DESAFIOS (SCRIM FINDER)
    ========================================================================== */
 
 function generatePlayersInputs(count) {
@@ -335,6 +481,8 @@ function generatePlayersInputs(count) {
 
 function handleMatchSubscription(e) {
     e.preventDefault();
+    if (!currentUser) return;
+
     const mode = document.getElementById('match-mode-selected').value;
     const tier = document.getElementById('match-tier').value;
     const time = document.getElementById('match-time').value;
@@ -357,10 +505,13 @@ function handleMatchSubscription(e) {
         players: playersList,
         whatsapp: whatsapp,
         status: 'Aguardando Desafiante',
-        createdAt: new Date()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp() // PERSISTÊNCIA REAL NO FIRESTORE
     }).then(() => {
         alert(`Desafio do time "${teamName}" publicado com sucesso!`);
-        document.getElementById('match-modal').classList.add('hidden');
+        
+        // FECHAMENTO AUTOMÁTICO DO MODAL
+        const matchModal = document.getElementById('match-modal');
+        if (matchModal) matchModal.classList.add('hidden');
         document.getElementById('match-form').reset();
     }).catch(err => alert('Erro ao registrar agendamento: ' + err.message));
 }
@@ -369,19 +520,23 @@ function listenScheduleQueue() {
     const queueContainer = document.getElementById('schedule-queue-container');
     if (!queueContainer) return;
 
-    // Monitoramento em tempo real do banco de dados (Persistente no F5)
+    // Monitoramento Firestore Persistente pós-F5
     db.collection('schedules').onSnapshot((snapshot) => {
         queueContainer.innerHTML = '';
         if (snapshot.empty) {
-            queueContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1;">Nenhum desafio aberto no momento. Agende o seu!</p>';
+            queueContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1;">Nenhum desafio aberto no momento. Lance o seu na tabela acima!</p>';
             return;
         }
 
         let docs = [];
         snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
 
-        // Ordenação por tempo mais recente
-        docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        // Ordenação segura por tempo
+        docs.sort((a, b) => {
+            const timeA = a.createdAt ? (a.createdAt.seconds || Date.now()) : Date.now();
+            const timeB = b.createdAt ? (b.createdAt.seconds || Date.now()) : Date.now();
+            return timeB - timeA;
+        });
 
         docs.forEach((item) => {
             const playersHtml = item.players ? item.players.map((p, idx) => `<li><small style="color: var(--primary-neon);">P${idx+1}:</small> ${p}</li>`).join('') : '';
@@ -415,7 +570,9 @@ function listenScheduleQueue() {
             `;
             queueContainer.innerHTML += cardHtml;
         });
-    }, err => console.error("Erro na fila:", err));
+    }, (err) => {
+        console.error("Erro no Listener da Fila:", err);
+    });
 }
 
 function acceptChallenge(docId, teamName, time) {
@@ -439,113 +596,52 @@ function acceptChallenge(docId, teamName, time) {
 }
 
 /* ==========================================================================
-   PAINEL DE CONTROLE DO ADMINISTRADOR (ADMIN ACTIONS)
+   PAINEL DE CONTROLE DO ADMINISTRADOR
    ========================================================================== */
 
 function loadAdminPanelData() {
     const adminContainer = document.getElementById('admin-schedules-list');
     if (!adminContainer) return;
 
-    adminContainer.innerHTML = '<p style="color: var(--text-secondary);">Carregando dados da plataforma...</p>';
+    adminContainer.innerHTML = '<p style="color: var(--text-secondary);">Carregando dados globais da plataforma...</p>';
 
     db.collection('schedules').get().then((snapshot) => {
         adminContainer.innerHTML = '';
         if (snapshot.empty) {
-            adminContainer.innerHTML = '<p>Nenhum agendamento encontrado.</p>';
+            adminContainer.innerHTML = '<p>Nenhum agendamento encontrado no sistema.</p>';
             return;
         }
 
         snapshot.forEach((doc) => {
             const data = doc.data();
             const itemHtml = `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #333;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #333;">
                     <div>
                         <strong style="color: var(--primary-neon);">${data.teamName}</strong> (${data.mode} - ${data.tier})
-                        <br><small style="color: var(--text-secondary);">Horário: ${data.time} | WhatsApp: ${data.whatsapp || 'N/A'}</small>
+                        <br><small style="color: var(--text-secondary);">Horário: ${data.time} | Contato: ${data.whatsapp || 'N/A'}</small>
+                        <br><small style="color: #888;">Capitão ID: ${data.captainId}</small>
                     </div>
                     <div>
-                        <button onclick="adminDeleteSchedule('${doc.id}')" class="btn-outline" style="border-color: #ff0055; color: #ff0055; padding: 4px 8px; font-size: 12px;">
-                            <i class="fa-solid fa-trash"></i> Excluir
+                        <button onclick="adminDeleteSchedule('${doc.id}')" class="btn-outline" style="border-color: #ff0055; color: #ff0055; padding: 5px 10px; font-size: 12px;">
+                            <i class="fa-solid fa-trash"></i> Apagar
                         </button>
                     </div>
                 </div>
             `;
             adminContainer.innerHTML += itemHtml;
         });
+    }).catch(err => {
+        adminContainer.innerHTML = `<p style="color: #ff0055;">Erro ao carregar dados do admin: ${err.message}</p>`;
     });
 }
 
 function adminDeleteSchedule(docId) {
-    if (confirm('Tem certeza de que deseja remover este agendamento como Administrador?')) {
+    if (confirm('Tem certeza de que deseja apagar este desafio como Administrador?')) {
         db.collection('schedules').doc(docId).delete().then(() => {
             alert('Agendamento removido com sucesso!');
             loadAdminPanelData();
         }).catch(err => alert('Erro ao excluir: ' + err.message));
     }
-}
-
-/* ==========================================================================
-   AUTENTICAÇÃO E SESSÃO DO USUÁRIO
-   ========================================================================== */
-
-function handleAuthSubmit(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if (isSignUpMode) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                return db.collection('users').doc(user.uid).set({
-                    email: user.email,
-                    role: 'player',
-                    nickname: email.split('@')[0],
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            })
-            .then(() => {
-                alert('Conta criada com sucesso!');
-                document.getElementById('auth-modal').classList.add('hidden');
-            })
-            .catch((error) => alert('Erro no cadastro: ' + error.message));
-    } else {
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                document.getElementById('auth-modal').classList.add('hidden');
-            })
-            .catch((error) => alert('Erro no login: ' + error.message));
-    }
-}
-
-function listenAuthState() {
-    auth.onAuthStateChanged((user) => {
-        const authBtnText = document.getElementById('auth-btn-text');
-        const adminBtn = document.getElementById('btn-admin');
-        const profileBtn = document.getElementById('btn-profile');
-
-        if (user) {
-            currentUser = user;
-            if (authBtnText) authBtnText.innerText = 'Sair';
-            if (profileBtn) profileBtn.classList.remove('hidden');
-
-            db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists && doc.data().role === 'admin') {
-                    isAdmin = true;
-                    if (adminBtn) adminBtn.classList.remove('hidden');
-                } else {
-                    isAdmin = false;
-                    if (adminBtn) adminBtn.classList.add('hidden');
-                }
-            });
-        } else {
-            currentUser = null;
-            isAdmin = false;
-            if (authBtnText) authBtnText.innerText = 'Entrar';
-            if (profileBtn) profileBtn.classList.add('hidden');
-            if (adminBtn) adminBtn.classList.add('hidden');
-        }
-    });
 }
 
 /* ==========================================================================
@@ -565,12 +661,12 @@ function handleNewPost() {
     if (!content) return;
 
     db.collection('posts').add({
-        author: currentUser.email.split('@')[0],
+        author: currentUser.displayName || currentUser.email.split('@')[0],
         userId: currentUser.uid,
         content: content,
         likes: 0,
         likedBy: [],
-        timestamp: new Date()
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => input.value = '');
 }
 
@@ -611,7 +707,11 @@ function listenFeedUpdates() {
         let posts = [];
         snapshot.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
 
-        posts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+        posts.sort((a, b) => {
+            const timeA = a.timestamp ? (a.timestamp.seconds || Date.now()) : Date.now();
+            const timeB = b.timestamp ? (b.timestamp.seconds || Date.now()) : Date.now();
+            return timeB - timeA;
+        });
 
         posts.forEach((data) => {
             const likesCount = data.likes || 0;
