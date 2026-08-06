@@ -48,6 +48,22 @@ body.light-theme {
     --gold-border: rgba(184, 134, 11, 0.4);
 }
 
+body.maintenance-mode::before {
+    content: "⚠️ MODO MANUTENÇÃO ATIVO - ACESSO RESTRITO A ADMINISTRADORES ⚠️";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #dc2626;
+    color: #ffffff;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 6px;
+    z-index: 10000;
+    letter-spacing: 1px;
+}
+
 /* ==========================================================================
    RESET E BASE
    ========================================================================== */
@@ -182,7 +198,7 @@ button {
 }
 
 /* ==========================================================================
-   BOTÕES E BOTÕES DE AÇÃO SLIM
+   BOTÕES E AÇÕES SLIM
    ========================================================================== */
 .btn-primary {
     background: #ffffff; 
@@ -291,7 +307,7 @@ button {
 .margin-bottom-card { margin-bottom: 25px; }
 
 /* ==========================================================================
-   NAVBAR MONOCROMÁTICA COM LINHA DOURADA FINE
+   NAVBAR
    ========================================================================== */
 .navbar {
     position: fixed; 
@@ -317,16 +333,6 @@ button {
     align-items: center; 
     gap: 12px; 
     letter-spacing: 2px; 
-}
-
-.logo-reduced { 
-    height: 38px; 
-    filter: grayscale(100%) brightness(1.8); 
-    transition: var(--transition-fast); 
-}
-
-.logo:hover .logo-reduced { 
-    filter: grayscale(0%) drop-shadow(0 0 8px var(--gold-glow)); 
 }
 
 .nav-links { display: flex; gap: 28px; }
@@ -384,10 +390,6 @@ button {
 .hero-glow-2 { bottom: 15%; right: 30%; background: rgba(255, 255, 255, 0.05); }
 
 .hero-brand-container { margin-bottom: 20px; }
-.viking-sublogo { 
-    height: 85px; 
-    filter: grayscale(100%) brightness(2) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); 
-}
 
 .hero-content { max-width: 900px; position: relative; z-index: 1; }
 .hero-content h1 { font-size: 56px; font-weight: 900; margin-bottom: 20px; line-height: 1.1; letter-spacing: 3px; }
@@ -431,6 +433,9 @@ button {
     overflow: hidden; 
     margin-bottom: 15px; 
     background: #000000; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
@@ -662,20 +667,8 @@ footer {
 }
 
 /* ==========================================================================
-   RESPONSIVIDADE
+   GOD MODE ADM PANEL
    ========================================================================== */
-@media (max-width: 900px) {
-    .profile-layout { grid-template-columns: 1fr; }
-    .hero-content h1 { font-size: 38px; }
-    .nav-links { display: none; }
-    .hero-stats { gap: 12px; }
-    .stat-card { min-width: 130px; padding: 12px; }
-    .admin-feed-item { flex-direction: column; align-items: flex-start; }
-}
-/* ==========================================================================
-   GOD MODE ADM PANEL - SLIM & GOLD EXTENSION
-   ========================================================================== */
-
 .btn-god-trigger {
     position: fixed;
     bottom: 25px;
@@ -691,7 +684,7 @@ footer {
     align-items: center;
     gap: 8px;
     box-shadow: 0 0 15px var(--gold-glow);
-    z-index: 999;
+    z-index: 1500;
     transition: var(--transition-normal);
 }
 
@@ -825,3 +818,15 @@ footer {
     border-color: rgba(220, 38, 38, 0.4);
 }
 .border-danger h4 { color: var(--danger-red); }
+
+/* ==========================================================================
+   RESPONSIVIDADE
+   ========================================================================== */
+@media (max-width: 900px) {
+    .profile-layout { grid-template-columns: 1fr; }
+    .hero-content h1 { font-size: 38px; }
+    .nav-links { display: none; }
+    .hero-stats { gap: 12px; }
+    .stat-card { min-width: 130px; padding: 12px; }
+    .admin-feed-item { flex-direction: column; align-items: flex-start; }
+}
