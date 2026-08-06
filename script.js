@@ -2,8 +2,7 @@
    CODM eSports Hub - Lógica Principal e Integrações
    ========================================================================== */
 
-// 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
-// Importante: Substitua as chaves abaixo pelas credenciais do seu projeto Firebase Console
+// 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE (PROJETO: projeto-codm-hub)
 const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
   authDomain: "projeto-codm-hub.firebaseapp.com",
@@ -191,7 +190,6 @@ function setupEventListeners() {
     if (loginBtn && authModal) {
         loginBtn.addEventListener('click', () => {
             if (currentUser) {
-                // Se já estiver logado, faz logout
                 auth.signOut();
             } else {
                 authModal.classList.remove('hidden');
@@ -269,7 +267,6 @@ function handleAuthSubmit(e) {
         auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-                // Salva perfil no Firestore
                 return db.collection('users').doc(user.uid).set({
                     email: user.email,
                     role: 'player',
@@ -299,7 +296,6 @@ function listenAuthState() {
             currentUser = user;
             if (authBtnText) authBtnText.innerText = 'Sair';
             
-            // Verifica permissões no Firestore
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists && doc.data().role === 'admin') {
                     isAdmin = true;
@@ -371,7 +367,7 @@ function listenFeedUpdates() {
                 postsContainer.innerHTML += postElement;
             });
         }, (error) => {
-            console.log("Modo offline ou Firestore não configurado. Exibindo mensagens de exemplo.");
+            console.log("Erro no Firestore:", error);
             postsContainer.innerHTML = `
                 <div class="post-card">
                     <div class="post-header">
@@ -426,12 +422,10 @@ function handleAdminStatUpdate(e) {
     const playerName = document.getElementById('admin-player-name').value;
     const pointsToAdd = parseInt(document.getElementById('admin-player-points').value);
 
-    // Exemplo de atualização de ranking local ou via Firebase
     const existingPlayer = mockLeaderboard.find(p => p.name.toLowerCase() === playerName.toLowerCase());
     if (existingPlayer) {
         existingPlayer.points += pointsToAdd;
         mockLeaderboard.sort((a, b) => b.points - a.points);
-        // Atualiza a tabela na UI
         renderLeaderboard(mockLeaderboard);
         alert(`Pontuação de ${playerName} atualizada para ${existingPlayer.points} pts!`);
         document.getElementById('admin-update-stats').reset();
