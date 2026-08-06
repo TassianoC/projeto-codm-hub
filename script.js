@@ -1,4 +1,4 @@
-// ESTADO GLOBAL DA APLICAÇÃO
+// BANCO DE DADOS EM MEMÓRIA & ESTADO DA APLICAÇÃO
 let currentUser = null;
 
 let playersData = [
@@ -8,13 +8,13 @@ let playersData = [
     { id: 4, nick: "KlausFPS", role: "Support", kd: "1.95", likes: 64, avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200" }
 ];
 
-// INICIALIZAÇÃO
+// INICIALIZADOR
 document.addEventListener('DOMContentLoaded', () => {
     initParticlesCanvas();
     renderAllViews();
 });
 
-// SIMULAÇÃO DE LOGIN / LOGOUT
+// GESTÃO DE AUTENTICAÇÃO
 function toggleLogin() {
     const btnProfile = document.getElementById('btn-tab-profile');
     const guestView = document.getElementById('auth-guest-view');
@@ -43,7 +43,7 @@ function toggleLogin() {
     }
 }
 
-// ALTERNÂNCIA DE ABAS
+// ALTERNÂNCIA DE ABAS DA NAVEGAÇÃO
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -55,7 +55,7 @@ function switchTab(tabName) {
     if (activeBtn) activeBtn.classList.add('active');
 }
 
-// SISTEMA DE CURTIDAS EM TEMPO REAL
+// LÓGICA DE CURTIDAS EM TEMPO REAL
 function likePlayer(id) {
     const player = playersData.find(p => p.id === id);
     if (player) {
@@ -64,7 +64,7 @@ function likePlayer(id) {
     }
 }
 
-// CONSTRUTOR DE HTML DOS CARDS DE JOGADOR
+// TEMPLATE HTML REUTILIZÁVEL PARA CARDS DE JOGADOR
 function createPlayerCardHtml(p) {
     return `
         <div class="card glass-panel player-card">
@@ -82,29 +82,29 @@ function createPlayerCardHtml(p) {
     `;
 }
 
-// ATUALIZAÇÃO REATIVA DE TODAS AS TELAS
+// RENDERIZAÇÃO E ATUALIZAÇÃO DE INTERFACE
 function renderAllViews() {
     const sortedPlayers = [...playersData].sort((a, b) => b.likes - a.likes);
 
-    // 1. Destaques na aba Início (Top 3)
+    // Grid da Aba Início (Top 3)
     const homeGrid = document.getElementById('home-top-players-grid');
     if (homeGrid) {
         homeGrid.innerHTML = sortedPlayers.slice(0, 3).map(createPlayerCardHtml).join('');
     }
 
-    // 2. Aba Mais Curtidos
+    // Grid da Aba Mais Curtidos
     const topGrid = document.getElementById('top-liked-players-grid');
     if (topGrid) {
         topGrid.innerHTML = sortedPlayers.map(createPlayerCardHtml).join('');
     }
 
-    // 3. Aba Todos os Jogadores
+    // Grid da Aba Todos os Jogadores
     const allGrid = document.getElementById('all-players-grid');
     if (allGrid) {
         allGrid.innerHTML = playersData.map(createPlayerCardHtml).join('');
     }
 
-    // 4. Indicadores Globais das Estatísticas
+    // Atualizador de Indicadores Globais
     document.getElementById('stat-total-players').innerText = playersData.length;
     
     let totalLikes = 0;
@@ -116,7 +116,7 @@ function renderAllViews() {
     }
 }
 
-// ATUALIZAR DADOS DO PERFIL LOGADO
+// ATUALIZADOR DO MEU PERFIL
 function updateMyProfileData() {
     if (!currentUser) return;
     document.getElementById('my-profile-nick').innerText = currentUser.nick;
@@ -126,7 +126,7 @@ function updateMyProfileData() {
     document.getElementById('my-avatar-img').src = currentUser.avatar;
 }
 
-// ANIMAÇÃO DE CANVAS DE PARTÍCULAS INTERATIVAS
+// CANVAS DE PARTÍCULAS EM SEGUNDO PLANO
 function initParticlesCanvas() {
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) return;
