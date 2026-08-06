@@ -1,8 +1,8 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica Principal e Integrações Atualizadas
+   CODM eSports Hub - Lógica de Perfil, Agendamento e Fila de Confrontos
    ========================================================================== */
 
-// 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE (PROJETO: projeto-codm-hub)
+// Configuração Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
   authDomain: "projeto-codm-hub.firebaseapp.com",
@@ -19,7 +19,7 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Estado Global da Aplicação
+// Estado Global
 let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
@@ -32,21 +32,14 @@ const mockLeaderboard = [
     { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
 ];
 
-const mockTrophies = [
-    { title: "Campeão 5v5 Series", desc: "1º Lugar no Torneio Primavera CODM", icon: "fa-crown" },
-    { title: "Lenda do Sniper 1v1", desc: "Invicto em 15 partidas seguidas", icon: "fa-crosshair" },
-    { title: "Dominador Duo", desc: "Campeão da Liga Busca & Destruir 2v2", icon: "fa-award" },
-    { title: "MVP da Temporada", desc: "Maior pontuação acumulada do Hub", icon: "fa-star" }
-];
-
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initCounters();
     renderLeaderboard(mockLeaderboard);
-    renderTrophies(mockTrophies);
     setupEventListeners();
     listenAuthState();
     listenFeedUpdates();
+    listenScheduleQueue();
 });
 
 function initParticles() {
@@ -112,25 +105,8 @@ function renderLeaderboard(data) {
     });
 }
 
-function renderTrophies(trophies) {
-    const container = document.getElementById('trophy-container');
-    if (!container) return;
-
-    container.innerHTML = '';
-    trophies.forEach(t => {
-        const card = `
-            <div class="glass-card trophy-card">
-                <i class="fa-solid ${t.icon}"></i>
-                <h4>${t.title}</h4>
-                <p>${t.desc}</p>
-            </div>
-        `;
-        container.innerHTML += card;
-    });
-}
-
 function setupEventListeners() {
-    // Alternador de Tema
+    // Tema
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -140,7 +116,7 @@ function setupEventListeners() {
         });
     }
 
-    // Modal de Auth
+    // Modal de Login
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
@@ -170,23 +146,17 @@ function setupEventListeners() {
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
-    // Modal de Perfil Editável
+    // Perfil
     const btnProfile = document.getElementById('btn-profile');
     const profileModal = document.getElementById('profile-modal');
     const closeProfileModal = document.querySelector('.close-profile-modal');
     const profileForm = document.getElementById('profile-form');
 
-    if (btnProfile && profileModal) {
-        btnProfile.addEventListener('click', openProfileModal);
-    }
-    if (closeProfileModal) {
-        closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
-    }
-    if (profileForm) {
-        profileForm.addEventListener('submit', handleProfileSave);
-    }
+    if (btnProfile && profileModal) btnProfile.addEventListener('click', openProfileModal);
+    if (closeProfileModal) closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
+    if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
 
-    // Modais e Botões de Inscrever-se em Partidas
+    // Botões de Partida (Abre o modal gerando os campos dos jogadores dinamicamente)
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
     const closeMatchModal = document.querySelector('.close-match-modal');
@@ -194,26 +164,25 @@ function setupEventListeners() {
 
     matchBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const mode = e.target.getAttribute('data-mode');
             if (!currentUser) {
-                alert('Faça login na sua conta para se inscrever nas partidas!');
+                alert('Faça login para inscrever seu time ou marcar horários!');
                 authModal.classList.remove('hidden');
                 return;
             }
+
+            const mode = btn.getAttribute('data-mode');
+            const numPlayers = parseInt(btn.getAttribute('data-players'));
+
             document.getElementById('match-mode-selected').value = mode;
+            generatePlayersInputs(numPlayers);
             matchModal.classList.remove('hidden');
         });
     });
 
-    if (closeMatchModal) {
-        closeMatchModal.addEventListener('click', () => matchModal.classList.add('hidden'));
-    }
+    if (closeMatchModal) closeMatchModal.addEventListener('click', () => matchModal.classList.add('hidden'));
+    if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    if (matchForm) {
-        matchForm.addEventListener('submit', handleMatchSubscription);
-    }
-
-    // Admin Modal
+    // Admin
     const adminBtn = document.getElementById('btn-admin');
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
@@ -221,35 +190,54 @@ function setupEventListeners() {
     if (adminBtn && adminModal) adminBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
     if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
-        });
-    });
-
     const postBtn = document.getElementById('btn-post');
     if (postBtn) postBtn.addEventListener('click', handleNewPost);
-
-    const adminStatsForm = document.getElementById('admin-update-stats');
-    if (adminStatsForm) adminStatsForm.addEventListener('submit', handleAdminStatUpdate);
 }
 
-// PERFIL EDITÁVEL
+// GERAÇÃO DINÂMICA DOS CAMPOS DE JOGADORES (1 a 5)
+function generatePlayersInputs(count) {
+    const container = document.getElementById('players-input-container');
+    container.innerHTML = `<h4 style="margin-bottom: 10px; color: var(--primary-neon);">Integrantes da Lineup (${count} Jogador(es)):</h4>`;
+
+    for (let i = 1; i <= count; i++) {
+        const labelText = i === 1 ? "Jogador 1 (Capitão / Seu Nick)" : `Jogador ${i}`;
+        const inputHtml = `
+            <div class="input-group" style="margin-bottom: 10px;">
+                <label style="font-size: 13px;">${labelText}</label>
+                <input type="text" class="match-player-input" required placeholder="Nick e Tag do Jogador ${i}">
+            </div>
+        `;
+        container.innerHTML += inputHtml;
+    }
+}
+
+// GERENCIAMENTO DO PERFIL DE ATLETA
 function openProfileModal() {
     if (!currentUser) return;
     const profileModal = document.getElementById('profile-modal');
-    
+
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('profile-nickname').value = data.nickname || '';
-            document.getElementById('profile-role').value = data.gameRole || 'Sniper';
-            document.getElementById('profile-bio').value = data.bio || '';
-            document.getElementById('profile-avatar').value = data.avatarUrl || '';
+            const nickname = data.nickname || currentUser.email.split('@')[0];
+            const role = data.gameRole || 'Sniper';
+            const tier = data.tier || 'T1 (Profissional)';
+            const bio = data.bio || 'Atleta competitivo de CODM.';
+            const avatar = data.avatarUrl || 'https://via.placeholder.com/80';
+
+            // Atualiza campos do form
+            document.getElementById('profile-nickname').value = nickname;
+            document.getElementById('profile-role').value = role;
+            document.getElementById('profile-tier').value = tier;
+            document.getElementById('profile-bio').value = bio;
+            document.getElementById('profile-avatar').value = avatar;
+
+            // Atualiza card de exibição no topo
+            document.getElementById('display-nickname').innerText = nickname;
+            document.getElementById('display-role').innerText = role;
+            document.getElementById('display-tier').innerText = tier;
+            document.getElementById('display-bio').innerText = `"${bio}"`;
+            document.getElementById('display-avatar').src = avatar;
         }
         profileModal.classList.remove('hidden');
     });
@@ -261,40 +249,123 @@ function handleProfileSave(e) {
 
     const nickname = document.getElementById('profile-nickname').value;
     const gameRole = document.getElementById('profile-role').value;
+    const tier = document.getElementById('profile-tier').value;
     const bio = document.getElementById('profile-bio').value;
     const avatarUrl = document.getElementById('profile-avatar').value;
 
     db.collection('users').doc(currentUser.uid).set({
         nickname: nickname,
         gameRole: gameRole,
+        tier: tier,
         bio: bio,
         avatarUrl: avatarUrl,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(() => {
-        alert('Perfil atualizado com sucesso!');
+        alert('Perfil do atleta salvo com sucesso!');
         document.getElementById('profile-modal').classList.add('hidden');
     }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
 }
 
-// INSCRIÇÃO NAS PARTIDAS
+// SUBMISSÃO DE INSCRIÇÃO/AGENDAMENTO NA FILA DE DESAFIOS
 function handleMatchSubscription(e) {
     e.preventDefault();
     const mode = document.getElementById('match-mode-selected').value;
+    const tier = document.getElementById('match-tier').value;
+    const time = document.getElementById('match-time').value;
     const teamName = document.getElementById('match-team-name').value;
     const whatsapp = document.getElementById('match-whatsapp').value;
 
-    db.collection('matches').add({
-        userId: currentUser.uid,
-        userEmail: currentUser.email,
-        mode: mode,
+    const playerInputs = document.querySelectorAll('.match-player-input');
+    const playersList = [];
+    playerInputs.forEach(input => {
+        if (input.value.trim()) playersList.push(input.value.trim());
+    });
+
+    db.collection('schedules').add({
+        captainId: currentUser.uid,
+        captainEmail: currentUser.email,
         teamName: teamName,
+        mode: mode,
+        tier: tier,
+        time: time,
+        players: playersList,
         whatsapp: whatsapp,
+        status: 'Aguardando Desafiante',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        alert(`Inscrição confirmada para o modo ${mode}! O organizador entrará em contato.`);
+        alert(`Desafio do time ${teamName} lançado com sucesso na fila para às ${time} (${tier})!`);
         document.getElementById('match-modal').classList.add('hidden');
         document.getElementById('match-form').reset();
-    }).catch(err => alert('Erro na inscrição: ' + err.message));
+    }).catch(err => alert('Erro ao lançar agendamento: ' + err.message));
+}
+
+// ESCUTAR FILA DE AGENDAMENTOS (SCRIM FINDER)
+function listenScheduleQueue() {
+    const queueContainer = document.getElementById('schedule-queue-container');
+    if (!queueContainer) return;
+
+    db.collection('schedules').orderBy('createdAt', 'desc').limit(12)
+        .onSnapshot((snapshot) => {
+            queueContainer.innerHTML = '';
+            if (snapshot.empty) {
+                queueContainer.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nenhum time lançou horário na fila ainda. Seja o primeiro a agendar!</p>';
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                const playersHtml = item.players ? item.players.map((p, idx) => `<li><small>P${idx+1}:</small> ${p}</li>`).join('') : '';
+
+                const isChallenged = item.status !== 'Aguardando Desafiante';
+                const statusBadge = isChallenged 
+                    ? `<span style="background: var(--secondary-neon); color:#fff; padding: 3px 8px; border-radius: 4px; font-size: 11px;">Partida Marcada</span>`
+                    : `<span style="background: var(--primary-neon); color:#000; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">Fila Aberta</span>`;
+
+                const cardHtml = `
+                    <div class="glass-card" style="position: relative; border-left: 4px solid ${item.tier === 'T1' ? '#ff0055' : item.tier === 'T2' ? '#ffb700' : '#00f0ff'};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0; font-size: 18px;">${item.teamName}</h3>
+                            ${statusBadge}
+                        </div>
+                        <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">
+                            <strong>Horário:</strong> <span class="highlight">${item.time}</span> | <strong>Tier:</strong> ${item.tier} | <strong>Modo:</strong> ${item.mode}
+                        </p>
+                        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+                            <p style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Escalação da Equipe:</p>
+                            <ul style="list-style: none; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                                ${playersHtml}
+                            </ul>
+                        </div>
+                        ${!isChallenged ? `
+                            <button onclick="acceptChallenge('${doc.id}', '${item.teamName}', '${item.time}')" class="btn-primary btn-full" style="font-size: 13px; padding: 8px;">
+                                <i class="fa-solid fa-swords"></i> Desafiar neste Horário
+                            </button>
+                        ` : `
+                            <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Confronto aceito por: ${item.challengedBy || 'Adversário'}</p>
+                        `}
+                    </div>
+                `;
+                queueContainer.innerHTML += cardHtml;
+            });
+        });
+}
+
+function acceptChallenge(docId, teamName, time) {
+    if (!currentUser) {
+        alert('Você precisa estar logado com seu time para aceitar um desafio!');
+        return;
+    }
+
+    const challengerTeam = prompt(`Digite o nome do seu time para confirmar o confronto contra ${teamName} às ${time}:`);
+    if (challengerTeam) {
+        db.collection('schedules').doc(docId).update({
+            status: 'Confronto Confirmado',
+            challengedBy: challengerTeam,
+            challengerUid: currentUser.uid
+        }).then(() => {
+            alert(`Confronto marcado com sucesso contra ${teamName} para às ${time}! Entrem em contato pelo WhatsApp cadastrado.`);
+        }).catch(err => alert('Erro ao aceitar desafio: ' + err.message));
+    }
 }
 
 // AUTH
@@ -337,12 +408,11 @@ function listenAuthState() {
             currentUser = user;
             if (authBtnText) authBtnText.innerText = 'Sair';
             if (profileBtn) profileBtn.classList.remove('hidden');
-            
+
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists && doc.data().role === 'admin') {
                     isAdmin = true;
                     if (adminBtn) adminBtn.classList.remove('hidden');
-                    loadAdminUsersList();
                 } else {
                     isAdmin = false;
                     if (adminBtn) adminBtn.classList.add('hidden');
@@ -358,13 +428,12 @@ function listenAuthState() {
     });
 }
 
-// FEED COM SISTEMA DE CURTIDAS
+// FEED COM CURTIDAS
 function handleNewPost() {
     if (!currentUser) {
-        alert('Você precisa estar logado para publicar no feed!');
+        alert('Logue para postar no feed!');
         return;
     }
-
     const input = document.getElementById('post-input');
     const content = input.value.trim();
     if (!content) return;
@@ -376,14 +445,12 @@ function handleNewPost() {
         likes: 0,
         likedBy: [],
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        input.value = '';
-    }).catch(err => alert('Erro ao publicar: ' + err.message));
+    }).then(() => input.value = '');
 }
 
 function toggleLikePost(postId) {
     if (!currentUser) {
-        alert('Faça login para curtir as publicações!');
+        alert('Faça login para curtir!');
         return;
     }
 
@@ -416,11 +483,6 @@ function listenFeedUpdates() {
     db.collection('posts').orderBy('timestamp', 'desc').limit(20)
         .onSnapshot((snapshot) => {
             postsContainer.innerHTML = '';
-            if (snapshot.empty) {
-                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada.</p>';
-                return;
-            }
-
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
@@ -444,56 +506,4 @@ function listenFeedUpdates() {
                 postsContainer.innerHTML += postElement;
             });
         });
-}
-
-// ADMIN
-function loadAdminUsersList() {
-    const container = document.getElementById('admin-users-list');
-    if (!container) return;
-
-    db.collection('users').get().then((snapshot) => {
-        container.innerHTML = '';
-        snapshot.forEach((doc) => {
-            const u = doc.data();
-            const userRow = `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-card);">
-                    <span>${u.email} (${u.role || 'player'})</span>
-                    <button onclick="toggleBanUser('${doc.id}')" class="btn-secondary" style="padding:4px 10px; font-size:12px;">
-                        ${u.banned ? 'Desbanir' : 'Banir'}
-                    </button>
-                </div>
-            `;
-            container.innerHTML += userRow;
-        });
-    });
-}
-
-function toggleBanUser(userId) {
-    const userRef = db.collection('users').doc(userId);
-    userRef.get().then((doc) => {
-        if (doc.exists) {
-            const currentBanStatus = doc.data().banned || false;
-            userRef.update({ banned: !currentBanStatus }).then(() => {
-                alert('Status alterado!');
-                loadAdminUsersList();
-            });
-        }
-    });
-}
-
-function handleAdminStatUpdate(e) {
-    e.preventDefault();
-    const playerName = document.getElementById('admin-player-name').value;
-    const pointsToAdd = parseInt(document.getElementById('admin-player-points').value);
-
-    const existingPlayer = mockLeaderboard.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-    if (existingPlayer) {
-        existingPlayer.points += pointsToAdd;
-        mockLeaderboard.sort((a, b) => b.points - a.points);
-        renderLeaderboard(mockLeaderboard);
-        alert(`Pontuação de ${playerName} atualizada!`);
-        document.getElementById('admin-update-stats').reset();
-    } else {
-        alert('Jogador não encontrado no Leaderboard.');
-    }
 }
