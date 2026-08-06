@@ -1,3 +1,4 @@
+/* VARIÁVEIS DE DESIGN SYSTEM */
 :root {
     --bg-dark: #050811;
     --card-bg: rgba(11, 17, 32, 0.75);
@@ -12,6 +13,7 @@
     --font-body: 'Rajdhani', sans-serif;
 }
 
+/* RESET GLOBAL */
 * {
     margin: 0;
     padding: 0;
@@ -27,7 +29,7 @@ body {
     position: relative;
 }
 
-/* BACKGROUND DE PARTÍCULAS */
+/* CANVAS PARTICULADO */
 #particles-canvas {
     position: fixed;
     top: 0;
@@ -38,7 +40,7 @@ body {
     pointer-events: none;
 }
 
-/* PAINÉIS DE VIDRO (GLASSMORPHISM) */
+/* GLASSMORPHISM BASE */
 .glass-panel {
     background: var(--card-bg);
     backdrop-filter: blur(16px);
@@ -48,7 +50,7 @@ body {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
 }
 
-/* NAVBAR */
+/* BARRA DE NAVEGAÇÃO */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -112,6 +114,7 @@ body {
 }
 
 #auth-user-view {
+    display: flex;
     align-items: center;
     gap: 12px;
 }
@@ -123,7 +126,7 @@ body {
     font-size: 0.9rem;
 }
 
-/* BOTÕES */
+/* ESTILIZAÇÃO DE BOTÕES */
 .btn-primary, .btn-secondary, .btn-outline { 
     font-family: var(--font-heading);
     font-size: 0.85rem;
@@ -173,7 +176,7 @@ body {
     color: var(--accent);
 }
 
-/* LAYOUT E ESTRUTURA */
+/* CONTAINER PRINCIPAL & ABAS */
 .main-container {
     max-width: 1100px;
     margin: 20px auto;
@@ -238,7 +241,7 @@ body {
     margin-top: 25px;
 }
 
-/* ESTATÍSTICAS */
+/* CARD DE ESTATÍSTICAS */
 .stats-overview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -258,7 +261,6 @@ body {
 
 .stat-icon {
     font-size: 2rem;
-    color: var(--accent);
     margin-bottom: 10px;
 }
 
@@ -279,7 +281,7 @@ body {
     letter-spacing: 1px;
 }
 
-/* SEÇÃO E GRID DE CARDS */
+/* CABEÇALHOS DE SEÇÃO E GRIDS */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -308,6 +310,7 @@ body {
     gap: 20px;
 }
 
+/* CARDS DE JOGADOR */
 .card {
     padding: 22px;
     position: relative;
@@ -367,7 +370,7 @@ body {
     display: inline-block;
 }
 
-/* MEU PERFIL */
+/* ESTILO DO MEU PERFIL */
 .insta-profile-card {
     padding: 35px;
 }
@@ -441,12 +444,13 @@ body {
     text-transform: uppercase;
 }
 
-/* ANIMAÇÕES E RESPONSIVIDADE */
+/* ANIMAÇÃO DE TRANSIÇÃO */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* RESPONSIVIDADE PARA DISPOSITIVOS MÓVEIS */
 @media (max-width: 768px) {
     .navbar { 
         flex-direction: column; 
