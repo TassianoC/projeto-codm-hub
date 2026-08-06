@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica de Perfil, Agendamento e Fila de Confrontos
+   CODM eSports Hub - Script Completo
    ========================================================================== */
 
 // Configuração Firebase
@@ -24,6 +24,7 @@ let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
 
+// Dados Mock do Leaderboard
 const mockLeaderboard = [
     { rank: 1, name: "Viper_CODM", kd: "3.42", wins: 320, points: 2850 },
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
@@ -32,6 +33,7 @@ const mockLeaderboard = [
     { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
 ];
 
+// Inicialização da Aplicação
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initCounters();
@@ -41,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
     listenFeedUpdates();
     listenScheduleQueue();
 });
+
+/* ==========================================================================
+   EFEITOS VISUAIS E INTERFACE
+   ========================================================================== */
 
 function initParticles() {
     if (typeof particlesJS !== 'undefined') {
@@ -105,8 +111,12 @@ function renderLeaderboard(data) {
     });
 }
 
+/* ==========================================================================
+   GERENCIADORES DE EVENTOS (EVENT LISTENERS)
+   ========================================================================== */
+
 function setupEventListeners() {
-    // Tema
+    // Alternância de Tema
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -116,7 +126,7 @@ function setupEventListeners() {
         });
     }
 
-    // Modal de Login
+    // Modal de Login/Autenticação
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
@@ -131,7 +141,10 @@ function setupEventListeners() {
             }
         });
     }
-    if (closeAuth) closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
+
+    if (closeAuth && authModal) {
+        closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
+    }
 
     if (toggleAuthMode) {
         toggleAuthMode.addEventListener('click', (e) => {
@@ -146,27 +159,42 @@ function setupEventListeners() {
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
-    // Perfil
+    // Modal de Perfil Restrito ao Usuário
     const btnProfile = document.getElementById('btn-profile');
     const profileModal = document.getElementById('profile-modal');
     const closeProfileModal = document.querySelector('.close-profile-modal');
     const profileForm = document.getElementById('profile-form');
 
-    if (btnProfile && profileModal) btnProfile.addEventListener('click', openProfileModal);
-    if (closeProfileModal) closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
-    if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
+    if (btnProfile) {
+        btnProfile.addEventListener('click', () => {
+            if (!currentUser) {
+                alert('Acesso negado. Você precisa estar logado para ver e editar seu perfil!');
+                if (authModal) authModal.classList.remove('hidden');
+                return;
+            }
+            openProfileModal();
+        });
+    }
 
-    // Botões de Partida (Abre o modal gerando os campos dos jogadores dinamicamente)
+    if (closeProfileModal && profileModal) {
+        closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
+    }
+
+    if (profileForm) {
+        profileForm.addEventListener('submit', handleProfileSave);
+    }
+
+    // Botões de Partida / Inscrição de Squads
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
     const closeMatchModal = document.querySelector('.close-match-modal');
     const matchForm = document.getElementById('match-form');
 
     matchBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             if (!currentUser) {
-                alert('Faça login para inscrever seu time ou marcar horários!');
-                authModal.classList.remove('hidden');
+                alert('Faça login para inscrever seu time ou lançar um desafio na fila!');
+                if (authModal) authModal.classList.remove('hidden');
                 return;
             }
 
@@ -179,43 +207,50 @@ function setupEventListeners() {
         });
     });
 
-    if (closeMatchModal) closeMatchModal.addEventListener('click', () => matchModal.classList.add('hidden'));
-    if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
+    if (closeMatchModal && matchModal) {
+        closeMatchModal.addEventListener('click', () => matchModal.classList.add('hidden'));
+    }
 
-    // Admin
+    if (matchForm) {
+        matchForm.addEventListener('submit', handleMatchSubscription);
+    }
+
+    // Painel Admin
     const adminBtn = document.getElementById('btn-admin');
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
 
-    if (adminBtn && adminModal) adminBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
-    if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
+    if (adminBtn && adminModal) {
+        adminBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
+    }
+    if (closeAdmin && adminModal) {
+        closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
+    }
 
+    // Publicar Feed
     const postBtn = document.getElementById('btn-post');
     if (postBtn) postBtn.addEventListener('click', handleNewPost);
+
+    // Fechar modais ao clicar no fundo escuro fora da caixa
+    window.addEventListener('click', (e) => {
+        if (e.target === authModal) authModal.classList.add('hidden');
+        if (e.target === profileModal) profileModal.classList.add('hidden');
+        if (e.target === matchModal) matchModal.classList.add('hidden');
+        if (e.target === adminModal) adminModal.classList.add('hidden');
+    });
 }
 
-// GERAÇÃO DINÂMICA DOS CAMPOS DE JOGADORES (1 a 5)
-function generatePlayersInputs(count) {
-    const container = document.getElementById('players-input-container');
-    container.innerHTML = `<h4 style="margin-bottom: 10px; color: var(--primary-neon);">Integrantes da Lineup (${count} Jogador(es)):</h4>`;
+/* ==========================================================================
+   PERFIL DE JOGADOR (RESTRITO À CONTA LOGADA)
+   ========================================================================== */
 
-    for (let i = 1; i <= count; i++) {
-        const labelText = i === 1 ? "Jogador 1 (Capitão / Seu Nick)" : `Jogador ${i}`;
-        const inputHtml = `
-            <div class="input-group" style="margin-bottom: 10px;">
-                <label style="font-size: 13px;">${labelText}</label>
-                <input type="text" class="match-player-input" required placeholder="Nick e Tag do Jogador ${i}">
-            </div>
-        `;
-        container.innerHTML += inputHtml;
-    }
-}
-
-// GERENCIAMENTO DO PERFIL DE ATLETA
 function openProfileModal() {
-    if (!currentUser) return;
     const profileModal = document.getElementById('profile-modal');
+    if (!currentUser || !profileModal) return;
 
+    profileModal.classList.remove('hidden');
+
+    // Busca os dados do perfil do usuário logado usando seu UID único
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
@@ -225,22 +260,27 @@ function openProfileModal() {
             const bio = data.bio || 'Atleta competitivo de CODM.';
             const avatar = data.avatarUrl || 'https://via.placeholder.com/80';
 
-            // Atualiza campos do form
             document.getElementById('profile-nickname').value = nickname;
             document.getElementById('profile-role').value = role;
             document.getElementById('profile-tier').value = tier;
             document.getElementById('profile-bio').value = bio;
             document.getElementById('profile-avatar').value = avatar;
 
-            // Atualiza card de exibição no topo
             document.getElementById('display-nickname').innerText = nickname;
             document.getElementById('display-role').innerText = role;
             document.getElementById('display-tier').innerText = tier;
             document.getElementById('display-bio').innerText = `"${bio}"`;
             document.getElementById('display-avatar').src = avatar;
+        } else {
+            // Novo Usuário: Inicializa o cartão com valores padrão
+            const defaultNick = currentUser.email.split('@')[0];
+            document.getElementById('profile-nickname').value = defaultNick;
+            document.getElementById('display-nickname').innerText = defaultNick;
+            document.getElementById('display-role').innerText = "Sniper";
+            document.getElementById('display-tier').innerText = "T3 (Amador / Treino)";
+            document.getElementById('display-bio').innerText = '"Edite seu perfil para definir suas estatísticas!"';
         }
-        profileModal.classList.remove('hidden');
-    });
+    }).catch(err => console.error("Erro ao carregar perfil:", err));
 }
 
 function handleProfileSave(e) {
@@ -261,12 +301,41 @@ function handleProfileSave(e) {
         avatarUrl: avatarUrl,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(() => {
-        alert('Perfil do atleta salvo com sucesso!');
+        alert('Seu perfil de atleta foi salvo com sucesso!');
+        
+        // Atualiza a visualização imediata do cartão
+        document.getElementById('display-nickname').innerText = nickname;
+        document.getElementById('display-role').innerText = gameRole;
+        document.getElementById('display-tier').innerText = tier;
+        document.getElementById('display-bio').innerText = `"${bio}"`;
+        if (avatarUrl) document.getElementById('display-avatar').src = avatarUrl;
+
         document.getElementById('profile-modal').classList.add('hidden');
     }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
 }
 
-// SUBMISSÃO DE INSCRIÇÃO/AGENDAMENTO NA FILA DE DESAFIOS
+/* ==========================================================================
+   INSCRIÇÃO DE SQUADS, CAMPOS DINÂMICOS E FILA DE DESAFIOS (SCRIM FINDER)
+   ========================================================================== */
+
+function generatePlayersInputs(count) {
+    const container = document.getElementById('players-input-container');
+    if (!container) return;
+
+    container.innerHTML = `<h4 style="margin-bottom: 10px; color: var(--primary-neon);">Escalação do Time (${count} Jogador(es)):</h4>`;
+
+    for (let i = 1; i <= count; i++) {
+        const labelText = i === 1 ? "Jogador 1 (Capitão / Seu Nick)" : `Jogador ${i}`;
+        const inputHtml = `
+            <div class="input-group" style="margin-bottom: 10px;">
+                <label style="font-size: 13px;">${labelText}</label>
+                <input type="text" class="match-player-input" required placeholder="Nick e Tag do Jogador ${i}">
+            </div>
+        `;
+        container.innerHTML += inputHtml;
+    }
+}
+
 function handleMatchSubscription(e) {
     e.preventDefault();
     const mode = document.getElementById('match-mode-selected').value;
@@ -293,13 +362,12 @@ function handleMatchSubscription(e) {
         status: 'Aguardando Desafiante',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        alert(`Desafio do time ${teamName} lançado com sucesso na fila para às ${time} (${tier})!`);
+        alert(`Desafio do time "${teamName}" publicado na fila para às ${time} (${tier})!`);
         document.getElementById('match-modal').classList.add('hidden');
         document.getElementById('match-form').reset();
-    }).catch(err => alert('Erro ao lançar agendamento: ' + err.message));
+    }).catch(err => alert('Erro ao publicar agendamento: ' + err.message));
 }
 
-// ESCUTAR FILA DE AGENDAMENTOS (SCRIM FINDER)
 function listenScheduleQueue() {
     const queueContainer = document.getElementById('schedule-queue-container');
     if (!queueContainer) return;
@@ -308,21 +376,21 @@ function listenScheduleQueue() {
         .onSnapshot((snapshot) => {
             queueContainer.innerHTML = '';
             if (snapshot.empty) {
-                queueContainer.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nenhum time lançou horário na fila ainda. Seja o primeiro a agendar!</p>';
+                queueContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1;">Nenhum time lançou horário na fila ainda. Seja o primeiro a agendar!</p>';
                 return;
             }
 
             snapshot.forEach((doc) => {
                 const item = doc.data();
-                const playersHtml = item.players ? item.players.map((p, idx) => `<li><small>P${idx+1}:</small> ${p}</li>`).join('') : '';
+                const playersHtml = item.players ? item.players.map((p, idx) => `<li><small style="color: var(--primary-neon);">P${idx+1}:</small> ${p}</li>`).join('') : '';
 
                 const isChallenged = item.status !== 'Aguardando Desafiante';
                 const statusBadge = isChallenged 
-                    ? `<span style="background: var(--secondary-neon); color:#fff; padding: 3px 8px; border-radius: 4px; font-size: 11px;">Partida Marcada</span>`
-                    : `<span style="background: var(--primary-neon); color:#000; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">Fila Aberta</span>`;
+                    ? `<span style="background: var(--secondary-neon, #ff0055); color:#fff; padding: 3px 8px; border-radius: 4px; font-size: 11px;">Partida Marcada</span>`
+                    : `<span style="background: var(--primary-neon, #00f0ff); color:#000; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">Fila Aberta</span>`;
 
                 const cardHtml = `
-                    <div class="glass-card" style="position: relative; border-left: 4px solid ${item.tier === 'T1' ? '#ff0055' : item.tier === 'T2' ? '#ffb700' : '#00f0ff'};">
+                    <div class="glass-card" style="position: relative; border-left: 4px solid ${item.tier === 'T1' ? '#ff0055' : item.tier === 'T2' ? '#ffb700' : '#00f0ff'}; margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <h3 style="margin: 0; font-size: 18px;">${item.teamName}</h3>
                             ${statusBadge}
@@ -332,7 +400,7 @@ function listenScheduleQueue() {
                         </p>
                         <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
                             <p style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">Escalação da Equipe:</p>
-                            <ul style="list-style: none; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                            <ul style="list-style: none; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 0;">
                                 ${playersHtml}
                             </ul>
                         </div>
@@ -341,7 +409,7 @@ function listenScheduleQueue() {
                                 <i class="fa-solid fa-swords"></i> Desafiar neste Horário
                             </button>
                         ` : `
-                            <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Confronto aceito por: ${item.challengedBy || 'Adversário'}</p>
+                            <p style="font-size: 12px; color: var(--text-secondary); text-align: center; margin: 0;">Confronto aceito por: <strong>${item.challengedBy || 'Adversário'}</strong></p>
                         `}
                     </div>
                 `;
@@ -352,23 +420,28 @@ function listenScheduleQueue() {
 
 function acceptChallenge(docId, teamName, time) {
     if (!currentUser) {
-        alert('Você precisa estar logado com seu time para aceitar um desafio!');
+        alert('Você precisa estar logado na sua conta para aceitar um desafio!');
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) authModal.classList.remove('hidden');
         return;
     }
 
     const challengerTeam = prompt(`Digite o nome do seu time para confirmar o confronto contra ${teamName} às ${time}:`);
-    if (challengerTeam) {
+    if (challengerTeam && challengerTeam.trim() !== '') {
         db.collection('schedules').doc(docId).update({
             status: 'Confronto Confirmado',
-            challengedBy: challengerTeam,
+            challengedBy: challengerTeam.trim(),
             challengerUid: currentUser.uid
         }).then(() => {
-            alert(`Confronto marcado com sucesso contra ${teamName} para às ${time}! Entrem em contato pelo WhatsApp cadastrado.`);
+            alert(`Confronto confirmado com sucesso contra ${teamName} para às ${time}!`);
         }).catch(err => alert('Erro ao aceitar desafio: ' + err.message));
     }
 }
 
-// AUTH
+/* ==========================================================================
+   AUTENTICAÇÃO E MONITORAMENTO DE CONTA
+   ========================================================================== */
+
 function handleAuthSubmit(e) {
     e.preventDefault();
     const email = document.getElementById('email').value;
@@ -381,11 +454,12 @@ function handleAuthSubmit(e) {
                 return db.collection('users').doc(user.uid).set({
                     email: user.email,
                     role: 'player',
+                    nickname: email.split('@')[0],
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             })
             .then(() => {
-                alert('Conta criada com sucesso!');
+                alert('Conta criada com sucesso! Seu perfil já está disponível.');
                 document.getElementById('auth-modal').classList.add('hidden');
             })
             .catch((error) => alert('Erro no cadastro: ' + error.message));
@@ -407,6 +481,8 @@ function listenAuthState() {
         if (user) {
             currentUser = user;
             if (authBtnText) authBtnText.innerText = 'Sair';
+            
+            // Exibe o botão de perfil SOMENTE para o usuário autenticado
             if (profileBtn) profileBtn.classList.remove('hidden');
 
             db.collection('users').doc(user.uid).get().then((doc) => {
@@ -422,18 +498,26 @@ function listenAuthState() {
             currentUser = null;
             isAdmin = false;
             if (authBtnText) authBtnText.innerText = 'Entrar';
-            if (adminBtn) adminBtn.classList.add('hidden');
+            
+            // Oculta os botões restritos quando não houver usuário logado
             if (profileBtn) profileBtn.classList.add('hidden');
+            if (adminBtn) adminBtn.classList.add('hidden');
         }
     });
 }
 
-// FEED COM CURTIDAS
+/* ==========================================================================
+   FEED DA COMUNIDADE COM CURTIDAS
+   ========================================================================== */
+
 function handleNewPost() {
     if (!currentUser) {
-        alert('Logue para postar no feed!');
+        alert('Faça login para publicar no feed!');
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) authModal.classList.remove('hidden');
         return;
     }
+
     const input = document.getElementById('post-input');
     const content = input.value.trim();
     if (!content) return;
@@ -450,7 +534,7 @@ function handleNewPost() {
 
 function toggleLikePost(postId) {
     if (!currentUser) {
-        alert('Faça login para curtir!');
+        alert('Faça login para curtir a publicação!');
         return;
     }
 
@@ -490,15 +574,15 @@ function listenFeedUpdates() {
                 const isLiked = currentUser && data.likedBy && data.likedBy.includes(currentUser.uid);
 
                 const postElement = `
-                    <div class="post-card">
-                        <div class="post-header">
-                            <span class="post-author">@${data.author}</span>
-                            <span class="post-date">${timeStr}</span>
+                    <div class="post-card" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border-card, #333);">
+                        <div class="post-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span class="post-author" style="color: var(--primary-neon, #00f0ff); font-weight: bold;">@${data.author}</span>
+                            <span class="post-date" style="font-size: 12px; color: var(--text-secondary);">${timeStr}</span>
                         </div>
-                        <p class="post-content">${data.content}</p>
-                        <div style="margin-top: 10px;">
-                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 14px; border-color: ${isLiked ? 'var(--secondary-neon)' : 'var(--primary-neon)'}">
-                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--secondary-neon)' : 'inherit'}"></i> ${likesCount} Curtidas
+                        <p class="post-content" style="margin-bottom: 10px;">${data.content}</p>
+                        <div>
+                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 13px; border-color: ${isLiked ? 'var(--secondary-neon, #ff0055)' : 'var(--primary-neon, #00f0ff)'}">
+                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--secondary-neon, #ff0055)' : 'inherit'}"></i> ${likesCount} Curtidas
                             </button>
                         </div>
                     </div>
