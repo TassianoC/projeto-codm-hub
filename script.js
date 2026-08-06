@@ -889,3 +889,61 @@ function godToggleMaintenance() {
     document.body.classList.toggle('maintenance-mode');
     alert("[PODER DE DEUS]: Estado do Servidor alterado!");
 }
+/* ==========================================================================
+   CONTROLE DE ACESSO EXCLUSIVO - GOD MODE
+   ========================================================================== */
+
+// E-mail supremo do criador com acesso total
+const SUPREME_GOD_EMAIL = "fallk.codm@gmail.com";
+
+// Exemplo: Simulação do usuário atualmente autenticado no sistema
+// (Na sua aplicação real, recupere este valor do seu sistema de Auth, LocalStorage ou Session)
+let currentUser = {
+    email: "fallk.codm@gmail.com", // Altere para testar com outro e-mail
+    name: "Tassiano"
+};
+
+/**
+ * Verifica se o usuário atual é o Administrador Supremo
+ */
+function isSupremeGod() {
+    return currentUser && currentUser.email.toLowerCase() === SUPREME_GOD_EMAIL.toLowerCase();
+}
+
+/**
+ * Inicializa e protege os controles do God Mode ao carregar a página
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    const godBtn = document.getElementById("btnGodTrigger");
+    const godModal = document.getElementById("godAdminModal");
+
+    if (!isSupremeGod()) {
+        // Se NÃO for a sua conta, remove completamente os elementos do código da página
+        if (godBtn) godBtn.remove();
+        if (godModal) godModal.remove();
+        console.log("Acesso ao God Mode: Negado.");
+    } else {
+        // Se for a sua conta, garante que o botão fique visível
+        if (godBtn) godBtn.classList.remove("hidden");
+    }
+});
+
+/**
+ * Função de abertura com trava de segurança reforçada
+ */
+function toggleGodPanel() {
+    // Dupla checagem de segurança
+    if (!isSupremeGod()) {
+        alert("[ACESSO NEGADO]: Você não possui permissões de Divindade.");
+        return;
+    }
+
+    const modal = document.getElementById('godAdminModal');
+    if (modal) {
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+            renderUsersTable();
+            renderAdminFeed();
+        }
+    }
+}
