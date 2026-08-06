@@ -1,8 +1,7 @@
 /* ==========================================================================
-   1. VARIÁVEIS E TEMAS (Dark & Light) - CORRIGIDO
+   1. VARIÁVEIS E TEMAS (Dark & Light)
    ========================================================================== */
 :root {
-    /* Fontes */
     --font-heading: 'Orbitron', sans-serif;
     --font-body: 'Rajdhani', sans-serif;
 
@@ -16,17 +15,16 @@
     --text-secondary: #a0aec0;
     --text-muted: #64748b;
 
-    /* Destaques Neon */
-    --primary-neon: #00f0ff;      /* Cyan Neon */
+    /* Neon */
+    --primary-neon: #00f0ff;
     --primary-neon-glow: rgba(0, 240, 255, 0.4);
-    --secondary-neon: #ff0055;    /* Pink/Red Neon */
-    --secondary-neon-glow: rgba(255, 0, 85, 0.4); /* CORRIGIDO DE ff -> 255 */
-    --accent-gold: #ffb700;       /* Gold Troféus */
+    --secondary-neon: #ff0055;
+    --secondary-neon-glow: rgba(255, 0, 85, 0.4);
+    --accent-gold: #ffb700;
     
     /* Gradientes */
     --grad-primary: linear-gradient(135deg, #00f0ff 0%, #7000ff 100%);
     --grad-accent: linear-gradient(135deg, #ff0055 0%, #ff7700 100%);
-    --grad-dark: linear-gradient(180deg, rgba(7, 9, 14, 0.9) 0%, rgba(3, 4, 7, 0.98) 100%);
     
     /* Outros */
     --radius-sm: 8px;
@@ -36,7 +34,6 @@
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Tema Claro */
 body.light-theme {
     --bg-main: #f1f5f9;
     --bg-card: rgba(255, 255, 255, 0.88);
@@ -140,7 +137,6 @@ button {
     -webkit-text-fill-color: transparent;
 }
 
-/* Badges e Pulsos */
 .hero-badge-container {
     display: inline-flex;
     align-items: center;
@@ -334,7 +330,7 @@ button {
 }
 
 /* ==========================================================================
-   5. SEÇÃO HERO (INÍCIO OTIMIZADO)
+   5. SEÇÃO HERO
    ========================================================================== */
 .hero-section {
     position: relative;
@@ -699,7 +695,6 @@ button {
     max-width: 800px;
 }
 
-/* Estilo unificado para o botão fechar das modais */
 .close-modal,
 .close-modal-admin,
 .close-modal-btn {
@@ -768,7 +763,6 @@ button {
     font-weight: 700;
 }
 
-/* Abas Admin */
 .admin-tabs {
     display: flex;
     gap: 15px;
