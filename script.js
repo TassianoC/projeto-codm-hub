@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica Principal e Integrações
+   CODM eSports Hub - Lógica Principal e Integrações Atualizadas
    ========================================================================== */
 
 // 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE (PROJETO: projeto-codm-hub)
@@ -13,7 +13,6 @@ const firebaseConfig = {
   appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-// Inicializa o Firebase no app
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -25,7 +24,6 @@ let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
 
-// Listas estáticas para preenchimento de UI
 const mockLeaderboard = [
     { rank: 1, name: "Viper_CODM", kd: "3.42", wins: 320, points: 2850 },
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
@@ -41,9 +39,6 @@ const mockTrophies = [
     { title: "MVP da Temporada", desc: "Maior pontuação acumulada do Hub", icon: "fa-star" }
 ];
 
-// ==========================================================================
-// 2. INICIALIZAÇÃO AO CARREGAR O DOM
-// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initCounters();
@@ -54,9 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     listenFeedUpdates();
 });
 
-// ==========================================================================
-// 3. BACKGROUND DE PARTÍCULAS (PARTICLES.JS)
-// ==========================================================================
 function initParticles() {
     if (typeof particlesJS !== 'undefined') {
         particlesJS('particles-js', {
@@ -66,42 +58,19 @@ function initParticles() {
                 shape: { type: 'circle' },
                 opacity: { value: 0.3, random: true },
                 size: { value: 3, random: true },
-                line_linked: {
-                    enable: true,
-                    distance: 150,
-                    color: '#00f0ff',
-                    opacity: 0.15,
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 2,
-                    direction: 'none',
-                    random: false,
-                    straight: false,
-                    out_mode: 'out',
-                    bounce: false
-                }
+                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.15, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
             },
             interactivity: {
                 detect_on: 'canvas',
-                events: {
-                    onhover: { enable: true, mode: 'grab' },
-                    onclick: { enable: true, mode: 'push' }
-                },
-                modes: {
-                    grab: { distance: 140, line_linked: { opacity: 0.4 } },
-                    push: { particles_nb: 3 }
-                }
+                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.4 } }, push: { particles_nb: 3 } }
             },
             retina_detect: true
         });
     }
 }
 
-// ==========================================================================
-// 4. ANIMAÇÃO DOS CONTADORES ESTATÍSTICOS
-// ==========================================================================
 function initCounters() {
     const counters = document.querySelectorAll('.counter');
     const speed = 200;
@@ -123,9 +92,6 @@ function initCounters() {
     });
 }
 
-// ==========================================================================
-// 5. RENDERIZAÇÃO DE DADOS (LEADERBOARD E TROFÉUS)
-// ==========================================================================
 function renderLeaderboard(data) {
     const tbody = document.getElementById('leaderboard-body');
     if (!tbody) return;
@@ -163,25 +129,18 @@ function renderTrophies(trophies) {
     });
 }
 
-// ==========================================================================
-// 6. EVENT LISTENERS E GERENCIAMENTO DA INTERFACE
-// ==========================================================================
 function setupEventListeners() {
-    // Alternador de Tema (Dark/Light)
+    // Alternador de Tema
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
             const icon = themeBtn.querySelector('i');
-            if (document.body.classList.contains('light-theme')) {
-                icon.className = 'fa-solid fa-sun';
-            } else {
-                icon.className = 'fa-solid fa-moon';
-            }
+            icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         });
     }
 
-    // Modal de Login
+    // Modal de Auth
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
@@ -196,10 +155,7 @@ function setupEventListeners() {
             }
         });
     }
-
-    if (closeAuth) {
-        closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
-    }
+    if (closeAuth) closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
 
     if (toggleAuthMode) {
         toggleAuthMode.addEventListener('click', (e) => {
@@ -211,53 +167,137 @@ function setupEventListeners() {
         });
     }
 
-    // Formulário de Autenticação
     const authForm = document.getElementById('auth-form');
-    if (authForm) {
-        authForm.addEventListener('submit', handleAuthSubmit);
+    if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
+
+    // Modal de Perfil Editável
+    const btnProfile = document.getElementById('btn-profile');
+    const profileModal = document.getElementById('profile-modal');
+    const closeProfileModal = document.querySelector('.close-profile-modal');
+    const profileForm = document.getElementById('profile-form');
+
+    if (btnProfile && profileModal) {
+        btnProfile.addEventListener('click', openProfileModal);
+    }
+    if (closeProfileModal) {
+        closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
+    }
+    if (profileForm) {
+        profileForm.addEventListener('submit', handleProfileSave);
     }
 
-    // Modal de Administração
+    // Modais e Botões de Inscrever-se em Partidas
+    const matchBtns = document.querySelectorAll('.btn-match');
+    const matchModal = document.getElementById('match-modal');
+    const closeMatchModal = document.querySelector('.close-match-modal');
+    const matchForm = document.getElementById('match-form');
+
+    matchBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const mode = e.target.getAttribute('data-mode');
+            if (!currentUser) {
+                alert('Faça login na sua conta para se inscrever nas partidas!');
+                authModal.classList.remove('hidden');
+                return;
+            }
+            document.getElementById('match-mode-selected').value = mode;
+            matchModal.classList.remove('hidden');
+        });
+    });
+
+    if (closeMatchModal) {
+        closeMatchModal.addEventListener('click', () => matchModal.classList.add('hidden'));
+    }
+
+    if (matchForm) {
+        matchForm.addEventListener('submit', handleMatchSubscription);
+    }
+
+    // Admin Modal
     const adminBtn = document.getElementById('btn-admin');
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
 
-    if (adminBtn && adminModal) {
-        adminBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
-    }
-    if (closeAdmin) {
-        closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
-    }
+    if (adminBtn && adminModal) adminBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
+    if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
-    // Abas do Painel Admin
     const tabBtns = document.querySelectorAll('.tab-btn');
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             tabBtns.forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
             btn.classList.add('active');
-            const targetTab = btn.getAttribute('data-tab');
-            document.getElementById(targetTab).classList.add('active');
+            document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
         });
     });
 
-    // Envio de Postagens no Feed
     const postBtn = document.getElementById('btn-post');
-    if (postBtn) {
-        postBtn.addEventListener('click', handleNewPost);
-    }
+    if (postBtn) postBtn.addEventListener('click', handleNewPost);
 
-    // Atualização de Estatísticas no Admin
     const adminStatsForm = document.getElementById('admin-update-stats');
-    if (adminStatsForm) {
-        adminStatsForm.addEventListener('submit', handleAdminStatUpdate);
-    }
+    if (adminStatsForm) adminStatsForm.addEventListener('submit', handleAdminStatUpdate);
 }
 
-// ==========================================================================
-// 7. AUTENTICAÇÃO FIREBASE (LOGIN / CADASTRO / ESTADO)
-// ==========================================================================
+// PERFIL EDITÁVEL
+function openProfileModal() {
+    if (!currentUser) return;
+    const profileModal = document.getElementById('profile-modal');
+    
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('profile-nickname').value = data.nickname || '';
+            document.getElementById('profile-role').value = data.gameRole || 'Sniper';
+            document.getElementById('profile-bio').value = data.bio || '';
+            document.getElementById('profile-avatar').value = data.avatarUrl || '';
+        }
+        profileModal.classList.remove('hidden');
+    });
+}
+
+function handleProfileSave(e) {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const nickname = document.getElementById('profile-nickname').value;
+    const gameRole = document.getElementById('profile-role').value;
+    const bio = document.getElementById('profile-bio').value;
+    const avatarUrl = document.getElementById('profile-avatar').value;
+
+    db.collection('users').doc(currentUser.uid).set({
+        nickname: nickname,
+        gameRole: gameRole,
+        bio: bio,
+        avatarUrl: avatarUrl,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).then(() => {
+        alert('Perfil atualizado com sucesso!');
+        document.getElementById('profile-modal').classList.add('hidden');
+    }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
+}
+
+// INSCRIÇÃO NAS PARTIDAS
+function handleMatchSubscription(e) {
+    e.preventDefault();
+    const mode = document.getElementById('match-mode-selected').value;
+    const teamName = document.getElementById('match-team-name').value;
+    const whatsapp = document.getElementById('match-whatsapp').value;
+
+    db.collection('matches').add({
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        mode: mode,
+        teamName: teamName,
+        whatsapp: whatsapp,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert(`Inscrição confirmada para o modo ${mode}! O organizador entrará em contato.`);
+        document.getElementById('match-modal').classList.add('hidden');
+        document.getElementById('match-form').reset();
+    }).catch(err => alert('Erro na inscrição: ' + err.message));
+}
+
+// AUTH
 function handleAuthSubmit(e) {
     e.preventDefault();
     const email = document.getElementById('email').value;
@@ -291,10 +331,12 @@ function listenAuthState() {
     auth.onAuthStateChanged((user) => {
         const authBtnText = document.getElementById('auth-btn-text');
         const adminBtn = document.getElementById('btn-admin');
+        const profileBtn = document.getElementById('btn-profile');
 
         if (user) {
             currentUser = user;
             if (authBtnText) authBtnText.innerText = 'Sair';
+            if (profileBtn) profileBtn.classList.remove('hidden');
             
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists && doc.data().role === 'admin') {
@@ -311,13 +353,12 @@ function listenAuthState() {
             isAdmin = false;
             if (authBtnText) authBtnText.innerText = 'Entrar';
             if (adminBtn) adminBtn.classList.add('hidden');
+            if (profileBtn) profileBtn.classList.add('hidden');
         }
     });
 }
 
-// ==========================================================================
-// 8. FEED EM TEMPO REAL (FIRESTORE)
-// ==========================================================================
+// FEED COM SISTEMA DE CURTIDAS
 function handleNewPost() {
     if (!currentUser) {
         alert('Você precisa estar logado para publicar no feed!');
@@ -326,17 +367,46 @@ function handleNewPost() {
 
     const input = document.getElementById('post-input');
     const content = input.value.trim();
-
     if (!content) return;
 
     db.collection('posts').add({
         author: currentUser.email.split('@')[0],
         userId: currentUser.uid,
         content: content,
+        likes: 0,
+        likedBy: [],
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         input.value = '';
     }).catch(err => alert('Erro ao publicar: ' + err.message));
+}
+
+function toggleLikePost(postId) {
+    if (!currentUser) {
+        alert('Faça login para curtir as publicações!');
+        return;
+    }
+
+    const postRef = db.collection('posts').doc(postId);
+    postRef.get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            const likedBy = data.likedBy || [];
+            const hasLiked = likedBy.includes(currentUser.uid);
+
+            if (hasLiked) {
+                postRef.update({
+                    likes: firebase.firestore.FieldValue.increment(-1),
+                    likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+                });
+            } else {
+                postRef.update({
+                    likes: firebase.firestore.FieldValue.increment(1),
+                    likedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+                });
+            }
+        }
+    });
 }
 
 function listenFeedUpdates() {
@@ -347,14 +417,16 @@ function listenFeedUpdates() {
         .onSnapshot((snapshot) => {
             postsContainer.innerHTML = '';
             if (snapshot.empty) {
-                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada. Seja o primeiro a postar!</p>';
+                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada.</p>';
                 return;
             }
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
                 const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
-                
+                const likesCount = data.likes || 0;
+                const isLiked = currentUser && data.likedBy && data.likedBy.includes(currentUser.uid);
+
                 const postElement = `
                     <div class="post-card">
                         <div class="post-header">
@@ -362,27 +434,19 @@ function listenFeedUpdates() {
                             <span class="post-date">${timeStr}</span>
                         </div>
                         <p class="post-content">${data.content}</p>
+                        <div style="margin-top: 10px;">
+                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 14px; border-color: ${isLiked ? 'var(--secondary-neon)' : 'var(--primary-neon)'}">
+                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--secondary-neon)' : 'inherit'}"></i> ${likesCount} Curtidas
+                            </button>
+                        </div>
                     </div>
                 `;
                 postsContainer.innerHTML += postElement;
             });
-        }, (error) => {
-            console.log("Erro no Firestore:", error);
-            postsContainer.innerHTML = `
-                <div class="post-card">
-                    <div class="post-header">
-                        <span class="post-author">@Viper_CODM</span>
-                        <span class="post-date">14:32</span>
-                    </div>
-                    <p class="post-content">Buscando duo pro campeonato de final de semana! Foco total em Busca & Destruir.</p>
-                </div>
-            `;
         });
 }
 
-// ==========================================================================
-// 9. PAINEL DE ADMINISTRAÇÃO E GERENCIAMENTO
-// ==========================================================================
+// ADMIN
 function loadAdminUsersList() {
     const container = document.getElementById('admin-users-list');
     if (!container) return;
@@ -392,7 +456,7 @@ function loadAdminUsersList() {
         snapshot.forEach((doc) => {
             const u = doc.data();
             const userRow = `
-                <div style="display:flex; justify-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-card);">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-card);">
                     <span>${u.email} (${u.role || 'player'})</span>
                     <button onclick="toggleBanUser('${doc.id}')" class="btn-secondary" style="padding:4px 10px; font-size:12px;">
                         ${u.banned ? 'Desbanir' : 'Banir'}
@@ -410,7 +474,7 @@ function toggleBanUser(userId) {
         if (doc.exists) {
             const currentBanStatus = doc.data().banned || false;
             userRef.update({ banned: !currentBanStatus }).then(() => {
-                alert('Status do usuário atualizado com sucesso!');
+                alert('Status alterado!');
                 loadAdminUsersList();
             });
         }
@@ -427,9 +491,9 @@ function handleAdminStatUpdate(e) {
         existingPlayer.points += pointsToAdd;
         mockLeaderboard.sort((a, b) => b.points - a.points);
         renderLeaderboard(mockLeaderboard);
-        alert(`Pontuação de ${playerName} atualizada para ${existingPlayer.points} pts!`);
+        alert(`Pontuação de ${playerName} atualizada!`);
         document.getElementById('admin-update-stats').reset();
     } else {
-        alert('Jogador não encontrado no Leaderboard local.');
+        alert('Jogador não encontrado no Leaderboard.');
     }
 }
