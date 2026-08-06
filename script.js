@@ -18,7 +18,7 @@ let teamsRef = null;
 
 let currentUser = null;
 let currentUserProfile = null;
-let activeViewingUid = null; // Guarda de qual jogador o perfil está sendo exibido
+let activeViewingUid = null;
 let isAdmin = false;
 const ADMIN_SECRET_PASSWORD = "lobark2026";
 
@@ -60,7 +60,6 @@ function listenToAuth() {
             guestView.style.display = 'none';
             userView.style.display = 'flex';
             
-            // Marca usuário como Online no Firebase Realtime Database
             db.ref(`users/${user.uid}/isOnline`).set(true);
             db.ref(`users/${user.uid}/isOnline`).onDisconnect().set(false);
 
@@ -68,16 +67,19 @@ function listenToAuth() {
                 currentUserProfile = snapshot.val() || {};
                 userDisplayName.innerText = currentUserProfile.nick || user.email.split('@')[0];
                 
-                // Se não estiver navegando pelo perfil de outro player, exibe o meu perfil
-                if (!activeViewingUid || activeViewingUid === user.uid) {
-                    renderUserProfile(user.uid);
+                if (document.getElementById('tab-profile').classList.contains('active')) {
+                    renderUserProfile(activeViewingUid || user.uid);
                 }
             });
         } else {
             guestView.style.display = 'block';
             userView.style.display = 'none';
             currentUserProfile = null;
-            if (activeViewingUid) renderUserProfile(activeViewingUid);
+            
+            if (document.getElementById('tab-profile').classList.contains('active')) {
+                if (activeViewingUid) renderUserProfile(activeViewingUid);
+                else checkProfileTabAccess();
+            }
         }
     });
 }
@@ -99,26 +101,51 @@ function listenToFirebase() {
         registeredTeams = [];
         if (s.val()) Object.keys(s.val()).forEach(k => registeredTeams.push({ firebaseKey: k, ...s.val()[k] }));
         renderTeams();
+        renderHomeStats();
     });
 
     usersRef.on('value', (s) => {
         allProfiles = s.val() || {};
         renderOnlinePlayers();
         renderAllPlayersTab();
+        renderTopLikedPlayers();
+        renderHomeStats();
         
-        // Atualiza a visualização da tela de perfil atual
         if (activeViewingUid) renderUserProfile(activeViewingUid);
         else if (currentUser) renderUserProfile(currentUser.uid);
     });
 }
 
-// CARREGA QUALQUER PERFIL ESPECÍFICO POR UID
+// VERIFICA SE O USUÁRIO PODE ACESSAR A ABA MEU PERFIL
+function checkProfileTabAccess() {
+    const notLoggedCard = document.getElementById('profile-not-logged-in');
+    const mainProfileCard = document.getElementById('profile-main-card');
+
+    if (!currentUser && !activeViewingUid) {
+        notLoggedCard.style.display = 'block';
+        mainProfileCard.style.display = 'none';
+    } else {
+        notLoggedCard.style.display = 'none';
+        mainProfileCard.style.display = 'block';
+    }
+}
+
+// RENDERIZA O PERFIL DE UM JOGADOR ESPECÍFICO
 function renderUserProfile(targetUid) {
+    if (!targetUid && !currentUser) {
+        checkProfileTabAccess();
+        return;
+    }
+
+    if (!targetUid && currentUser) targetUid = currentUser.uid;
+
     activeViewingUid = targetUid;
+    checkProfileTabAccess();
+
     const profile = allProfiles[targetUid] || {};
     const isOwner = currentUser && currentUser.uid === targetUid;
 
-    // Controla o Banner de Visita
+    // Controla Banner de Visita
     const visitorBanner = document.getElementById('profile-visitor-banner');
     if (!isOwner && currentUser) {
         visitorBanner.style.display = 'block';
@@ -127,7 +154,7 @@ function renderUserProfile(targetUid) {
         visitorBanner.style.display = 'none';
     }
 
-    // Avatar / Foto de Perfil
+    // Avatar
     const avatarImg = document.getElementById('profile-avatar-img');
     const avatarDefault = document.getElementById('profile-default-icon');
     if (profile.avatarUrl) {
@@ -139,8 +166,10 @@ function renderUserProfile(targetUid) {
         avatarDefault.style.display = 'block';
     }
 
-    // Informações Básicas
+    // Dados do Perfil
     document.getElementById('view-profile-nick').innerText = profile.nick || (isOwner ? 'Seu Nick' : 'Jogador Anônimo');
+    document.getElementById('view-profile-likes').innerText = profile.profileLikes || 0;
+    document.getElementById('profile-likes-count').innerText = profile.profileLikes || 0;
     document.getElementById('view-profile-kd').innerText = profile.kd || '0.00';
     document.getElementById('view-profile-peak-viewers').innerText = profile.peakViewers ? parseInt(profile.peakViewers).toLocaleString('pt-BR') : '0';
     document.getElementById('view-profile-earnings').innerText = profile.earnings || '$0';
@@ -156,11 +185,14 @@ function renderUserProfile(targetUid) {
 
     document.getElementById('view-profile-status-dot').className = profile.isOnline ? 'status-indicator online' : 'status-indicator offline';
 
-    // Apenas o próprio dono pode ver os botões de editar e criar posts
+    // Permissões de botões
     const btnEdit = document.getElementById('btn-edit-my-profile');
     const btnCreatePost = document.getElementById('btn-create-my-post');
+    const btnLikeProfile = document.getElementById('btn-like-profile');
+
     if (btnEdit) btnEdit.style.display = isOwner ? 'inline-flex' : 'none';
     if (btnCreatePost) btnCreatePost.style.display = isOwner ? 'inline-flex' : 'none';
+    if (btnLikeProfile) btnLikeProfile.style.display = isOwner ? 'none' : 'inline-flex';
 
     if (isOwner) {
         document.getElementById('edit-avatar-url').value = profile.avatarUrl || '';
@@ -179,14 +211,76 @@ function renderUserProfile(targetUid) {
     renderProfileFeed(profile.posts || {}, targetUid);
 }
 
-// RETORNAR AO MEU PRÓPRIO PERFIL
+// SISTEMA DE CURTIR O PERFIL
+function likeProfileByUid(uid) {
+    const currentLikes = allProfiles[uid]?.profileLikes || 0;
+    usersRef.child(`${uid}/profileLikes`).set(currentLikes + 1);
+}
+
+function likeCurrentProfile() {
+    if (activeViewingUid) likeProfileByUid(activeViewingUid);
+}
+
 function viewMyOwnProfile() {
     if (!currentUser) return openModal('auth');
+    activeViewingUid = currentUser.uid;
     renderUserProfile(currentUser.uid);
     switchTab('profile');
 }
 
-// RENDERIZA O FEED NO GRID ESTILO INSTAGRAM
+// RENDERIZA A ABA "MAIS CURTIDOS" E O DESTAQUE NA "HOME"
+function renderTopLikedPlayers() {
+    const topGrid = document.getElementById('top-liked-players-grid');
+    const homeGrid = document.getElementById('home-top-players-grid');
+
+    const sortedPlayers = Object.keys(allProfiles).map(uid => ({
+        uid: uid,
+        ...allProfiles[uid]
+    })).sort((a, b) => (b.profileLikes || 0) - (a.profileLikes || 0));
+
+    if (topGrid) {
+        topGrid.innerHTML = '';
+        sortedPlayers.forEach(p => topGrid.appendChild(createPlayerCardElement(p)));
+    }
+
+    if (homeGrid) {
+        homeGrid.innerHTML = '';
+        sortedPlayers.slice(0, 3).forEach(p => homeGrid.appendChild(createPlayerCardElement(p)));
+    }
+}
+
+function createPlayerCardElement(p) {
+    const card = document.createElement('div');
+    card.className = 'card glass-panel player-card';
+
+    const avatarHtml = p.avatarUrl 
+        ? `<img src="${p.avatarUrl}">` 
+        : `<i class="fa-solid fa-user-ninja"></i>`;
+
+    card.innerHTML = `
+        <span class="player-likes-tag"><i class="fa-solid fa-heart" style="color: var(--crimson);"></i> ${p.profileLikes || 0}</span>
+        <div class="player-card-avatar">${avatarHtml}</div>
+        <h3 style="font-family: var(--font-heading); margin-bottom: 5px;">${p.nick || 'Jogador'}</h3>
+        <span class="badge badge-t1" style="margin-bottom: 12px;">${p.role || 'Flex'}</span>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">K/D: ${p.kd || '0.00'}</p>
+        <div style="display:flex; gap:8px;">
+            <button class="btn-primary" style="flex:1;" onclick="viewPlayerProfileByUid('${p.uid}')"><i class="fa-solid fa-eye"></i> Perfil</button>
+            <button class="btn-secondary" onclick="likeProfileByUid('${p.uid}')"><i class="fa-solid fa-heart"></i></button>
+        </div>
+    `;
+    return card;
+}
+
+function renderHomeStats() {
+    const totalPlayers = Object.keys(allProfiles).length;
+    let totalLikes = 0;
+    Object.values(allProfiles).forEach(p => totalLikes += (p.profileLikes || 0));
+
+    document.getElementById('stat-total-players').innerText = totalPlayers;
+    document.getElementById('stat-total-likes').innerText = totalLikes;
+    document.getElementById('stat-total-teams').innerText = registeredTeams.length;
+}
+
 function renderProfileFeed(postsObject, targetUid) {
     const grid = document.getElementById('my-feed-grid');
     const postsCountLabel = document.getElementById('view-profile-posts-count');
@@ -197,10 +291,7 @@ function renderProfileFeed(postsObject, targetUid) {
     if (postsCountLabel) postsCountLabel.innerText = postKeys.length;
 
     if (postKeys.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">
-            <i class="fa-solid fa-camera" style="font-size:2rem; margin-bottom:10px;"></i>
-            <p>Nenhuma publicação ou mídia adicionada ao feed ainda.</p>
-        </div>`;
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);"><i class="fa-solid fa-camera" style="font-size:2rem; margin-bottom:10px;"><p>Nenhuma publicação adicionada ainda.</p></div>`;
         return;
     }
 
@@ -210,9 +301,7 @@ function renderProfileFeed(postsObject, targetUid) {
         item.className = 'insta-grid-item';
 
         const isVideo = post.type === 'video';
-        const mediaHtml = isVideo 
-            ? `<video src="${post.mediaUrl}" muted></video>` 
-            : `<img src="${post.mediaUrl}" alt="Mídia">`;
+        const mediaHtml = isVideo ? `<video src="${post.mediaUrl}" muted></video>` : `<img src="${post.mediaUrl}">`;
 
         item.innerHTML = `
             <span class="media-type-icon"><i class="fa-solid ${isVideo ? 'fa-video' : 'fa-image'}"></i></span>
@@ -251,10 +340,9 @@ function handleSaveProfile(e) {
 
 function handleCreatePost(e) {
     e.preventDefault();
-    if (!currentUser) return alert("Faça login para adicionar uma mídia.");
+    if (!currentUser) return alert("Faça login para publicar.");
 
-    const newPostRef = usersRef.child(`${currentUser.uid}/posts`).push();
-    newPostRef.set({
+    usersRef.child(`${currentUser.uid}/posts`).push({
         type: document.getElementById('post-type').value,
         mediaUrl: document.getElementById('post-media-url').value.trim(),
         caption: document.getElementById('post-caption').value.trim(),
@@ -286,56 +374,30 @@ function openPostModal(ownerUid, postKey) {
             ${isOwner || isAdmin ? `<button class="btn-danger" onclick="deleteProfilePost('${ownerUid}', '${postKey}')"><i class="fa-solid fa-trash"></i> Excluir Mídia</button>` : ''}
         </div>
     `;
-
     openModal('view-post');
 }
 
 function likeProfilePost(ownerUid, postKey) {
     const currentLikes = allProfiles[ownerUid]?.posts?.[postKey]?.likes || 0;
-    usersRef.child(`${ownerUid}/posts/${postKey}`).update({ likes: currentLikes + 1 }).then(() => {
-        openPostModal(ownerUid, postKey);
-    });
+    usersRef.child(`${ownerUid}/posts/${postKey}`).update({ likes: currentLikes + 1 }).then(() => openPostModal(ownerUid, postKey));
 }
 
 function deleteProfilePost(ownerUid, postKey) {
     if (confirm("Tem certeza que deseja excluir esta mídia?")) {
-        usersRef.child(`${ownerUid}/posts/${postKey}`).remove().then(() => {
-            closeModal('view-post');
-        });
+        usersRef.child(`${ownerUid}/posts/${postKey}`).remove().then(() => closeModal('view-post'));
     }
 }
 
-// RENDERIZA A ABA DE TODOS OS JOGADORES DA COMUNIDADE
 function renderAllPlayersTab() {
     const container = document.getElementById('all-players-grid');
     if (!container) return;
     container.innerHTML = '';
-
-    Object.keys(allProfiles).forEach(uid => {
-        const p = allProfiles[uid];
-        const card = document.createElement('div');
-        card.className = 'card glass-panel player-card';
-        
-        const avatarHtml = p.avatarUrl 
-            ? `<img src="${p.avatarUrl}">` 
-            : `<i class="fa-solid fa-user-ninja"></i>`;
-
-        card.innerHTML = `
-            <div class="player-card-avatar">${avatarHtml}</div>
-            <h3 style="font-family: var(--font-heading); margin-bottom: 5px;">${p.nick || 'Jogador'}</h3>
-            <span class="badge badge-t1" style="margin-bottom: 12px;">${p.role || 'Flex'}</span>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">K/D: ${p.kd || '0.00'} // Viewers: ${p.peakViewers || 0}</p>
-            <button class="btn-primary btn-block" onclick="viewPlayerProfileByUid('${uid}')"><i class="fa-solid fa-eye"></i> Ver Perfil</button>
-        `;
-        container.appendChild(card);
-    });
+    Object.keys(allProfiles).forEach(uid => container.appendChild(createPlayerCardElement({ uid: uid, ...allProfiles[uid] })));
 }
 
 function filterPlayersList() {
     const query = document.getElementById('search-player-input').value.toLowerCase();
-    const cards = document.querySelectorAll('#all-players-grid .player-card');
-
-    cards.forEach(card => {
+    document.querySelectorAll('#all-players-grid .player-card').forEach(card => {
         const nick = card.querySelector('h3').innerText.toLowerCase();
         card.style.display = nick.includes(query) ? 'block' : 'none';
     });
@@ -376,14 +438,12 @@ function renderTeams() {
     const container = document.getElementById('teams-grid');
     if (!container) return;
     container.innerHTML = '';
-
     registeredTeams.forEach(team => {
         const card = document.createElement('div');
         card.className = 'card glass-panel';
         card.innerHTML = `
             <span class="badge badge-${team.tier ? team.tier.toLowerCase() : 't3'}">${team.tier || 'T3'}</span>
             <h3 style="font-family: var(--font-heading); margin-top:8px;">${team.name}</h3>
-            <button class="btn-primary btn-block" style="margin-top:15px;">Detalhes da Equipe</button>
         `;
         container.appendChild(card);
     });
@@ -391,17 +451,13 @@ function renderTeams() {
 
 function handleCreateTeam(e) {
     e.preventDefault();
-    teamsRef.push({
-        name: document.getElementById('team-name').value,
-        tier: document.getElementById('team-tier').value
-    }).then(() => closeModal('create-team'));
+    teamsRef.push({ name: document.getElementById('team-name').value, tier: document.getElementById('team-tier').value }).then(() => closeModal('create-team'));
 }
 
 function renderLobbies() {
     const container = document.getElementById('lobbies-container');
     if (!container) return;
     container.innerHTML = '';
-
     lobbies.forEach(lobby => {
         const card = document.createElement('div');
         card.className = 'card glass-panel';
@@ -418,7 +474,6 @@ function renderRanking() {
     const tbody = document.getElementById('ranking-body');
     if (!tbody) return;
     tbody.innerHTML = '';
-
     teamsRanking.forEach((team, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -435,26 +490,18 @@ function renderRanking() {
 
 function handleCreateScrim(e) {
     e.preventDefault();
-    lobbiesRef.push({
-        type: document.getElementById('scrim-type').value,
-        time: document.getElementById('scrim-time').value,
-        team: document.getElementById('scrim-team-name').value
-    }).then(() => closeModal('scrim'));
+    lobbiesRef.push({ type: document.getElementById('scrim-type').value, time: document.getElementById('scrim-time').value, team: document.getElementById('scrim-team-name').value }).then(() => closeModal('scrim'));
 }
 
 function handleCreateX1(e) {
     e.preventDefault();
-    lobbiesRef.push({
-        type: 'X1',
-        time: document.getElementById('x1-time').value,
-        team: `${document.getElementById('x1-player').value} (X1)`
-    }).then(() => closeModal('x1'));
+    lobbiesRef.push({ type: 'X1', time: document.getElementById('x1-time').value, team: `${document.getElementById('x1-player').value} (X1)` }).then(() => closeModal('x1'));
 }
 
 function handleGoogleLogin() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(() => closeModal('auth')); }
 function handleEmailAuth(e) { e.preventDefault(); auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => closeModal('auth')); }
 function handleRegister() { auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value).then(() => closeModal('auth')); }
-function handleLogout() { auth.signOut(); }
+function handleLogout() { auth.signOut(); activeViewingUid = null; switchTab('home'); }
 
 function toggleAdminMode() {
     if (prompt("Senha ADM:") === ADMIN_SECRET_PASSWORD) {
@@ -466,11 +513,8 @@ function toggleAdminMode() {
 function switchProfileSubTab(sub) {
     document.querySelectorAll('.p-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.profile-sub-content').forEach(c => c.classList.remove('active'));
-
     document.getElementById(`ptab-${sub}`).classList.add('active');
-    if (window.event && window.event.currentTarget) {
-        window.event.currentTarget.classList.add('active');
-    }
+    if (window.event && window.event.currentTarget) window.event.currentTarget.classList.add('active');
 }
 
 function switchTab(tabName) {
@@ -479,9 +523,9 @@ function switchTab(tabName) {
     
     document.getElementById(`tab-${tabName}`).classList.add('active');
 
-    // Se clicar no botão "Meu Perfil", força o carregamento do próprio UID
-    if (tabName === 'profile' && currentUser) {
-        renderUserProfile(currentUser.uid);
+    if (tabName === 'profile') {
+        if (!activeViewingUid && currentUser) activeViewingUid = currentUser.uid;
+        renderUserProfile(activeViewingUid);
     }
 }
 
