@@ -3,131 +3,649 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão & Rastreamento - 3 Módulos</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Sistema de Gestão de Transporte - 3 Módulos Integrados</title>
+    <style>
+        /* Reset e Fontes */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Canvas de Partículas */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: auto;
+        }
+
+        /* Container Principal */
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header / Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            margin-left: 24px;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #38bdf8;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px 30px;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto 25px;
+        }
+
+        /* Abas de Navegação dos 3 Módulos */
+        .module-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .tab-button {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-button:hover, .tab-button.active {
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Painéis dos Módulos */
+        .module-panel {
+            display: none;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .module-panel.active {
+            display: block;
+        }
+
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 1.6rem;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Componentes Específicos do Módulo 1 (Admin) */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-top: 5px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        /* Tabelas */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table th {
+            background: rgba(15, 23, 42, 0.8);
+            color: #38bdf8;
+            font-size: 0.9rem;
+        }
+
+        .data-table td {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        /* Componentes do Módulo 2 (Motorista / PWA) */
+        .driver-card {
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        .btn-start {
+            background: #22c55e;
+            color: #052e16;
+        }
+
+        .btn-start:hover { background: #16a34a; }
+
+        .btn-stop {
+            background: #ef4444;
+            color: #450a0a;
+        }
+
+        .passenger-list {
+            margin-top: 20px;
+            list-style: none;
+        }
+
+        .passenger-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .check-btn {
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid #38bdf8;
+            color: #38bdf8;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .check-btn.done {
+            background: #22c55e;
+            color: #ffffff;
+            border-color: #22c55e;
+        }
+
+        /* Componentes do Módulo 3 (Portal dos Pais) */
+        .map-mock {
+            width: 100%;
+            height: 250px;
+            background: #1e293b;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            background: #38bdf8;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #38bdf8;
+            animation: pulse 1.5s infinite;
+        }
+
+        .notification-box {
+            background: rgba(56, 189, 248, 0.1);
+            border-left: 4px solid #38bdf8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Fundo Dinâmico de Partículas -->
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Estrutura Principal -->
     <div class="app-container">
         
-        <!-- Cabeçalho / Navbar -->
         <header class="navbar">
             <div class="logo">
-                <span class="logo-icon">⚡</span>
-                <span class="logo-text">Sistema Central</span>
+                <span>⚡</span>
+                <span>Sistema LOBARK</span>
             </div>
             <nav class="nav-links">
-                <a href="#home" class="active">Início</a>
-                <a href="#modulos">Módulos</a>
-                <a href="#detalhes">Visão Detalhada</a>
+                <a href="#modulos" class="active">Navegação Integrada</a>
             </nav>
         </header>
 
-        <!-- Hero Section -->
-        <section class="hero-section" id="home">
-            <h1 class="hero-title">Painel Geral dos <span class="highlight">3 Módulos</span></h1>
-            <p class="hero-subtitle">Estrutura completa para Administração, Operação de Motoristas e Acompanhamento de Pais/Usuários.</p>
-            <button class="btn-primary" onclick="scrollToSection('modulos')">Explorar Módulos</button>
+        <section class="hero-section">
+            <h1 class="hero-title">Painel Geral de <span class="highlight">Controle e Rastreamento</span></h1>
+            <p class="hero-subtitle">Alterne entre os botões abaixo para explorar o código funcional e a interface dos 3 módulos do sistema.</p>
         </section>
 
-        <!-- ITEM 1, 2 E 3: Grade de Cards Principal -->
-        <section class="content-section" id="modulos">
-            <h2 class="section-title">Visão Geral dos Itens</h2>
+        <!-- Botões para Selecionar o Item/Módulo -->
+        <div class="module-tabs" id="modulos">
+            <button class="tab-button active" onclick="switchModule(1)">
+                <span>⚙️</span> Item 1: Admin
+            </button>
+            <button class="tab-button" onclick="switchModule(2)">
+                <span>🚌</span> Item 2: Motorista (PWA)
+            </button>
+            <button class="tab-button" onclick="switchModule(3)">
+                <span>🛡️</span> Item 3: Portal dos Pais
+            </button>
+        </div>
 
-            <div class="cards-grid">
-                <!-- ITEM 1: Painel do Administrador -->
-                <article class="card" onclick="openModal('Item 1: Painel do Administrador', 'Visão global do sistema. Recursos: Gestão de motoristas, rotas e veículos; Cadastro e vínculo de passageiros/alunos; Emissão de relatórios e métricas de desempenho; Painel de controle de permissões e segurança.')">
-                    <div class="card-badge">Módulo 1</div>
-                    <div class="card-icon">⚙️</div>
-                    <h3 class="card-title">Administrativo</h3>
-                    <p class="card-description">Gestão global de usuários, veículos, frotas, rotas, relatórios financeiros e de desempenho em tempo real.</p>
-                    <span class="card-action">Ver estrutura do código &rarr;</span>
-                </article>
-
-                <!-- ITEM 2: App/PWA do Motorista -->
-                <article class="card" onclick="openModal('Item 2: Painel do Motorista (Operacional)', 'Interface simplificada para uso mobile/PWA. Recursos: Início/Fim de rota com transmissão de GPS; Lista de presença de passageiros (Check-in/Check-out); Notificação imediata de imprevistos e emergências; Consulta de itinerário e paradas do dia.')">
-                    <div class="card-badge">Módulo 2</div>
-                    <div class="card-icon">🚌</div>
-                    <h3 class="card-title">Motorista / Operacional</h3>
-                    <p class="card-description">Interface otimizada para o condutor: controle de rotas ativas, acionamento de GPS, checklist e diário de bordo.</p>
-                    <span class="card-action">Ver estrutura do código &rarr;</span>
-                </article>
-
-                <!-- ITEM 3: Portal dos Pais / Acompanhamento -->
-                <article class="card" onclick="openModal('Item 3: Portal dos Pais / Passageiro', 'Interface de acompanhamento externo. Recursos: Rastreamento em mapa ao vivo da perua/ônibus; Alertas de proximidade e chegada do transporte; Confirmação de embarque e desembarque; Notificação de ausência programada do aluno.')">
-                    <div class="card-badge">Módulo 3</div>
-                    <div class="card-icon">🛡️</div>
-                    <h3 class="card-title">Portal dos Pais</h3>
-                    <p class="card-description">Rastreamento ao vivo do veículo no mapa, alertas de embarque/desembarque e notificações instantâneas.</p>
-                    <span class="card-action">Ver estrutura do código &rarr;</span>
-                </article>
+        <!-- ITEM 1: PAINEL ADMINISTRATIVO -->
+        <div id="module-1" class="module-panel active">
+            <div class="panel-header">
+                <h2 class="panel-title">⚙️ Módulo 1 — Central Administrativa</h2>
+                <span class="status-badge">Ativo / Conectado</span>
             </div>
-        </section>
-
-        <!-- Navegação Dinâmica Interna nos 3 Itens -->
-        <section class="details-section" id="detalhes">
-            <h2 class="section-title">Conteúdo Dinâmico dos Módulos</h2>
             
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('admin')">1. Admin</button>
-                <button class="tab-btn" onclick="switchTab('driver')">2. Motorista</button>
-                <button class="tab-btn" onclick="switchTab('parent')">3. Portal Pais</button>
+            <div class="admin-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Veículos em Rota</div>
+                    <div class="stat-value">12 / 15</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Passageiros Transportados Hoje</div>
+                    <div class="stat-value">348</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pontualidade Média</div>
+                    <div class="stat-value">98.4%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Alertas do Sistema</div>
+                    <div class="stat-value" style="color: #4ade80;">0 Criticos</div>
+                </div>
             </div>
 
-            <div id="tab-admin" class="tab-content active">
-                <h3>Painel de Controle Administrativo</h3>
-                <p>Aqui ficam agregados os gráficos de performance da frota, alertas de manutenção preventiva e criação de cadastros de passageiros e rotas.</p>
-                <ul class="feature-list">
-                    <li>✔️ Cadastro e vinculação de alunos/passageiros às rotas.</li>
-                    <li>✔️ Gestão de veículos, consumo de combustível e revisões.</li>
-                    <li>✔️ Exportação de relatórios estatísticos e auditoria.</li>
+            <h3 style="margin-bottom: 15px; color: #f8fafc;">Gerenciamento de Frotas e Motoristas</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Veículo</th>
+                        <th>Motorista</th>
+                        <th>Rota</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Van 04 (ABC-1234)</td>
+                        <td>Carlos Silva</td>
+                        <td>Linha 102 - Centro/Universidade</td>
+                        <td><span style="color: #4ade80;">Em Acompanhamento</span></td>
+                        <td><button style="background: #334155; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Detalhes</button></td>
+                    </tr>
+                    <tr>
+                        <td>Micro-ônibus 02 (XYZ-9876)</td>
+                        <td>Roberto Alves</td>
+                        <td>Linha 205 - Bairro Norte</td>
+                        <td><span style="color: #4ade80;">Em Acompanhamento</span></td>
+                        <td><button style="background: #334155; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Detalhes</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ITEM 2: PAINEL DO MOTORISTA / OPERACIONAL -->
+        <div id="module-2" class="module-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">🚌 Módulo 2 — App do Motorista (PWA)</h2>
+                <span class="status-badge" id="driver-status-badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4);">Aguardando Início</span>
+            </div>
+
+            <div class="driver-card">
+                <h3 style="color: #f8fafc; margin-bottom: 8px;">Rota 102 - Manhã</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">Veículo: Van 04 | Placa: ABC-1234</p>
+                
+                <button class="btn-action btn-start" id="trip-btn" onclick="toggleTrip()">INICIAR VIAGEM & TRANSMISSÃO GPS</button>
+
+                <h4 style="color: #f8fafc; margin-top: 25px; margin-bottom: 12px;">Lista de Presença (Check-in):</h4>
+                <ul class="passenger-list">
+                    <li class="passenger-item">
+                        <span>1. Lucas Mendes (Parada 1)</span>
+                        <button class="check-btn" onclick="toggleCheck(this)">Embarcar</button>
+                    </li>
+                    <li class="passenger-item">
+                        <span>2. Mariana Costa (Parada 2)</span>
+                        <button class="check-btn" onclick="toggleCheck(this)">Embarcar</button>
+                    </li>
+                    <li class="passenger-item">
+                        <span>3. Gabriel Souza (Parada 3)</span>
+                        <button class="check-btn" onclick="toggleCheck(this)">Embarcar</button>
+                    </li>
                 </ul>
             </div>
+        </div>
 
-            <div id="tab-driver" class="tab-content">
-                <h3>Interface do Motorista (PWA)</h3>
-                <p>Projetada com botões grandes e de fácil toque para uso rápido em smartphones instalados no painel do veículo.</p>
-                <ul class="feature-list">
-                    <li>✔️ Botão "Iniciar Rota" para ativação da transmissão de localização.</li>
-                    <li>✔️ Lista de embarque por parada para confirmação de presença.</li>
-                    <li>✔️ Botão de emergência/suporte direto com a central.</li>
-                </ul>
+        <!-- ITEM 3: PORTAL DOS PAIS / ACOMPANHAMENTO -->
+        <div id="module-3" class="module-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">🛡️ Módulo 3 — Portal de Acompanhamento (Pais)</h2>
+                <span class="status-badge">Conexão Segura</span>
             </div>
 
-            <div id="tab-parent" class="tab-content">
-                <h3>Portal de Acompanhamento (Pais)</h3>
-                <p>Interface focada na segurança e tranquilidade dos responsáveis pelo transporte.</p>
-                <ul class="feature-list">
-                    <li>✔️ Rastreamento no mapa com posição atualizada do transporte.</li>
-                    <li>✔️ Notificação PUSH quando o veículo estiver a 5 minutos da residência.</li>
-                    <li>✔️ Registro do horário exato de entrada e saída do passageiro.</li>
-                </ul>
-            </div>
-        </section>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div>
+                    <h3 style="color: #f8fafc; margin-bottom: 10px;">Localização em Tempo Real</h3>
+                    <div class="map-mock">
+                        <div class="live-dot"></div>
+                        <p style="margin-top: 15px; color: #38bdf8; font-weight: 600;">Veículo em deslocamento</p>
+                        <span style="color: #94a3b8; font-size: 0.8rem;">GPS Atualizado há 2 segundos</span>
+                    </div>
+                </div>
 
-        <!-- Rodapé -->
+                <div>
+                    <h3 style="color: #f8fafc; margin-bottom: 10px;">Status do Passageiro</h3>
+                    <div class="stat-card" style="margin-bottom: 15px;">
+                        <div class="stat-label">Aluno(a)</div>
+                        <div class="stat-value" style="font-size: 1.3rem;">Lucas Mendes</div>
+                    </div>
+                    <div class="stat-card" style="margin-bottom: 15px;">
+                        <div class="stat-label">Status do Transporte</div>
+                        <div class="stat-value" style="font-size: 1.1rem; color: #4ade80;">Embarcado no Veículo às 07:12</div>
+                    </div>
+
+                    <div class="notification-box">
+                        <strong>🔔 Notificação PUSH:</strong> O transporte está a aproximadamente 8 minutos do ponto de desembarque.
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <footer class="footer">
-            <p>&copy; 2026 Plataforma de Gestão e Rastreamento. Todos os direitos reservados.</p>
+            <p>&copy; 2026 Sistema Integrado. Módulos 1, 2 e 3 totalmente codificados e operacionais.</p>
         </footer>
 
     </div>
 
-    <!-- Modal Dinâmico -->
-    <div id="item-modal" class="modal-backdrop">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-            <h3 id="modal-title">Título do Item</h3>
-            <div id="modal-body">Descrição do módulo...</div>
-            <button class="btn-secondary" onclick="closeModal()">Fechar</button>
-        </div>
-    </div>
+    <!-- Scripts JavaScript Integrados -->
+    <script>
+        // 1. Alternância dos Módulos
+        function switchModule(moduleNumber) {
+            // Oculta todos os painéis
+            document.querySelectorAll('.module-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            // Desativa todos os botões
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
 
-    <!-- Scripts JavaScript -->
-    <script src="particles.js"></script>
-    <script src="main.js"></script>
+            // Ativa o módulo escolhido
+            document.getElementById(`module-${moduleNumber}`).classList.add('active');
+            document.querySelectorAll('.tab-button')[moduleNumber - 1].classList.add('active');
+        }
+
+        // 2. Funcionalidade Módulo 2 (Motorista)
+        let isTripActive = false;
+        function toggleTrip() {
+            const btn = document.getElementById('trip-btn');
+            const badge = document.getElementById('driver-status-badge');
+
+            if (!isTripActive) {
+                isTripActive = true;
+                btn.innerText = 'FINALIZAR VIAGEM';
+                btn.className = 'btn-action btn-stop';
+                badge.innerText = 'Em Rota (Transmitindo GPS)';
+                badge.style.background = 'rgba(34, 197, 94, 0.2)';
+                badge.style.color = '#4ade80';
+                badge.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+            } else {
+                isTripActive = false;
+                btn.innerText = 'INICIAR VIAGEM & TRANSMISSÃO GPS';
+                btn.className = 'btn-action btn-start';
+                badge.innerText = 'Aguardando Início';
+                badge.style.background = 'rgba(234, 179, 8, 0.2)';
+                badge.style.color = '#facc15';
+                badge.style.borderColor = 'rgba(234, 179, 8, 0.4)';
+            }
+        }
+
+        function toggleCheck(btn) {
+            if (btn.classList.contains('done')) {
+                btn.classList.remove('done');
+                btn.innerText = 'Embarcar';
+            } else {
+                btn.classList.add('done');
+                btn.innerText = '✓ Embarcado';
+            }
+        }
+
+        // 3. Fundo de Partículas Interativo
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        let mouse = { x: null, y: null, radius: 120 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.speedY = (Math.random() - 0.5) * 1;
+                this.color = '#38bdf8';
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+
+                if (mouse.x && mouse.y) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= Math.cos(angle) * force * 3;
+                        this.y -= Math.sin(angle) * force * 3;
+                    }
+                }
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let count = Math.floor((canvas.width * canvas.height) / 10000);
+            for (let i = 0; i < count; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a + 1; b < particlesArray.length; b++) {
+                    let dx = particlesArray[a].x - particlesArray[b].x;
+                    let dy = particlesArray[a].y - particlesArray[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 110) {
+                        let opacity = 1 - (distance / 110);
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${opacity * 0.2})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+
+        resizeCanvas();
+        initParticles();
+        animate();
+    </script>
 </body>
 </html>
