@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOBARK - CODM Hub Competitivo</title>
+    <title>CODM Hub - Plataforma Competitiva</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -12,156 +12,196 @@
 </head>
 <body>
 
-    <!-- Fundo Interativo de Partículas Dynamic Canvas -->
+    <!-- Fundo de Partículas Dinâmicas (Canvas) -->
     <canvas id="particles-canvas"></canvas>
 
-    <!-- Topbar / Header -->
+    <!-- Barra de Navegação -->
     <header class="navbar">
-        <div class="logo">LOBARK <span>CODM</span></div>
+        <div class="logo">CODM <span>HUB</span></div>
         <nav>
-            <button onclick="showSection('profile-section')">📸 Perfil & Feed</button>
-            <button onclick="showSection('scrims-section')">⚔️ Scrims (T1/T2/T3)</button>
-            <button onclick="showSection('x1-section')">🎯 Desafios X1</button>
-            <button onclick="showSection('ranking-section')">🏆 Ranking</button>
-            <button onclick="showSection('rules-section')">📜 Regras</button>
-            <button id="admin-nav-btn" class="btn-admin hidden" onclick="showSection('admin-section')">⚡ Painel Admin</button>
+            <button onclick="switchTab('profile-tab')">Meu Perfil & Feed</button>
+            <button onclick="switchTab('scrims-tab')">Scrims (T1/T2/T3)</button>
+            <button onclick="switchTab('x1-tab')">Desafios X1</button>
+            <button onclick="switchTab('ranking-tab')">Ranking & Pontuação</button>
+            <button onclick="switchTab('rules-tab')">Regras Oficiais</button>
+            <button id="admin-nav-btn" class="btn-admin hidden" onclick="switchTab('admin-tab')">Painel Admin</button>
         </nav>
         <div id="auth-controls">
-            <button id="login-btn" onclick="loginWithGoogle()">Conectar Google</button>
-            <div id="user-profile" class="hidden">
+            <button id="open-auth-btn" onclick="openAuthModal()">Entrar / Registrar</button>
+            <div id="user-info" class="hidden">
                 <span id="user-name"></span>
                 <button onclick="logout()">Sair</button>
             </div>
         </div>
     </header>
 
+    <!-- Modal de Autenticação (Google + Email/Senha) -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content card">
+            <span class="close-btn" onclick="closeAuthModal()">&times;</span>
+            <h2>Acessar CODM Hub</h2>
+            <div class="auth-tabs">
+                <button class="btn-sub active" onclick="switchAuthMode('login')">Entrar</button>
+                <button class="btn-sub" onclick="switchAuthMode('register')">Criar Conta</button>
+            </div>
+            
+            <form id="email-auth-form" onsubmit="handleEmailAuth(event)">
+                <div class="form-group">
+                    <label>E-mail:</label>
+                    <input type="email" id="auth-email" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Senha:</label>
+                    <input type="password" id="auth-password" required placeholder="Sua senha secreta">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary">Entrar com E-mail</button>
+            </form>
+
+            <div class="divider">OU</div>
+            <button onclick="loginWithGoogle()" class="btn-google">Conectar com Google</button>
+        </div>
+    </div>
+
     <main class="container">
 
-        <!-- 1. PERFIL COMPLETO + FEED ESTILO INSTAGRAM -->
-        <section id="profile-section" class="content-section">
-            <div class="grid-layout">
-                <!-- Card de Perfil Estilo Card de Atleta -->
-                <div class="card profile-card">
-                    <div class="avatar-header">
-                        <div class="avatar-ring">
-                            <img id="p-avatar" src="https://via.placeholder.com/100" alt="Avatar">
-                        </div>
-                        <h2 id="p-display-ign">Carregando...</h2>
-                        <span id="p-display-tier" class="badge">Tier -</span>
-                    </div>
+        <!-- 1. PERFIL EDITÁVEL COM FEED DE MÍDIA (FOTOS E VÍDEOS) -->
+        <section id="profile-tab" class="tab-content">
+            <div id="profile-guest-msg" class="card">
+                <h2>Área de Membros</h2>
+                <p>Faça login na plataforma para visualizar seu perfil customizável e interagir no feed de mídias.</p>
+                <button onclick="openAuthModal()" class="btn-primary">Fazer Login Agora</button>
+            </div>
 
-                    <form id="profile-form" onsubmit="saveProfile(event)">
-                        <div class="form-group">
-                            <label>Nick no Game (IGN):</label>
-                            <input type="text" id="p-ign" required placeholder="Ex: LOBARK_Ghost">
-                        </div>
-                        <div class="form-group">
-                            <label>Função (Role):</label>
-                            <select id="p-role">
-                                <option value="IGL">IGL (In-Game Leader)</option>
-                                <option value="Main Sniper">Main Sniper</option>
-                                <option value="Entry Fragger">Entry Fragger</option>
-                                <option value="Support">Suporte / Âncora</option>
-                                <option value="Slayer">Slayer</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tier da Lineup:</label>
-                            <select id="p-tier">
-                                <option value="T1">Tier 1 (Pro)</option>
-                                <option value="T2">Tier 2 (Semi-Pro)</option>
-                                <option value="T3">Tier 3 (Amador)</option>
-                            </select>
-                        </div>
-                        <div class="stats-grid">
-                            <div><span id="p-stat-kd">0.0</span><small>K/D Ratio</small></div>
-                            <div><span id="p-stat-win">0%</span><small>Win Rate</small></div>
-                            <div><span id="p-stat-mvp">0</span><small>MVPs</small></div>
-                        </div>
-                        <div class="form-group">
-                            <label>Loadouts / Armas Favoritas:</label>
-                            <input type="text" id="p-loadout" placeholder="Ex: DL Q33 / Kilo 141">
-                        </div>
-                        <button type="submit" class="btn-primary">Atualizar Estatísticas</button>
-                    </form>
-                </div>
-
-                <!-- Feed de Mídia Estilo Instagram -->
-                <div class="feed-container">
+            <div id="profile-member-area" class="hidden">
+                <div class="profile-layout">
+                    <!-- Configurações do Perfil -->
                     <div class="card">
-                        <h3>Nova Publicação no Feed</h3>
-                        <form onsubmit="postToFeed(event)">
+                        <h2>Meu Perfil Competitivo</h2>
+                        <form onsubmit="saveProfile(event)">
                             <div class="form-group">
-                                <input type="url" id="feed-media-url" placeholder="URL da Imagem ou Clipe (Imgur, etc)" required>
+                                <label>IGN (Nickname no Jogo):</label>
+                                <input type="text" id="p-ign" required placeholder="Ex: Ghost_CODM">
                             </div>
                             <div class="form-group">
-                                <input type="text" id="feed-caption" placeholder="Legenda do jogada ou resultado..." required>
+                                <label>Função Principal (Role):</label>
+                                <select id="p-role">
+                                    <option value="IGL">IGL (In-Game Leader)</option>
+                                    <option value="Main Sniper">Main Sniper</option>
+                                    <option value="Entry Fragger">Entry Fragger</option>
+                                    <option value="Support">Suporte / Âncora</option>
+                                    <option value="Slayer">Slayer</option>
+                                </select>
                             </div>
-                            <button type="submit" class="btn-primary">Publicar Clipe/Foto</button>
+                            <div class="form-group">
+                                <label>Tier Competitivo:</label>
+                                <select id="p-tier">
+                                    <option value="T1">Tier 1 (Pro)</option>
+                                    <option value="T2">Tier 2 (Semi-Pro)</option>
+                                    <option value="T3">Tier 3 (Amador)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Arma / Loadout Principal:</label>
+                                <input type="text" id="p-loadout" placeholder="Ex: DL Q33 / Kilo 141">
+                            </div>
+                            <button type="submit" class="btn-primary">Salvar Perfil</button>
                         </form>
                     </div>
 
-                    <div id="feed-posts-list"></div>
+                    <!-- Feed de Mídia (Imagens e Vídeos) -->
+                    <div class="feed-section">
+                        <div class="card">
+                            <h3>Publicar no Feed de Mídia</h3>
+                            <form onsubmit="postToFeed(event)">
+                                <div class="form-group">
+                                    <label>URL da Imagem ou Vídeo (YouTube, Imgur, MP4):</label>
+                                    <input type="url" id="feed-media-url" required placeholder="https://...">
+                                </div>
+                                <div class="form-group">
+                                    <label>Legenda / Descrição da Jogada:</label>
+                                    <input type="text" id="feed-caption" required placeholder="Ex: Ace clutch na final da scrim!">
+                                </div>
+                                <button type="submit" class="btn-primary">Publicar Mídia</button>
+                            </form>
+                        </div>
+
+                        <h2>Feed da Comunidade</h2>
+                        <div id="feed-list"></div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- 2. SCRIMS & TREINOS (T1/T2/T3) -->
-        <section id="scrims-section" class="content-section hidden">
+        <!-- 2. AGENDAMENTO DE SCRIMS (T1/T2/T3) -->
+        <section id="scrims-tab" class="tab-content hidden">
             <div class="card">
-                <h2>Agendar Scrim / Treino de Lineups</h2>
+                <h2>Criar Agendamento de Scrim</h2>
                 <form onsubmit="createScrim(event)">
-                    <div class="form-row">
-                        <input type="text" id="scrim-title" placeholder="Nome do Clan / Time Host" required>
+                    <div class="form-group">
+                        <label>Nome / Lineup Host:</label>
+                        <input type="text" id="scrim-title" required placeholder="Ex: Treino T1 - Lineup Alpha">
+                    </div>
+                    <div class="form-group">
+                        <label>Tier:</label>
                         <select id="scrim-tier">
                             <option value="T1">Tier 1</option>
                             <option value="T2">Tier 2</option>
                             <option value="T3">Tier 3</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Modo de Jogo:</label>
                         <select id="scrim-mode">
-                            <option value="S&D">Search & Destroy</option>
+                            <option value="Search & Destroy">Search & Destroy (S&D)</option>
                             <option value="Hardpoint">Ponto Quente</option>
                             <option value="Misto">Misto Competitivo</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Horário:</label>
                         <input type="time" id="scrim-time" required>
                     </div>
-                    <button type="submit" class="btn-primary">Criar Sala de Treino</button>
+                    <button type="submit" class="btn-primary">Publicar Vaga de Scrim</button>
                 </form>
             </div>
 
-            <h2>Salas Abertas</h2>
-            <div id="scrims-list" class="grid-list"></div>
+            <h2>Scrims Disponíveis</h2>
+            <div id="scrims-list" class="grid"></div>
         </section>
 
         <!-- 3. DESAFIOS X1 -->
-        <section id="x1-section" class="content-section hidden">
+        <section id="x1-tab" class="tab-content hidden">
             <div class="card">
-                <h2>Mural de Desafios X1</h2>
+                <h2>Lançar Desafio X1</h2>
                 <form onsubmit="createX1(event)">
-                    <div class="form-row">
-                        <input type="text" id="x1-map" placeholder="Mapa (ex: Killhouse / Shipment)" required>
-                        <input type="text" id="x1-rules" placeholder="Regras (ex: Só Sniper / Sem Habilidade)" required>
+                    <div class="form-group">
+                        <label>Mapa:</label>
+                        <input type="text" id="x1-map" required placeholder="Ex: Killhouse, Rust">
                     </div>
-                    <button type="submit" class="btn-primary">Lançar Desafio</button>
+                    <div class="form-group">
+                        <label>Regras Específicas:</label>
+                        <input type="text" id="x1-rules" required placeholder="Ex: Apenas Sniper, Sem Habilidade de Operador">
+                    </div>
+                    <button type="submit" class="btn-primary">Criar Desafio X1</button>
                 </form>
             </div>
 
-            <h2>Desafios Ativos</h2>
-            <div id="x1-list" class="grid-list"></div>
+            <h2>Mural de Desafios X1</h2>
+            <div id="x1-list" class="grid"></div>
         </section>
 
-        <!-- 4. RANKING COMPETITIVO -->
-        <section id="ranking-section" class="content-section hidden">
-            <h2>Leaderboard da Temporada</h2>
+        <!-- 4. TABELA DE RANKING E PONTUAÇÃO -->
+        <section id="ranking-tab" class="tab-content hidden">
             <div class="card">
+                <h2>Ranking e Sistema de Pontuação</h2>
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th>Posição</th>
-                            <th>Atleta / IGN</th>
+                            <th>Jogador (IGN)</th>
                             <th>Tier</th>
                             <th>Role</th>
-                            <th>Pontuação</th>
+                            <th>Pontos</th>
                         </tr>
                     </thead>
                     <tbody id="ranking-body"></tbody>
@@ -170,26 +210,26 @@
         </section>
 
         <!-- 5. REGRAS OFICIAIS -->
-        <section id="rules-section" class="content-section hidden">
+        <section id="rules-tab" class="tab-content hidden">
             <div class="card">
-                <h2>Regulamento Oficial LOBARK / CODM World Championship</h2>
+                <h2>Regras Oficiais do Competitivo</h2>
                 <ul class="rules-list">
-                    <li><strong>Itens Banidos:</strong> SMRS, FHJ-18, C4, Mina de Proximidade e Granada de Gás.</li>
-                    <li><strong>Scorestreaks Proibidos:</strong> VTOL, Napalm, Helicóptero de Ataque, Chopper Gunner.</li>
-                    <li><strong>Composição S&D:</strong> Limite de 1 Main Sniper ativo simultaneamente por equipe.</li>
-                    <li><strong>Gravação Obligatória:</strong> Todos os jogadores de T1/T2 são obrigados a gravar a tela para auditoria contra cheaters.</li>
+                    <li><strong>Armas e Equipamentos Proibidos:</strong> Lançadores (SMRS/FHJ), C4 e Mina de Proximidade.</li>
+                    <li><strong>Scorestreaks Restritos:</strong> VTOL, Napalm, Helicóptero de Ataque e Chopper Gunner.</li>
+                    <li><strong>Limites em S&D:</strong> Permitido apenas 1 Main Sniper ativo por equipe simultaneamente.</li>
+                    <li><strong>Fair Play:</strong> Qualquer forma de manipulação de resultado ou uso de trapaças resultará em banimento permanente do Hub.</li>
                 </ul>
             </div>
         </section>
 
-        <!-- 6. PAINEL ADMINISTRATIVO & MODERAÇÃO -->
-        <section id="admin-section" class="content-section hidden">
-            <div class="card danger-zone">
-                <h2>Central de Moderação LOBARK</h2>
-                <p>Controle global de salas, gerenciamento de denúncias e remoção de posts/usuários em descumprimento de regras.</p>
-                <div id="admin-scrim-list"></div>
-                <hr>
-                <h3>Publicações para Moderar</h3>
+        <!-- 6. PAINEL ADMINISTRATIVO DE MODERAÇÃO -->
+        <section id="admin-tab" class="tab-content hidden">
+            <div class="card admin-card">
+                <h2>Painel Administrativo de Moderação</h2>
+                <p>Gerenciamento de salas ativas e moderação de conteúdo da comunidade.</p>
+                <div id="admin-scrims-list"></div>
+                <hr style="border-color: var(--border); margin: 1.5rem 0;">
+                <h3>Moderação do Feed</h3>
                 <div id="admin-feed-list"></div>
             </div>
         </section>
