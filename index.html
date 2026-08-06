@@ -3,621 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIKING eSports Hub - Sistema de Conta & God Mode</title>
-    <!-- Fontes & Ícones -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>VIKING eSports Hub | CODM Competitive League</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* ==========================================================================
-           1. ESTILOS BASE & TEMA MONOCROMÁTICO + DOURADO SLIM
-           ========================================================================== */
-        :root {
-            --font-heading: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
-
-            --bg-main: #000000;
-            --bg-card: rgba(12, 12, 12, 0.88);
-            --bg-card-hover: rgba(22, 22, 22, 0.95);
-            --border-card: rgba(255, 255, 255, 0.12);
-            
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --text-muted: #666666;
-
-            --gold-primary: #d4af37;
-            --gold-bright: #f3e5ab;
-            --gold-glow: rgba(212, 175, 55, 0.22);
-            --gold-border: rgba(212, 175, 55, 0.35);
-            --danger-red: #dc2626;
-            
-            --radius-sm: 6px;
-            --radius-md: 12px;
-            --radius-lg: 18px;
-            --transition-fast: 0.2s ease;
-            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            font-size: 18px;
-            line-height: 1.5;
-            min-height: 100vh;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-heading);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        button { font-family: var(--font-heading); cursor: pointer; border: none; outline: none; }
-        .hidden { display: none !important; }
-
-        .glass-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-md);
-            padding: 25px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-            transition: var(--transition-normal);
-        }
-
-        /* Botões */
-        .btn-primary {
-            background: #ffffff; color: #000000; padding: 8px 18px;
-            border-radius: var(--radius-sm); font-weight: 800; transition: var(--transition-fast);
-            border: 1px solid #ffffff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;
-        }
-        .btn-primary:hover { background: var(--gold-primary); border-color: var(--gold-primary); box-shadow: 0 0 20px var(--gold-glow); }
-        .btn-secondary { background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); border: 1px solid var(--gold-border); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 12px; }
-        .btn-secondary:hover { background: var(--gold-primary); color: #000000; }
-        .btn-danger { background: rgba(220, 38, 38, 0.15); color: var(--danger-red); border: 1px solid rgba(220, 38, 38, 0.4); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 12px; }
-        .btn-danger:hover { background: var(--danger-red); color: #ffffff; }
-        .btn-outline { background: transparent; color: #ffffff; border: 1px solid var(--border-card); padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 600; font-size: 12px; }
-        .btn-outline:hover { background: rgba(255, 255, 255, 0.1); border-color: #ffffff; }
-        .btn-sm { padding: 5px 10px; font-size: 12px; }
-        .btn-full { width: 100%; }
-
-        /* ==========================================================================
-           2. BARRA DE NAVEGAÇÃO SUPERIOR & CONTROLES DA CONTA
-           ========================================================================== */
-        .app-navbar {
-            height: 70px; padding: 0 4%; display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border-card); background: rgba(0, 0, 0, 0.95);
-            position: sticky; top: 0; z-index: 100;
-        }
-
-        .brand-logo {
-            font-family: var(--font-heading); font-weight: 900; font-size: 18px; color: #fff;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .brand-logo span { color: var(--gold-primary); }
-
-        .account-bar {
-            display: flex; align-items: center; gap: 12px;
-        }
-
-        .user-pill {
-            display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-card); padding: 6px 14px; border-radius: 50px; font-size: 13px;
-        }
-
-        .user-pill i { color: var(--gold-primary); }
-
-        /* MODO ATLETA (CONTEÚDO DO SITE PARA JOGADORES) */
-        .player-dashboard {
-            max-width: 1100px; margin: 40px auto; padding: 0 20px;
-        }
-
-        .player-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 25px;
-        }
-
-        /* ==========================================================================
-           3. ESTILOS PAINEL GOD MODE EXCLUSIVO
-           ========================================================================== */
-        .btn-god-trigger {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: #000000;
-            color: var(--gold-primary);
-            border: 1px solid var(--gold-primary);
-            padding: 10px 18px;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 15px var(--gold-glow);
-            z-index: 999;
-            transition: var(--transition-normal);
-        }
-
-        .btn-god-trigger:hover {
-            background: var(--gold-primary);
-            color: #000000;
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
-            transform: translateY(-3px) scale(1.05);
-        }
-
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.92); backdrop-filter: blur(12px);
-            display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
-        }
-
-        .modal-content { width: 90%; max-width: 900px; position: relative; padding: 35px; border-color: var(--border-card); max-height: 85vh; overflow-y: auto; }
-        
-        .god-card {
-            border: 1px solid var(--gold-primary) !important;
-            box-shadow: 0 0 40px var(--gold-glow), inset 0 0 15px rgba(212, 175, 55, 0.05) !important;
-        }
-
-        .god-top-actions {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-        }
-
-        .god-header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-card); }
-        .god-header h2 { font-size: 24px; color: #ffffff; margin-top: 6px; }
-
-        .god-badge {
-            display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 800;
-            letter-spacing: 2px; color: var(--gold-primary); background: rgba(212, 175, 55, 0.08);
-            border: 1px solid var(--gold-border); padding: 3px 12px; border-radius: 20px;
-        }
-
-        .pulse-dot-gold {
-            width: 6px; height: 6px; background: var(--gold-primary); border-radius: 50%;
-            box-shadow: 0 0 8px var(--gold-primary); animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
-            70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
-        }
-
-        .god-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .god-stat-box { background: rgba(0, 0, 0, 0.6); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
-        .stat-label { display: block; font-size: 11px; color: var(--text-muted); font-family: var(--font-heading); }
-        .stat-value { font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #ffffff; }
-        .stat-value.danger { color: var(--danger-red); }
-        .stat-value.highlight { color: var(--gold-primary); }
-        .stat-value.online { color: #10b981; }
-
-        .admin-tabs { display: flex; gap: 8px; margin: 18px 0; border-bottom: 1px solid var(--border-card); padding-bottom: 10px; flex-wrap: wrap; }
-        .tab-btn { background: transparent; color: var(--text-muted); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; transition: var(--transition-fast); }
-        .tab-btn.active { background: #ffffff; color: #000000; font-weight: 800; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .admin-toolbar { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
-        .admin-toolbar input { flex: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 8px 12px; color: #ffffff; }
-
-        .table-container { overflow-x: auto; }
-        .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid var(--border-card); font-size: 14px; }
-        .admin-table th { font-family: var(--font-heading); color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
-
-        .role-tag { font-weight: 700; font-size: 11px; font-family: var(--font-heading); }
-        .role-admin { color: var(--gold-primary); }
-        .role-player { color: var(--text-muted); }
-
-        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-        .status-active { background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); }
-        .status-banned { background: rgba(220, 38, 38, 0.2); color: var(--danger-red); border: 1px solid var(--danger-red); }
-
-        .admin-actions-flex { display: flex; gap: 6px; align-items: center; }
-        .admin-feed-list { display: flex; flex-direction: column; gap: 10px; }
-        .admin-feed-item { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-
-        .god-actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
-        .god-action-card { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-card); padding: 18px; border-radius: var(--radius-sm); display: flex; flex-direction: column; justify-content: space-between; }
-        .god-action-card h4 { color: var(--gold-primary); font-size: 15px; margin-bottom: 8px; }
-        .god-action-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 15px; }
-        .god-action-card input { background: rgba(0, 0, 0, 0.6); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 8px; color: #fff; width: 100%; margin-bottom: 10px; }
-        .border-danger { border-color: rgba(220, 38, 38, 0.4); }
-        .border-danger h4 { color: var(--danger-red); }
-    </style>
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-theme">
 
-    <!-- NAVBAR COM GESTÃO DE CONTA E MODO DE ACESSO -->
-    <header class="app-navbar">
-        <div class="brand-logo">
-            <i class="fas fa-shield-halved"></i> VIKING <span>eSports</span>
+    <!-- Fundo de Partículas -->
+    <div id="particles-js"></div>
+
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="/img/studio_20260730_195359_0000-removebg-preview.png" alt="Viking Icon" class="logo-reduced">
+            <span>VIKING <span class="highlight">HUB</span></span>
         </div>
-
-        <div class="account-bar">
-            <!-- Indicador do usuário ativo -->
-            <div class="user-pill" id="userPillDisplay">
-                <i class="fas fa-user-circle"></i>
-                <span id="currentEmailText">fallk.codm@gmail.com</span>
-            </div>
-
-            <!-- Botão de Acesso Direto ao God Mode (Visível apenas para fallk.codm@gmail.com) -->
-            <button class="btn-secondary hidden" id="godNavBtn" onclick="toggleGodPanel()">
-                <i class="fas fa-crown"></i> Painel DEUS
+        <nav class="nav-links">
+            <a href="#hero">Início</a>
+            <a href="#rules">Regras</a>
+            <a href="#modes">Modos</a>
+            <a href="#leaderboard">Ranking</a>
+            <a href="#feed">Comunidade</a>
+            <a href="#profile-section" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
+            <a href="#" id="nav-admin-link" class="highlight-link hidden" style="color: var(--accent-gold) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
+        </nav>
+        <div class="nav-actions">
+            <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
+                <i class="fa-solid fa-moon"></i>
             </button>
-
-            <!-- Botão de Trocar de Conta -->
-            <button class="btn-outline" onclick="switchAccountPrompt()">
-                <i class="fas fa-arrows-rotate"></i> Trocar Conta
+            <button id="btn-login" class="btn-primary">
+                <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
             </button>
-
-            <!-- Botão de Sair -->
-            <button class="btn-danger btn-sm" onclick="logoutUser()">
-                <i class="fas fa-right-from-bracket"></i> Sair
+            <button id="btn-admin" class="btn-secondary hidden">
+                <i class="fa-solid fa-shield-halved"></i> Painel ADM
             </button>
         </div>
     </header>
 
-    <!-- CONTEÚDO NORMAL DO SITE PARA ATLETAS/JOGADORES (INCLUINDO A SUA CONTA) -->
-    <main class="player-dashboard">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div>
-                <h2>Área do Atleta / Feed Central</h2>
-                <p style="color: var(--text-secondary); font-size: 14px;">Você está acessando as funcionalidades normais de jogador da plataforma.</p>
-            </div>
-            <button class="btn-primary" onclick="createNewPostPrompt()"><i class="fas fa-pen-to-square"></i> Nova Publicação</button>
-        </div>
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="cyber-grid-bg"></div>
+            <div class="hero-glow hero-glow-1"></div>
+            <div class="hero-glow hero-glow-2"></div>
+            
+            <div class="hero-content">
+                <div class="hero-brand-container">
+                    <img src="/img/studio_20260730_195359_0000-removebg-preview.png" alt="Viking Sublogo" class="viking-sublogo">
+                </div>
 
-        <div class="player-grid">
-            <div class="glass-card">
-                <h3><i class="fas fa-trophy" style="color: var(--gold-primary);"></i> Seus Torneios</h3>
-                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Você está inscrito na Liga Viking Call of Duty - 2026.</p>
-            </div>
+                <div class="hero-badge-container">
+                    <span class="pulse-dot"></span>
+                    <span class="badge-neon">VIKING COMPETITIVE LEAGUE 2026</span>
+                </div>
+                
+                <h1>DOMINE O <br><span class="text-gradient">CAMPO DE BATALHA</span></h1>
+                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, gestão de equipes e o ranking supremo dos atalaias e guerreiros do Call of Duty: Mobile.</p>
 
-            <div class="glass-card">
-                <h3><i class="fas fa-chart-line" style="color: var(--gold-primary);"></i> Suas Estatísticas</h3>
-                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">K/D Ratio: 3.45 | Vitórias: 128 | Rank: Supremo</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-trophy stat-icon"></i>
+                        <h3 class="counter" data-target="1450">0</h3>
+                        <p>Vitórias Totais</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-skull stat-icon"></i>
+                        <h3 class="counter" data-target="3820">0</h3>
+                        <p>Kills em Torneios</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-award stat-icon"></i>
+                        <h3 class="counter" data-target="48">0</h3>
+                        <p>Troféus Entregues</p>
+                    </div>
+                </div>
+
+                <div class="hero-cta">
+                    <a href="#modes" class="btn-primary btn-large">
+                        <i class="fa-solid fa-gamepad"></i> Entrar em Partida
+                    </a>
+                    <a href="#rules" class="btn-outline btn-large">
+                        <i class="fa-solid fa-scroll"></i> Ver Regras
+                    </a>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Seção de Perfil Completo do Jogador -->
+        <section id="profile-section" class="container-section profile-page hidden">
+            <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Guerreiro</span></h2>
+            
+            <div class="profile-layout">
+                <div class="glass-card profile-sidebar">
+                    <div class="avatar-container">
+                        <img id="user-avatar-preview" src="studio_20260730_195359_0000.png" alt="Avatar Atleta">
+                    </div>
+                    <h3 id="display-nickname">Seu Nickname</h3>
+                    <span class="role-badge" id="display-role">Sniper</span>
+                    <p id="display-bio" class="user-bio">Sua biografia aparecerá aqui...</p>
+                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top">
+                        <i class="fa-solid fa-user-pen"></i> Editar Perfil
+                    </button>
+                </div>
+
+                <div class="profile-main-content">
+                    <div class="glass-card margin-bottom-card">
+                        <div class="card-header-flex">
+                            <h3><i class="fa-solid fa-trophy highlight"></i> Minhas Conquistas</h3>
+                            <button id="btn-add-achievement" class="btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar Conquista</button>
+                        </div>
+                        <div id="user-achievements-grid" class="user-trophy-grid"></div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-rss highlight"></i> Minhas Publicações</h3>
+                        <div class="post-creator margin-top">
+                            <textarea id="user-post-input" placeholder="O que você está aprontando no CODM hoje?"></textarea>
+                            <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar no Meu Feed</button>
+                        </div>
+                        <div id="user-posts-list" class="posts-list margin-top"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Regras Competitivas -->
+        <section id="rules" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-book-bookmark"></i> Regras <span class="highlight">Oficiais</span></h2>
+            <div class="rules-grid">
+                <div class="glass-card">
+                    <i class="fa-solid fa-ban rule-icon"></i>
+                    <h3>Itens Banidos</h3>
+                    <p>Armas de apoio sem precisão, operadores de escudo excessivo e scorestreaks específicas são proibidas no competitivo.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-stopwatch rule-icon"></i>
+                    <h3>Tempo & Tolerância</h3>
+                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. A ausência resulta em W.O. automático.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-camera rule-icon"></i>
+                    <h3>Comprovação</h3>
+                    <p>Todos os capitães devem enviar a captura de tela (print) da pontuação final ao término de cada mapa disputado.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Modos de Jogo -->
+        <section id="modes" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-gamepad"></i> Modos de <span class="highlight">Confronto</span></h2>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <div class="mode-badge">DUELO</div>
+                    <h3>1v1 Sniper / Gunfight</h3>
+                    <p>Modo puramente mecânico. Teste sua precisão, movimentação e tempo de reação no confronto direto.</p>
+                    <button class="btn-outline btn-full btn-match" data-mode="1v1 Sniper">Inscrever-se 1v1</button>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-badge">DUO</div>
+                    <h3>2v2 Buscar & Destruir</h3>
+                    <p>Sincronia e tática em dupla. Mapas reduzidos e rodadas rápidas sem respawn.</p>
+                    <button class="btn-outline btn-full btn-match" data-mode="2v2 Buscar & Destruir">Inscrever Dupla</button>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-badge highlight-bg">SQUAD</div>
+                    <h3>5v5 Competitive Series</h3>
+                    <p>O formato oficial do CODM World Championship. Rotação de Hardpoint, Search & Destroy e Control.</p>
+                    <button class="btn-primary btn-full btn-match" data-mode="5v5 Squad Competitive">Inscrever Squad</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Leaderboard / Ranking -->
+        <section id="leaderboard" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Leaderboard <span class="highlight">Competitivo</span></h2>
+            <div class="glass-card table-container">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Guerreiro / Lineup</th>
+                            <th>K/D</th>
+                            <th>Vitórias</th>
+                            <th>Pontos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Seção Feed Global -->
+        <section id="feed" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-comments"></i> Feed da <span class="highlight">Comunidade</span></h2>
+            <div class="glass-card feed-box">
+                <div class="post-creator">
+                    <textarea id="post-input" placeholder="Compartilhe uma jogada, estratégia ou resultado de treino..."></textarea>
+                    <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
+                </div>
+                <div id="posts-container" class="posts-list"></div>
+            </div>
+        </section>
     </main>
 
-    <!-- BOTÃO FLUTUANTE GOD MODE (PARA ATIVAÇÃO RÁPIDA) -->
-    <button class="btn-god-trigger hidden" id="btnGodTrigger" onclick="toggleGodPanel()">
-        <i class="fas fa-crown"></i>
-        <span>GOD MODE</span>
-    </button>
+    <!-- Modal de Edição de Perfil -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-profile-modal close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-user-gear"></i> Editar Perfil</h2>
+            <form id="profile-form">
+                <div class="input-group">
+                    <label for="profile-nickname">Nick / Tag CODM</label>
+                    <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper#123">
+                </div>
+                <div class="input-group">
+                    <label for="profile-role">Função Principal</label>
+                    <select id="profile-role" class="custom-select">
+                        <option value="Sniper">Sniper</option>
+                        <option value="Rusher">Rusher / Entry</option>
+                        <option value="Support">Support / Anchor</option>
+                        <option value="IGL">IGL (Capitão)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="profile-bio">Biografia / Descrição</label>
+                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, clan atual...">
+                </div>
+                <div class="input-group">
+                    <label for="profile-avatar">URL Foto de Perfil (Avatar)</label>
+                    <input type="url" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Salvar Perfil</button>
+            </form>
+        </div>
+    </div>
 
-    <!-- PAINEL MODAL GOD MODE -->
-    <div class="modal hidden" id="godAdminModal">
-        <div class="modal-content glass-card god-card">
+    <!-- Modal de Adicionar Conquista -->
+    <div id="achievement-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-achievement-modal close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-award"></i> Adicionar Conquista</h2>
+            <form id="achievement-form">
+                <div class="input-group">
+                    <label for="ach-title">Título da Conquista</label>
+                    <input type="text" id="ach-title" required placeholder="Ex: MVP do Torneio Valhalla">
+                </div>
+                <div class="input-group">
+                    <label for="ach-desc">Descrição / Detalhes</label>
+                    <input type="text" id="ach-desc" required placeholder="Ex: Vencedor do torneio semanal sem derrotas">
+                </div>
+                <div class="input-group">
+                    <label for="ach-icon">Ícone</label>
+                    <select id="ach-icon" class="custom-select">
+                        <option value="fa-crown">Coroa (Campeão)</option>
+                        <option value="fa-crosshair">Mira (Sniper/Duelo)</option>
+                        <option value="fa-medal">Medalha</option>
+                        <option value="fa-star">Estrela</option>
+                        <option value="fa-skull">Caveira (Most Kills)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Adicionar Conquista</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Autenticação -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal close-modal-btn">&times;</span>
+            <h2 id="modal-title">Acessar Viking Hub</h2>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required placeholder="seu@email.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+            </form>
+            <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Verificação de Senha Admin -->
+    <div id="admin-pass-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-admin-pass-modal close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-lock highlight"></i> Acesso Restrito ADM</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">
+                Digite sua senha de administrador para autenticar a sessão.
+            </p>
+            <form id="admin-pass-form">
+                <div class="input-group">
+                    <label for="admin-password">Senha do Administrador</label>
+                    <input type="password" id="admin-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Autenticar e Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Inscrição em Partida -->
+    <div id="match-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-match-modal close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-crosshair"></i> Inscrever em Partida</h2>
+            <form id="match-form">
+                <div class="input-group">
+                    <label>Modo Escolhido</label>
+                    <input type="text" id="match-mode-selected" readonly style="color: var(--primary-neon); font-weight: bold;">
+                </div>
+                <div class="input-group">
+                    <label for="match-team-name">Nome do Clan / Nick do Duo/Squad</label>
+                    <input type="text" id="match-team-name" required placeholder="Ex: Viking Clan / Viper & Ghost">
+                </div>
+                <div class="input-group">
+                    <label for="match-whatsapp">WhatsApp para Contato/Sala</label>
+                    <input type="tel" id="match-whatsapp" required placeholder="(00) 90000-0000">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Confirmar Inscrição</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAINEL DE ADMINISTRAÇÃO SUPREMO -->
+    <div id="admin-modal" class="modal hidden">
+        <div class="modal-content glass-card modal-large">
+            <span class="close-modal-admin close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-shield-halved highlight"></i> Painel do Administrador</h2>
             
-            <!-- BARRA SUPERIOR DO MODO GOD (Sair do Modo God e Voltar para Jogador) -->
-            <div class="god-top-actions">
-                <button class="btn-outline" onclick="toggleGodPanel()">
-                    <i class="fas fa-arrow-left"></i> Sair do Modo DEUS (Voltar ao Site)
-                </button>
-                <span style="font-size: 12px; color: var(--text-muted);">SESSÃO DEUS ATIVA</span>
-            </div>
-
-            <div class="god-header">
-                <div class="god-badge">
-                    <span class="pulse-dot-gold"></span> SUPREME AUTHORITY
-                </div>
-                <h2><i class="fas fa-eye"></i> PAINEL SUPREMO DE MODERAÇÃO</h2>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Acesso irrestrito exclusivo para fallk.codm@gmail.com</p>
-            </div>
-
-            <!-- METRICAS -->
-            <div class="god-stats-grid">
-                <div class="god-stat-box">
-                    <span class="stat-label">Usuários Ativos</span>
-                    <span class="stat-value" id="totalUsersCount">1,420</span>
-                </div>
-                <div class="god-stat-box">
-                    <span class="stat-label">Banned Logs</span>
-                    <span class="stat-value danger" id="bannedUsersCount">12</span>
-                </div>
-                <div class="god-stat-box">
-                    <span class="stat-label">Carga Servidor</span>
-                    <span class="stat-value highlight">12%</span>
-                </div>
-                <div class="god-stat-box">
-                    <span class="stat-label">Status da API</span>
-                    <span class="stat-value online">ONLINE</span>
-                </div>
-            </div>
-
-            <!-- NAVEGAÇÃO INTERNA DO ADM -->
             <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchAdminTab('usersTab', event)"><i class="fas fa-users-cog"></i> Controle de Jogadores</button>
-                <button class="tab-btn" onclick="switchAdminTab('feedTab', event)"><i class="fas fa-stream"></i> Moderação do Feed</button>
-                <button class="tab-btn" onclick="switchAdminTab('systemTab', event)"><i class="fas fa-terminal"></i> Comandos Supremos</button>
+                <button class="tab-btn active" data-tab="users-tab"><i class="fa-solid fa-users"></i> Usuários</button>
+                <button class="tab-btn" data-tab="posts-tab"><i class="fa-solid fa-comments"></i> Moderação Feed</button>
+                <button class="tab-btn" data-tab="matches-tab"><i class="fa-solid fa-gamepad"></i> Inscrições</button>
+                <button class="tab-btn" data-tab="stats-tab"><i class="fa-solid fa-trophy"></i> Leaderboard</button>
             </div>
 
-            <!-- TAB 1: USUÁRIOS -->
-            <div id="usersTab" class="tab-content active">
-                <div class="admin-toolbar">
-                    <input type="text" id="userSearchInput" placeholder="Buscar atleta por ID ou Nick..." onkeyup="filterUsersTable()">
-                    <button class="btn-primary btn-sm" onclick="createNewUserPrompt()"><i class="fas fa-user-plus"></i> Forjar Atleta</button>
-                </div>
+            <!-- Aba 1: Usuários -->
+            <div class="tab-content active" id="users-tab">
+                <h3>Gerenciar Atletas Registrados</h3>
+                <p class="text-muted margin-bottom-sm">Controle de banimento, exclusão e permissões de acesso do sistema.</p>
                 <div class="table-container">
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Atleta</th>
-                                <th>Cargo</th>
+                                <th>E-mail</th>
+                                <th>Nick / Função</th>
                                 <th>Status</th>
-                                <th>Ações Supremas</th>
+                                <th>Cargo</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="usersTableBody"></tbody>
+                        <tbody id="admin-users-list"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- TAB 2: FEED -->
-            <div id="feedTab" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3>Feed Global em Tempo Real</h3>
-                    <button class="btn-danger btn-sm" onclick="godClearAllPosts()"><i class="fas fa-skull"></i> PURGAR FEED</button>
-                </div>
-                <div class="admin-feed-list" id="adminFeedList"></div>
+            <!-- Aba 2: Moderação do Feed -->
+            <div class="tab-content" id="posts-tab">
+                <h3>Moderação de Conteúdo do Feed</h3>
+                <p class="text-muted margin-bottom-sm">Exclua publicações impróprias, ofensivas ou violadoras das regras.</p>
+                <div id="admin-posts-list" class="admin-feed-list"></div>
             </div>
 
-            <!-- TAB 3: SISTEMA -->
-            <div id="systemTab" class="tab-content">
-                <div class="god-actions-grid">
-                    <div class="god-action-card">
-                        <h4><i class="fas fa-bolt"></i> Global Anúncio</h4>
-                        <p>Envia alerta em tempo real para todos os usuários online no site.</p>
-                        <input type="text" id="godGlobalNotice" placeholder="Mensagem do anúncio...">
-                        <button class="btn-primary btn-full btn-sm" onclick="godBroadcastNotice()">Transmitir</button>
-                    </div>
-
-                    <div class="god-action-card">
-                        <h4><i class="fas fa-trophy"></i> Reset Leaderboard</h4>
-                        <p>Zera as tabelas de classificação para início do novo torneio.</p>
-                        <button class="btn-secondary btn-full btn-sm" onclick="godResetLeaderboard()">Resetar Pontuações</button>
-                    </div>
-
-                    <div class="god-action-card border-danger">
-                        <h4><i class="fas fa-radiation"></i> Modo Emergência</h4>
-                        <p>Ativa a trava de manutenção global do servidor.</p>
-                        <button class="btn-danger btn-full btn-sm" onclick="godToggleMaintenance()">Alternar Estado</button>
-                    </div>
+            <!-- Aba 3: Inscrições em Partidas -->
+            <div class="tab-content" id="matches-tab">
+                <h3>Gerenciar Inscrições de Torneios</h3>
+                <p class="text-muted margin-bottom-sm">Lista de times e duos inscritos nos modos competitivos.</p>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Modo</th>
+                                <th>Time / Nick</th>
+                                <th>WhatsApp</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-matches-list"></tbody>
+                    </table>
                 </div>
             </div>
 
+            <!-- Aba 4: Leaderboard -->
+            <div class="tab-content" id="stats-tab">
+                <h3>Atualizar Placar Global de Atletas</h3>
+                <form id="admin-update-stats">
+                    <div class="input-group">
+                        <label>Nome do Jogador / Time</label>
+                        <input type="text" id="admin-player-name" required placeholder="Ex: Viking_Warrior">
+                    </div>
+                    <div class="input-group">
+                        <label>Pontos Adicionais</label>
+                        <input type="number" id="admin-player-points" required placeholder="Ex: 150">
+                    </div>
+                    <button type="submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Adicionar Pontos ao Leaderboard</button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- SCRIPT DE NAVEGAÇÃO, SESSÃO E DEUS MODE -->
-    <script>
-        /* ==========================================================================
-           1. CONTROLE DE AUTENTICAÇÃO E PERMISSÕES
-           ========================================================================== */
+    <!-- Footer -->
+    <footer>
+        <div style="margin-bottom: 12px;">
+            <img src="/img/studio_20260730_195359_0000.png" alt="Viking Main Logo" style="height: 45px; filter: drop-shadow(0 0 10px rgba(0,240,255,0.4));">
+        </div>
+        <p>&copy; 2026 VIKING eSports Hub. Todos os direitos reservados.</p>
+    </footer>
 
-        const SUPREME_GOD_EMAIL = "fallk.codm@gmail.com";
-
-        // Recupera o usuário logado do LocalStorage ou define a sua conta como padrão
-        let currentUser = JSON.parse(localStorage.getItem('viking_active_user')) || {
-            email: "fallk.codm@gmail.com",
-            name: "Tassiano (Fallk)"
-        };
-
-        // Lista de usuários simulados
-        let usersDatabase = [
-            { id: "001", name: "Fallk (Viking)", role: "GOD_ADM", status: "Active" },
-            { id: "002", name: "Thor_eSports", role: "Player", status: "Active" },
-            { id: "003", name: "Loki_Cheater", role: "Player", status: "Banned" },
-            { id: "004", name: "Odin_Master", role: "Admin", status: "Active" }
-        ];
-
-        let globalFeedPosts = [
-            { id: 101, author: "Thor_eSports", content: "Partida incrível na final hoje!", date: "18:30" },
-            { id: 102, author: "Loki_Cheater", content: "GG WP a todos os participantes.", date: "17:10" }
-        ];
-
-        function isSupremeGod() {
-            return currentUser && currentUser.email && currentUser.email.toLowerCase() === SUPREME_GOD_EMAIL.toLowerCase();
-        }
-
-        /**
-         * Atualiza a Interface conforme a conta ativa
-         */
-        function updateUIState() {
-            const currentEmailText = document.getElementById("currentEmailText");
-            const godBtn = document.getElementById("btnGodTrigger");
-            const godNavBtn = document.getElementById("godNavBtn");
-            const godModal = document.getElementById("godAdminModal");
-
-            if (currentEmailText) {
-                currentEmailText.textContent = currentUser ? currentUser.email : "Visitante";
-            }
-
-            if (!isSupremeGod()) {
-                // Se NÃO for a sua conta suprema, esconde e bloqueia totalmente os botões de God Mode
-                if (godBtn) godBtn.classList.add("hidden");
-                if (godNavBtn) godNavBtn.classList.add("hidden");
-                if (godModal && !godModal.classList.contains("hidden")) godModal.classList.add("hidden");
-            } else {
-                // Se for a sua conta fallk.codm@gmail.com, exibe o acesso ao God Mode
-                if (godBtn) godBtn.classList.remove("hidden");
-                if (godNavBtn) godNavBtn.classList.remove("hidden");
-            }
-        }
-
-        // Inicializar aplicação
-        document.addEventListener("DOMContentLoaded", () => {
-            updateUIState();
-        });
-
-        /* ==========================================================================
-           2. AÇÕES DE CONTA (TROCAR CONTA, SAIR, SAIR DO MODO GOD)
-           ========================================================================== */
-
-        // Alternar Visibilidade do Painel God Mode (Entrar e Sair do Modo Deus)
-        function toggleGodPanel() {
-            if (!isSupremeGod()) {
-                alert("[ACESSO NEGADO]: Esta conta não possui privilégios de Divindade.");
-                return;
-            }
-
-            const modal = document.getElementById('godAdminModal');
-            if (modal) {
-                modal.classList.toggle('hidden');
-                if (!modal.classList.contains('hidden')) {
-                    renderUsersTable();
-                    renderAdminFeed();
-                }
-            }
-        }
-
-        // Trocar de Conta (Simulador para testes)
-        function switchAccountPrompt() {
-            const newEmail = prompt("Informe o e-mail da conta que deseja acessar:", "atleta@viking.com");
-            if (newEmail && newEmail.trim() !== "") {
-                currentUser = {
-                    email: newEmail.trim(),
-                    name: newEmail.split("@")[0]
-                };
-                localStorage.setItem('viking_active_user', JSON.stringify(currentUser));
-                updateUIState();
-                alert(`Sessão alterada para: ${currentUser.email}`);
-            }
-        }
-
-        // Sair da Conta (Logout)
-        function logoutUser() {
-            if (confirm("Deseja realmente sair da sua conta?")) {
-                currentUser = { email: "desconectado", name: "Convidado" };
-                localStorage.removeItem('viking_active_user');
-                updateUIState();
-                alert("Você saiu da sua conta.");
-            }
-        }
-
-        // Função de uso normal do site
-        function createNewPostPrompt() {
-            const content = prompt("Escreva sua mensagem para o Feed de Jogadores:");
-            if (content) {
-                alert("Publicação enviada com sucesso!");
-            }
-        }
-
-        /* ==========================================================================
-           3. LÓGICA DO MODO GOD
-           ========================================================================== */
-
-        function switchAdminTab(tabId, event) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        function renderUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '';
-
-            usersDatabase.forEach(user => {
-                const isBanned = user.status === 'Banned';
-                const isGod = user.role === 'GOD_ADM';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>#${user.id}</td>
-                    <td><strong>${user.name}</strong></td>
-                    <td><span class="role-tag ${isGod ? 'role-admin' : 'role-player'}">${user.role}</span></td>
-                    <td><span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">${user.status}</span></td>
-                    <td class="admin-actions-flex">
-                        ${!isGod ? `
-                            <button class="btn-secondary btn-sm" onclick="toggleUserRole('${user.id}')">
-                                ${user.role === 'Admin' ? 'Tornar Player' : 'Promover ADM'}
-                            </button>
-                            <button class="btn-danger btn-sm" onclick="godToggleBan('${user.id}')">
-                                ${isBanned ? 'Desbanir' : 'BANIR'}
-                            </button>
-                        ` : '<span style="font-size:11px; color: var(--text-muted);">INTOCÁVEL</span>'}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function godToggleBan(userId) {
-            if (!isSupremeGod()) return;
-            const user = usersDatabase.find(u => u.id === userId);
-            if (user) {
-                user.status = user.status === 'Banned' ? 'Active' : 'Banned';
-                renderUsersTable();
-            }
-        }
-
-        function toggleUserRole(userId) {
-            if (!isSupremeGod()) return;
-            const user = usersDatabase.find(u => u.id === userId);
-            if (user) {
-                user.role = user.role === 'Admin' ? 'Player' : 'Admin';
-                renderUsersTable();
-            }
-        }
-
-        function renderAdminFeed() {
-            const feedContainer = document.getElementById('adminFeedList');
-            feedContainer.innerHTML = '';
-
-            globalFeedPosts.forEach(post => {
-                const item = document.createElement('div');
-                item.className = 'admin-feed-item';
-                item.innerHTML = `
-                    <div>
-                        <strong>@${post.author}</strong> <span style="font-size:12px; color: var(--text-muted);">${post.date}</span>
-                        <p style="font-size: 14px; color: var(--text-secondary); margin-top:2px;">${post.content}</p>
-                    </div>
-                    <button class="btn-danger btn-sm" onclick="godDeletePost(${post.id})"><i class="fas fa-trash"></i></button>
-                `;
-                feedContainer.appendChild(item);
-            });
-        }
-
-        function godDeletePost(postId) {
-            if (!isSupremeGod()) return;
-            globalFeedPosts = globalFeedPosts.filter(p => p.id !== postId);
-            renderAdminFeed();
-        }
-
-        function godClearAllPosts() {
-            if (!isSupremeGod()) return;
-            if (confirm("PODER SUPREMO: Limpar todas as postagens do Feed?")) {
-                globalFeedPosts = [];
-                renderAdminFeed();
-            }
-        }
-
-        function godBroadcastNotice() {
-            if (!isSupremeGod()) return;
-            const text = document.getElementById('godGlobalNotice').value;
-            if (!text) return;
-            alert(`[TRANSMISSÃO SUPREMA]: ${text.toUpperCase()}`);
-            document.getElementById('godGlobalNotice').value = '';
-        }
-
-        function godResetLeaderboard() {
-            if (!isSupremeGod()) return;
-            if (confirm("Zerar pontuações do campeonato?")) {
-                alert("[GOD MODE]: Tabela resetada com sucesso!");
-            }
-        }
-
-        function godToggleMaintenance() {
-            if (!isSupremeGod()) return;
-            alert("[GOD MODE]: Estado do Servidor alternado.");
-        }
-    </script>
+    <!-- Scripts CDN -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Script Principal -->
+    <script src="script.js"></script>
 </body>
 </html>
