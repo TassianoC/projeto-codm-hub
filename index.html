@@ -21,7 +21,6 @@
     <!-- Header / Navbar -->
     <header class="navbar">
         <div class="logo">
-            <!-- Logo Reduzida / Ícone Viking -->
             <img src="/img/studio_20260730_195359_0000-removebg-preview.png" alt="Viking Icon" class="logo-reduced">
             <span>VIKING <span class="highlight">HUB</span></span>
         </div>
@@ -32,6 +31,7 @@
             <a href="#leaderboard">Ranking</a>
             <a href="#feed">Comunidade</a>
             <a href="#profile-section" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
+            <a href="#" id="nav-admin-link" class="highlight-link hidden" style="color: var(--accent-gold) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
         </nav>
         <div class="nav-actions">
             <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
@@ -54,7 +54,6 @@
             <div class="hero-glow hero-glow-2"></div>
             
             <div class="hero-content">
-                <!-- Sublogo Viking -->
                 <div class="hero-brand-container">
                     <img src="/img/studio_20260730_195359_0000-removebg-preview.png" alt="Viking Sublogo" class="viking-sublogo">
                 </div>
@@ -277,7 +276,7 @@
     <!-- Modal de Autenticação -->
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content glass-card">
-            <span class="close-modal">&times;</span>
+            <span class="close-modal close-modal-btn">&times;</span>
             <h2 id="modal-title">Acessar Viking Hub</h2>
             <form id="auth-form">
                 <div class="input-group">
@@ -291,6 +290,24 @@
                 <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
             </form>
             <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de Verificação de Senha Admin -->
+    <div id="admin-pass-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-admin-pass-modal close-modal-btn">&times;</span>
+            <h2><i class="fa-solid fa-lock highlight"></i> Acesso Restrito ADM</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">
+                Digite sua senha de administrador para autenticar a sessão.
+            </p>
+            <form id="admin-pass-form">
+                <div class="input-group">
+                    <label for="admin-password">Senha do Administrador</label>
+                    <input type="password" id="admin-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Autenticar e Entrar</button>
+            </form>
         </div>
     </div>
 
@@ -317,7 +334,7 @@
         </div>
     </div>
 
-    <!-- MODAL DO PAINEL DE ADMINISTRAÇÃO SUPREMO -->
+    <!-- PAINEL DE ADMINISTRAÇÃO SUPREMO -->
     <div id="admin-modal" class="modal hidden">
         <div class="modal-content glass-card modal-large">
             <span class="close-modal-admin close-modal-btn">&times;</span>
@@ -396,7 +413,6 @@
 
     <!-- Footer -->
     <footer>
-        <!-- Logo Viking no Rodapé -->
         <div style="margin-bottom: 12px;">
             <img src="/img/studio_20260730_195359_0000.png" alt="Viking Main Logo" style="height: 45px; filter: drop-shadow(0 0 10px rgba(0,240,255,0.4));">
         </div>
