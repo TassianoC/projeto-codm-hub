@@ -750,3 +750,142 @@ function handleAdminStatUpdate(e) {
         alert('Jogador não encontrado no Leaderboard.');
     }
 }
+/* ==========================================================================
+   SISTEMA DE CONTROLE SUPREMO GOD MODE
+   ========================================================================== */
+
+// Base de dados simulada
+let usersDatabase = [
+    { id: "001", name: "Tassiano (Viking)", role: "GOD_ADM", status: "Active" },
+    { id: "002", name: "Thor_eSports", role: "Player", status: "Active" },
+    { id: "003", name: "Loki_Cheater", role: "Player", status: "Banned" },
+    { id: "004", name: "Odin_Master", role: "Admin", status: "Active" }
+];
+
+let globalFeedPosts = [
+    { id: 101, author: "Thor_eSports", content: "Partida incrível na final hoje!", date: "Hoje às 18:30" },
+    { id: 102, author: "Loki_Cheater", content: "GG WP a todos os participantes.", date: "Hoje às 17:10" }
+];
+
+// Alternar visibilidade do Modal God Mode
+function toggleGodPanel() {
+    const modal = document.getElementById('godAdminModal');
+    modal.classList.toggle('hidden');
+    if (!modal.classList.contains('hidden')) {
+        renderUsersTable();
+        renderAdminFeed();
+    }
+}
+
+// Alternar Abas Internas
+function switchAdminTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// Renderizar Tabela de Usuários
+function renderUsersTable() {
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+
+    usersDatabase.forEach(user => {
+        const isBanned = user.status === 'Banned';
+        const isGod = user.role === 'GOD_ADM';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${user.id}</td>
+            <td><strong>${user.name}</strong></td>
+            <td><span class="role-tag ${isGod ? 'role-admin' : 'role-player'}">${user.role}</span></td>
+            <td><span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">${user.status}</span></td>
+            <td class="admin-actions-flex">
+                ${!isGod ? `
+                    <button class="btn-secondary btn-sm" onclick="toggleUserRole('${user.id}')">
+                        ${user.role === 'Admin' ? 'Promover para Player' : 'Tornar ADM'}
+                    </button>
+                    <button class="btn-danger btn-sm" onclick="godToggleBan('${user.id}')">
+                        ${isBanned ? 'Desbanir' : ' BANIR'}
+                    </button>
+                ` : '<span class="text-muted" style="font-size:11px;">INTOCÁVEL</span>'}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Banir / Desbanir Atleta
+function godToggleBan(userId) {
+    const user = usersDatabase.find(u => u.id === userId);
+    if (user) {
+        user.status = user.status === 'Banned' ? 'Active' : 'Banned';
+        renderUsersTable();
+        alert(`[PODER DE DEUS]: O status de ${user.name} foi alterado para ${user.status}.`);
+    }
+}
+
+// Alterar Cargo de Usuário
+function toggleUserRole(userId) {
+    const user = usersDatabase.find(u => u.id === userId);
+    if (user) {
+        user.role = user.role === 'Admin' ? 'Player' : 'Admin';
+        renderUsersTable();
+    }
+}
+
+// Renderizar Feed de Moderação
+function renderAdminFeed() {
+    const feedContainer = document.getElementById('adminFeedList');
+    feedContainer.innerHTML = '';
+
+    globalFeedPosts.forEach(post => {
+        const item = document.createElement('div');
+        item.className = 'admin-feed-item';
+        item.innerHTML = `
+            <div>
+                <strong>@${post.author}</strong> - <span class="text-muted">${post.date}</span>
+                <p class="post-content">${post.content}</p>
+            </div>
+            <button class="btn-danger btn-sm" onclick="godDeletePost(${post.id})"><i class="fas fa-trash"></i> Apagar</button>
+        `;
+        feedContainer.appendChild(item);
+    });
+}
+
+// Apagar Postagem Única
+function godDeletePost(postId) {
+    globalFeedPosts = globalFeedPosts.filter(p => p.id !== postId);
+    renderAdminFeed();
+}
+
+// Purgar Todo o Feed
+function godClearAllPosts() {
+    if (confirm("PODER SUPREMO: Deseja apagar TODAS as postagens da plataforma?")) {
+        globalFeedPosts = [];
+        renderAdminFeed();
+        alert("[PODER DE DEUS]: O Feed Global foi totalmente limpo.");
+    }
+}
+
+// Transmitir Anúncio Global
+function godBroadcastNotice() {
+    const text = document.getElementById('godGlobalNotice').value;
+    if (!text) return;
+    alert(`[TRANSMISSÃO SUPREMA PARA O SITE]\n\n"${text.toUpperCase()}"`);
+    document.getElementById('godGlobalNotice').value = '';
+}
+
+// Resetar Leaderboard
+function godResetLeaderboard() {
+    if (confirm("Deseja zerar a pontuação de todos os jogadores para o novo Torneio?")) {
+        alert("[PODER DE DEUS]: Leaderboard resetada com sucesso!");
+    }
+}
+
+// Alternar Modo Manutenção
+function godToggleMaintenance() {
+    document.body.classList.toggle('maintenance-mode');
+    alert("[PODER DE DEUS]: Estado do Servidor alterado!");
+}
