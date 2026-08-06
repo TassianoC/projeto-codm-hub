@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica e Firebase Integrações
+   CODM eSports Hub - Lógica Principal e Integrações Firebase
    ========================================================================== */
 
 const firebaseConfig = {
@@ -31,21 +31,13 @@ const mockLeaderboard = [
     { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
 ];
 
-const mockTrophies = [
-    { title: "Campeão 5v5 Series", desc: "1º Lugar no Torneio Primavera CODM", icon: "fa-crown" },
-    { title: "Lenda do Sniper 1v1", desc: "Invicto em 15 partidas seguidas", icon: "fa-crosshair" },
-    { title: "Dominador Duo", desc: "Campeão da Liga Busca & Destruir 2v2", icon: "fa-award" },
-    { title: "MVP da Temporada", desc: "Maior pontuação acumulada do Hub", icon: "fa-star" }
-];
-
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initCounters();
     renderLeaderboard(mockLeaderboard);
-    renderTrophies(mockTrophies);
     setupEventListeners();
     if (auth) listenAuthState();
-    if (db) listenFeedUpdates();
+    if (db) listenGlobalFeed();
 });
 
 function initParticles() {
@@ -111,23 +103,6 @@ function renderLeaderboard(data) {
     });
 }
 
-function renderTrophies(trophies) {
-    const container = document.getElementById('trophy-container');
-    if (!container) return;
-
-    container.innerHTML = '';
-    trophies.forEach(t => {
-        const card = `
-            <div class="glass-card trophy-card">
-                <i class="fa-solid ${t.icon}"></i>
-                <h4>${t.title}</h4>
-                <p>${t.desc}</p>
-            </div>
-        `;
-        container.innerHTML += card;
-    });
-}
-
 function setupEventListeners() {
     // Alternar tema
     const themeBtn = document.getElementById('theme-toggle');
@@ -139,7 +114,7 @@ function setupEventListeners() {
         });
     }
 
-    // Modal Auth
+    // Auth Modal
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
@@ -169,17 +144,35 @@ function setupEventListeners() {
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
-    // Modal Perfil
-    const btnProfile = document.getElementById('btn-profile');
+    // Perfil Modais & Ações
+    const editProfileBtn = document.getElementById('btn-edit-profile-modal');
     const profileModal = document.getElementById('profile-modal');
     const closeProfile = document.querySelector('.close-profile-modal');
     const profileForm = document.getElementById('profile-form');
 
-    if (btnProfile && profileModal) btnProfile.addEventListener('click', openProfileModal);
+    if (editProfileBtn) editProfileBtn.addEventListener('click', openProfileModal);
     if (closeProfile) closeProfile.addEventListener('click', () => profileModal.classList.add('hidden'));
     if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
 
-    // Modal Partida
+    // Conquistas Modais & Ações
+    const addAchBtn = document.getElementById('btn-add-achievement');
+    const achModal = document.getElementById('achievement-modal');
+    const closeAch = document.querySelector('.close-achievement-modal');
+    const achForm = document.getElementById('achievement-form');
+
+    if (addAchBtn) addAchBtn.addEventListener('click', () => achModal.classList.remove('hidden'));
+    if (closeAch) closeAch.addEventListener('click', () => achModal.classList.add('hidden'));
+    if (achForm) achForm.addEventListener('submit', handleAddAchievement);
+
+    // Publicação Pessoal
+    const userPostBtn = document.getElementById('btn-user-post');
+    if (userPostBtn) userPostBtn.addEventListener('click', handleNewUserPost);
+
+    // Publicação Global
+    const globalPostBtn = document.getElementById('btn-post');
+    if (globalPostBtn) globalPostBtn.addEventListener('click', handleNewGlobalPost);
+
+    // Inscrição em Partidas
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
     const closeMatch = document.querySelector('.close-match-modal');
@@ -201,7 +194,7 @@ function setupEventListeners() {
     if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // Modal Admin
+    // Painel Admin
     const adminBtn = document.getElementById('btn-admin');
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
@@ -219,11 +212,34 @@ function setupEventListeners() {
         });
     });
 
-    const postBtn = document.getElementById('btn-post');
-    if (postBtn) postBtn.addEventListener('click', handleNewPost);
-
     const adminStatsForm = document.getElementById('admin-update-stats');
     if (adminStatsForm) adminStatsForm.addEventListener('submit', handleAdminStatUpdate);
+}
+
+/* ==========================================================================
+   Sincronização do Perfil do Jogador
+   ========================================================================== */
+function loadUserProfileData() {
+    if (!currentUser || !db) return;
+
+    // Carregar Informações Pessoais
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById('display-nickname').innerText = data.nickname || currentUser.email.split('@')[0];
+            document.getElementById('display-role').innerText = data.gameRole || 'Sniper';
+            document.getElementById('display-bio').innerText = data.bio || 'Sem biografia informada.';
+            if (data.avatarUrl) {
+                document.getElementById('user-avatar-preview').src = data.avatarUrl;
+            }
+        }
+    });
+
+    // Carregar Conquistas do Usuário
+    listenUserAchievements();
+
+    // Carregar Feed do Usuário
+    listenUserFeed();
 }
 
 function openProfileModal() {
@@ -260,31 +276,111 @@ function handleProfileSave(e) {
     }, { merge: true }).then(() => {
         alert('Perfil atualizado com sucesso!');
         document.getElementById('profile-modal').classList.add('hidden');
+        loadUserProfileData();
     }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
 }
 
-function handleMatchSubscription(e) {
+function handleAddAchievement(e) {
     e.preventDefault();
     if (!currentUser || !db) return;
 
-    const mode = document.getElementById('match-mode-selected').value;
-    const teamName = document.getElementById('match-team-name').value;
-    const whatsapp = document.getElementById('match-whatsapp').value;
+    const title = document.getElementById('ach-title').value;
+    const desc = document.getElementById('ach-desc').value;
+    const icon = document.getElementById('ach-icon').value;
 
-    db.collection('matches').add({
-        userId: currentUser.uid,
-        userEmail: currentUser.email,
-        mode: mode,
-        teamName: teamName,
-        whatsapp: whatsapp,
+    db.collection('users').doc(currentUser.uid).collection('achievements').add({
+        title: title,
+        desc: desc,
+        icon: icon,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        alert(`Inscrição confirmada para o modo ${mode}! O organizador entrará em contato.`);
-        document.getElementById('match-modal').classList.add('hidden');
-        document.getElementById('match-form').reset();
-    }).catch(err => alert('Erro na inscrição: ' + err.message));
+        alert('Conquista adicionada!');
+        document.getElementById('achievement-modal').classList.add('hidden');
+        document.getElementById('achievement-form').reset();
+    }).catch(err => alert('Erro ao adicionar conquista: ' + err.message));
 }
 
+function listenUserAchievements() {
+    const container = document.getElementById('user-achievements-grid');
+    if (!container || !currentUser || !db) return;
+
+    db.collection('users').doc(currentUser.uid).collection('achievements').orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+            container.innerHTML = '';
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nenhuma conquista cadastrada ainda. Clique no botão acima para adicionar!</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const card = `
+                    <div class="user-trophy-card">
+                        <i class="fa-solid ${data.icon || 'fa-award'}"></i>
+                        <h4>${data.title}</h4>
+                        <p>${data.desc}</p>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        });
+}
+
+function handleNewUserPost() {
+    const input = document.getElementById('user-post-input');
+    const content = input.value.trim();
+    if (!content || !currentUser || !db) return;
+
+    db.collection('posts').add({
+        author: currentUser.email.split('@')[0],
+        userId: currentUser.uid,
+        content: content,
+        likes: 0,
+        likedBy: [],
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        input.value = '';
+    }).catch(err => alert('Erro ao publicar: ' + err.message));
+}
+
+function listenUserFeed() {
+    const container = document.getElementById('user-posts-list');
+    if (!container || !currentUser || !db) return;
+
+    db.collection('posts')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('timestamp', 'desc')
+        .onSnapshot(snapshot => {
+            container.innerHTML = '';
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="text-muted">Você ainda não possui publicações.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
+                
+                const post = `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <span class="post-author">@${data.author}</span>
+                            <span class="post-date">${timeStr}</span>
+                        </div>
+                        <p class="post-content">${data.content}</p>
+                        <div style="margin-top: 8px;">
+                            <small class="highlight"><i class="fa-solid fa-heart"></i> ${data.likes || 0} Curtidas</small>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += post;
+            });
+        });
+}
+
+/* ==========================================================================
+   Feed Global & Autenticação
+   ========================================================================== */
 function handleAuthSubmit(e) {
     e.preventDefault();
     if (!auth) return;
@@ -320,13 +416,17 @@ function listenAuthState() {
     auth.onAuthStateChanged((user) => {
         const authBtnText = document.getElementById('auth-btn-text');
         const adminBtn = document.getElementById('btn-admin');
-        const profileBtn = document.getElementById('btn-profile');
+        const profileSection = document.getElementById('profile-section');
+        const navProfileLink = document.getElementById('nav-profile-link');
 
         if (user) {
             currentUser = user;
             if (authBtnText) authBtnText.innerText = 'Sair';
-            if (profileBtn) profileBtn.classList.remove('hidden');
-            
+            if (profileSection) profileSection.classList.remove('hidden');
+            if (navProfileLink) navProfileLink.classList.remove('hidden');
+
+            loadUserProfileData();
+
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists && doc.data().role === 'admin') {
                     isAdmin = true;
@@ -342,12 +442,13 @@ function listenAuthState() {
             isAdmin = false;
             if (authBtnText) authBtnText.innerText = 'Entrar';
             if (adminBtn) adminBtn.classList.add('hidden');
-            if (profileBtn) profileBtn.classList.add('hidden');
+            if (profileSection) profileSection.classList.add('hidden');
+            if (navProfileLink) navProfileLink.classList.add('hidden');
         }
     });
 }
 
-function handleNewPost() {
+function handleNewGlobalPost() {
     if (!currentUser) {
         alert('Você precisa estar logado para publicar!');
         return;
@@ -367,6 +468,43 @@ function handleNewPost() {
     }).then(() => {
         input.value = '';
     }).catch(err => alert('Erro ao publicar: ' + err.message));
+}
+
+function listenGlobalFeed() {
+    const postsContainer = document.getElementById('posts-container');
+    if (!postsContainer) return;
+
+    db.collection('posts').orderBy('timestamp', 'desc').limit(20)
+        .onSnapshot((snapshot) => {
+            postsContainer.innerHTML = '';
+            if (snapshot.empty) {
+                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada no feed global.</p>';
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
+                const likesCount = data.likes || 0;
+                const isLiked = currentUser && data.likedBy && data.likedBy.includes(currentUser.uid);
+
+                const postElement = `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <span class="post-author">@${data.author}</span>
+                            <span class="post-date">${timeStr}</span>
+                        </div>
+                        <p class="post-content">${data.content}</p>
+                        <div style="margin-top: 10px;">
+                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 14px; border-color: ${isLiked ? 'var(--secondary-neon)' : 'var(--primary-neon)'}">
+                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--secondary-neon)' : 'inherit'}"></i> ${likesCount} Curtidas
+                            </button>
+                        </div>
+                    </div>
+                `;
+                postsContainer.innerHTML += postElement;
+            });
+        });
 }
 
 function toggleLikePost(postId) {
@@ -397,41 +535,26 @@ function toggleLikePost(postId) {
     });
 }
 
-function listenFeedUpdates() {
-    const postsContainer = document.getElementById('posts-container');
-    if (!postsContainer) return;
+function handleMatchSubscription(e) {
+    e.preventDefault();
+    if (!currentUser || !db) return;
 
-    db.collection('posts').orderBy('timestamp', 'desc').limit(20)
-        .onSnapshot((snapshot) => {
-            postsContainer.innerHTML = '';
-            if (snapshot.empty) {
-                postsContainer.innerHTML = '<p class="text-muted">Nenhuma publicação encontrada.</p>';
-                return;
-            }
+    const mode = document.getElementById('match-mode-selected').value;
+    const teamName = document.getElementById('match-team-name').value;
+    const whatsapp = document.getElementById('match-whatsapp').value;
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
-                const likesCount = data.likes || 0;
-                const isLiked = currentUser && data.likedBy && data.likedBy.includes(currentUser.uid);
-
-                const postElement = `
-                    <div class="post-card">
-                        <div class="post-header">
-                            <span class="post-author">@${data.author}</span>
-                            <span class="post-date">${timeStr}</span>
-                        </div>
-                        <p class="post-content">${data.content}</p>
-                        <div style="margin-top: 10px;">
-                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 14px; border-color: ${isLiked ? 'var(--secondary-neon)' : 'var(--primary-neon)'}">
-                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--secondary-neon)' : 'inherit'}"></i> ${likesCount} Curtidas
-                            </button>
-                        </div>
-                    </div>
-                `;
-                postsContainer.innerHTML += postElement;
-            });
-        });
+    db.collection('matches').add({
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        mode: mode,
+        teamName: teamName,
+        whatsapp: whatsapp,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert(`Inscrição confirmada para o modo ${mode}!`);
+        document.getElementById('match-modal').classList.add('hidden');
+        document.getElementById('match-form').reset();
+    }).catch(err => alert('Erro na inscrição: ' + err.message));
 }
 
 function loadAdminUsersList() {
