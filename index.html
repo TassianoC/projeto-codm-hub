@@ -428,5 +428,146 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <script src="script.js"></script>
+    
+
+    <!-- Canvas de Partículas Futuristas no Fundo -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Header / Navbar -->
+    <header class="navbar glass-panel">
+        <div class="logo-container" onclick="switchTab('home')" style="cursor: pointer;">
+            <h1 class="glow-text">LOBARK <span class="sub-logo">CHARTS</span></h1>
+        </div>
+
+        <nav class="nav-links">
+            <button class="nav-btn active" id="btn-tab-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Início</button>
+            <button class="nav-btn" id="btn-tab-top-liked" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Mais Curtidos</button>
+            <button class="nav-btn" id="btn-tab-players" onclick="switchTab('players')"><i class="fa-solid fa-users"></i> Jogadores</button>
+            <button class="nav-btn hidden" id="btn-tab-profile" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Meu Perfil</button>
+        </nav>
+
+        <div class="user-auth-control">
+            <div id="auth-guest-view">
+                <button class="btn-primary" onclick="toggleLogin()"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
+            </div>
+            <div id="auth-user-view" style="display: none; align-items: center; gap: 10px;">
+                <span id="user-display-name" class="user-tag"></span>
+                <button class="btn-outline" style="padding: 6px 12px;" onclick="toggleLogin()"><i class="fa-solid fa-sign-out-alt"></i> Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-container">
+
+        <!-- ABA 1: INÍCIO (HERO & PARTÍCULAS) -->
+        <section id="tab-home" class="tab-content active">
+            
+            <!-- Hero Banner Futurista -->
+            <div class="hero-banner glass-panel">
+                <div class="hero-glow-effect"></div>
+                <div class="hero-content">
+                    <span class="badge badge-t3" style="font-size:0.85rem; margin-bottom:12px; display:inline-block;">
+                        <i class="fa-solid fa-bolt"></i> ESPORTS COMMUNITY HUB
+                    </span>
+                    <h1 class="hero-title">A ARENA DOS <span class="text-neon">MELHORES JOGADORES</span></h1>
+                    <p class="hero-description">Explore o ranking de destaque da comunidade, interaja com curtidas em tempo real e mostre sua relevância no cenário competitivo.</p>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:25px;">
+                        <button class="btn-primary" onclick="switchTab('top-liked')"><i class="fa-solid fa-fire"></i> Ver Ranking de Curtidas</button>
+                        <button class="btn-secondary" onclick="switchTab('players')"><i class="fa-solid fa-magnifying-glass"></i> Explorar Jogadores</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas Gerais -->
+            <div class="stats-overview-grid" style="margin-top: 35px;">
+                <div class="card glass-panel stat-box">
+                    <i class="fa-solid fa-users stat-icon"></i>
+                    <h3 id="stat-total-players">0</h3>
+                    <span>Jogadores Registrados</span>
+                </div>
+                <div class="card glass-panel stat-box">
+                    <i class="fa-solid fa-heart stat-icon" style="color: var(--crimson);"></i>
+                    <h3 id="stat-total-likes">0</h3>
+                    <span>Curtidas em Perfis</span>
+                </div>
+                <div class="card glass-panel stat-box">
+                    <i class="fa-solid fa-crown stat-icon" style="color: #ffaa00;"></i>
+                    <h3 id="stat-top-player">--</h3>
+                    <span>Líder Atual do Rank</span>
+                </div>
+            </div>
+
+            <!-- Jogadores em Destaque na Home -->
+            <div class="section-header" style="margin-top: 45px;">
+                <h2><i class="fa-solid fa-crown" style="color: #ffaa00;"></i> Top 3 Perfis em Destaque</h2>
+                <button class="btn-outline" onclick="switchTab('top-liked')">Ver Ranking Completo <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+            <div id="home-top-players-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 2: MAIS CURTIDOS -->
+        <section id="tab-top-liked" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h2><i class="fa-solid fa-fire" style="color: var(--crimson);"></i> Perfis Mais Curtidos</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Jogadores com maior relevância e votos da comunidade.</p>
+                </div>
+            </div>
+            <div id="top-liked-players-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 3: TODOS OS JOGADORES -->
+        <section id="tab-players" class="tab-content">
+            <div class="section-header">
+                <h2>Todos os Jogadores</h2>
+            </div>
+            <div id="all-players-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- ABA 4: MEU PERFIL (SÓ APARECE SE LOGADO) -->
+        <section id="tab-profile" class="tab-content">
+            <div id="profile-main-card" class="insta-profile-card glass-panel">
+                <div class="insta-header">
+                    <div class="insta-avatar-container">
+                        <div class="insta-avatar-ring">
+                            <div class="avatar-box">
+                                <img id="my-avatar-img" src="" alt="Foto de Perfil">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insta-details">
+                        <div class="insta-user-row">
+                            <h2 id="my-profile-nick">--</h2>
+                            <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> PRO PLAYER</span>
+                        </div>
+
+                        <div class="insta-stats-row">
+                            <div class="insta-stat">
+                                <strong id="my-profile-likes">0</strong>
+                                <span>Curtidas</span>
+                            </div>
+                            <div class="insta-stat">
+                                <strong id="my-profile-role">Flex</strong>
+                                <span>Função</span>
+                            </div>
+                            <div class="insta-stat">
+                                <strong id="my-profile-kd">0.00</strong>
+                                <span>K/D Global</span>
+                            </div>
+                        </div>
+
+                        <div class="insta-bio">
+                            <p id="my-profile-bio">Seu perfil está ativo no Hub Lobark.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html>
