@@ -40,7 +40,7 @@
                 <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
             </button>
             <button id="btn-admin" class="btn-secondary hidden">
-                <i class="fa-solid fa-shield-halved"></i> Admin
+                <i class="fa-solid fa-shield-halved"></i> Painel ADM
             </button>
         </div>
     </header>
@@ -89,12 +89,11 @@
             </div>
         </section>
 
-        <!-- Seção de Perfil Completo do Jogador (Aba Exclusiva) -->
+        <!-- Seção de Perfil Completo do Jogador -->
         <section id="profile-section" class="container-section profile-page hidden">
             <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Atleta</span></h2>
             
             <div class="profile-layout">
-                <!-- Cartão Lateral: Dados de Perfil -->
                 <div class="glass-card profile-sidebar">
                     <div class="avatar-container">
                         <img id="user-avatar-preview" src="https://via.placeholder.com/150/00f0ff/000000?text=CODM" alt="Avatar Atleta">
@@ -107,29 +106,22 @@
                     </button>
                 </div>
 
-                <!-- Conteúdo Principal da Aba de Perfil -->
                 <div class="profile-main-content">
-                    <!-- Gerenciador de Conquistas -->
                     <div class="glass-card margin-bottom-card">
                         <div class="card-header-flex">
                             <h3><i class="fa-solid fa-trophy highlight"></i> Minhas Conquistas</h3>
                             <button id="btn-add-achievement" class="btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar Conquista</button>
                         </div>
-                        <div id="user-achievements-grid" class="user-trophy-grid">
-                            <!-- Conquistas carregadas via JS -->
-                        </div>
+                        <div id="user-achievements-grid" class="user-trophy-grid"></div>
                     </div>
 
-                    <!-- Feed Exclusivo de Publicações do Jogador -->
                     <div class="glass-card">
                         <h3><i class="fa-solid fa-rss highlight"></i> Minhas Publicações</h3>
                         <div class="post-creator margin-top">
                             <textarea id="user-post-input" placeholder="O que você está aprontando no CODM hoje?"></textarea>
                             <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar no Meu Feed</button>
                         </div>
-                        <div id="user-posts-list" class="posts-list margin-top">
-                            <!-- Posts pessoais carregados via JS -->
-                        </div>
+                        <div id="user-posts-list" class="posts-list margin-top"></div>
                     </div>
                 </div>
             </div>
@@ -196,14 +188,12 @@
                             <th>Pontos</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboard-body">
-                        <!-- Preenchido via JS -->
-                    </tbody>
+                    <tbody id="leaderboard-body"></tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Seção Feed Global da Comunidade -->
+        <!-- Seção Feed Global -->
         <section id="feed" class="container-section">
             <h2 class="section-title"><i class="fa-solid fa-comments"></i> Feed da <span class="highlight">Comunidade</span></h2>
             <div class="glass-card feed-box">
@@ -211,9 +201,7 @@
                     <textarea id="post-input" placeholder="Compartilhe uma jogada, estratégia ou resultado de treino..."></textarea>
                     <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
                 </div>
-                <div id="posts-container" class="posts-list">
-                    <!-- Posts dinâmicos via Firebase -->
-                </div>
+                <div id="posts-container" class="posts-list"></div>
             </div>
         </section>
     </main>
@@ -322,31 +310,84 @@
         </div>
     </div>
 
-    <!-- Modal do Painel de Administração -->
+    <!-- MODAL DO PAINEL DE ADMINISTRAÇÃO SUPREMO -->
     <div id="admin-modal" class="modal hidden">
         <div class="modal-content glass-card modal-large">
             <span class="close-modal-admin close-modal-btn">&times;</span>
-            <h2><i class="fa-solid fa-user-shield"></i> Painel de Moderação & Gestão</h2>
+            <h2><i class="fa-solid fa-shield-halved highlight"></i> Painel do Administrador</h2>
+            
             <div class="admin-tabs">
-                <button class="tab-btn active" data-tab="users-tab">Usuários</button>
-                <button class="tab-btn" data-tab="stats-tab">Estatísticas do Torneio</button>
+                <button class="tab-btn active" data-tab="users-tab"><i class="fa-solid fa-users"></i> Usuários</button>
+                <button class="tab-btn" data-tab="posts-tab"><i class="fa-solid fa-comments"></i> Moderação Feed</button>
+                <button class="tab-btn" data-tab="matches-tab"><i class="fa-solid fa-gamepad"></i> Inscrições</button>
+                <button class="tab-btn" data-tab="stats-tab"><i class="fa-solid fa-trophy"></i> Leaderboard</button>
             </div>
+
+            <!-- Aba 1: Usuários (Banir, Excluir, Promover) -->
             <div class="tab-content active" id="users-tab">
-                <h3>Gerenciar Atletas</h3>
-                <div id="admin-users-list"></div>
+                <h3>Gerenciar Atletas Registrados</h3>
+                <p class="text-muted margin-bottom-sm">Controle de banimento, exclusão e permissões de acesso do sistema.</p>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>E-mail</th>
+                                <th>Nick / Função</th>
+                                <th>Status</th>
+                                <th>Cargo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Aba 2: Moderação do Feed -->
+            <div class="tab-content" id="posts-tab">
+                <h3>Moderação de Conteúdo do Feed</h3>
+                <p class="text-muted margin-bottom-sm">Exclua publicações impróprias, ofensivas ou violadoras das regras.</p>
+                <div id="admin-posts-list" class="admin-feed-list">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <!-- Aba 3: Inscrições em Partidas -->
+            <div class="tab-content" id="matches-tab">
+                <h3>Gerenciar Inscrições de Torneios</h3>
+                <p class="text-muted margin-bottom-sm">Lista de times e duos inscritos nos modos competitivos.</p>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Modo</th>
+                                <th>Time / Nick</th>
+                                <th>WhatsApp</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-matches-list">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Aba 4: Leaderboard -->
             <div class="tab-content" id="stats-tab">
-                <h3>Atualizar Placar Global</h3>
+                <h3>Atualizar Placar Global de Atletas</h3>
                 <form id="admin-update-stats">
                     <div class="input-group">
-                        <label>Nome do Jogador/Time</label>
-                        <input type="text" id="admin-player-name" required>
+                        <label>Nome do Jogador / Time</label>
+                        <input type="text" id="admin-player-name" required placeholder="Ex: Viper_CODM">
                     </div>
                     <div class="input-group">
                         <label>Pontos Adicionais</label>
-                        <input type="number" id="admin-player-points" required>
+                        <input type="number" id="admin-player-points" required placeholder="Ex: 150">
                     </div>
-                    <button type="submit" class="btn-primary">Atualizar Leaderboard</button>
+                    <button type="submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Adicionar Pontos ao Leaderboard</button>
                 </form>
             </div>
         </div>
