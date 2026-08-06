@@ -7,7 +7,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- CSS Principal -->
@@ -37,7 +37,7 @@
                 <i class="fa-solid fa-moon"></i>
             </button>
             <button id="btn-profile" class="btn-outline hidden">
-                <i class="fa-solid fa-id-card"></i> Meu Perfil
+                <i class="fa-solid fa-id-card"></i> Perfil
             </button>
             <button id="btn-login" class="btn-primary">
                 <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
@@ -49,29 +49,45 @@
     </header>
 
     <main>
-        <!-- Hero Section -->
+        <!-- Hero Section Renovada -->
         <section id="hero" class="hero-section">
+            <div class="cyber-grid-bg"></div>
+            <div class="hero-glow hero-glow-1"></div>
+            <div class="hero-glow hero-glow-2"></div>
+            
             <div class="hero-content">
-                <span class="badge-neon">CODM COMPETITIVE HUB</span>
-                <h1>DOMINE O <span class="text-gradient">CAMPO DE BATALHA</span></h1>
-                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, regras oficiais e gestão de perfis eSports.</p>
+                <div class="hero-badge-container">
+                    <span class="pulse-dot"></span>
+                    <span class="badge-neon">CODM COMPETITIVE LEAGUE 2026</span>
+                </div>
+                <h1>DOMINE O <br><span class="text-gradient">CAMPO DE BATALHA</span></h1>
+                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, gestão de equipes e o ranking supremo dos melhores atletas de Call of Duty: Mobile.</p>
+
                 <div class="hero-stats">
                     <div class="stat-card">
+                        <i class="fa-solid fa-trophy stat-icon"></i>
                         <h3 class="counter" data-target="1450">0</h3>
                         <p>Vitórias Totais</p>
                     </div>
                     <div class="stat-card">
+                        <i class="fa-solid fa-skull stat-icon"></i>
                         <h3 class="counter" data-target="3820">0</h3>
                         <p>Kills em Torneios</p>
                     </div>
                     <div class="stat-card">
+                        <i class="fa-solid fa-award stat-icon"></i>
                         <h3 class="counter" data-target="48">0</h3>
-                        <p>Troféus Obtidos</p>
+                        <p>Troféus Entregues</p>
                     </div>
                 </div>
+
                 <div class="hero-cta">
-                    <a href="#modes" class="btn-primary btn-large">Entrar em Partida</a>
-                    <a href="#rules" class="btn-outline btn-large">Ver Regras</a>
+                    <a href="#modes" class="btn-primary btn-large">
+                        <i class="fa-solid fa-gamepad"></i> Entrar em Partida
+                    </a>
+                    <a href="#rules" class="btn-outline btn-large">
+                        <i class="fa-solid fa-scroll"></i> Ver Regras
+                    </a>
                 </div>
             </div>
         </section>
@@ -83,12 +99,12 @@
                 <div class="glass-card">
                     <i class="fa-solid fa-ban rule-icon"></i>
                     <h3>Itens Banidos</h3>
-                    <p>Armas de apoio sem precisão, operadores de escudo excessivo e pontuações de racha específicas são proibidas em ambiente competitivo.</p>
+                    <p>Armas de apoio sem precisão, operadores de escudo excessivo e scorestreaks específicas são proibidas no competitivo.</p>
                 </div>
                 <div class="glass-card">
                     <i class="fa-solid fa-stopwatch rule-icon"></i>
                     <h3>Tempo & Tolerância</h3>
-                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. A ausência resulta em W.O. automático na rodada.</p>
+                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. A ausência resulta em W.O. automático.</p>
                 </div>
                 <div class="glass-card">
                     <i class="fa-solid fa-camera rule-icon"></i>
@@ -161,7 +177,7 @@
                     <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
                 </div>
                 <div id="posts-container" class="posts-list">
-                    <!-- Posts dinâmicos com curtidas via Firebase -->
+                    <!-- Posts dinâmicos via Firebase -->
                 </div>
             </div>
         </section>
@@ -190,7 +206,7 @@
     <!-- Modal de Perfil Editável do Jogador -->
     <div id="profile-modal" class="modal hidden">
         <div class="modal-content glass-card">
-            <span class="close-profile-modal">&times;</span>
+            <span class="close-profile-modal close-modal-btn">&times;</span>
             <h2><i class="fa-solid fa-user-gear"></i> Perfil do Atleta</h2>
             <form id="profile-form">
                 <div class="input-group">
@@ -199,7 +215,7 @@
                 </div>
                 <div class="input-group">
                     <label for="profile-role">Função Principal</label>
-                    <select id="profile-role" style="background: rgba(0,0,0,0.3); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                    <select id="profile-role" class="custom-select">
                         <option value="Sniper">Sniper</option>
                         <option value="Rusher">Rusher / Entry</option>
                         <option value="Support">Support / Anchor</option>
@@ -222,7 +238,7 @@
     <!-- Modal de Inscrição em Partida -->
     <div id="match-modal" class="modal hidden">
         <div class="modal-content glass-card">
-            <span class="close-match-modal">&times;</span>
+            <span class="close-match-modal close-modal-btn">&times;</span>
             <h2><i class="fa-solid fa-crosshair"></i> Inscrever em Partida</h2>
             <form id="match-form">
                 <div class="input-group">
@@ -245,7 +261,7 @@
     <!-- Modal do Painel de Administração -->
     <div id="admin-modal" class="modal hidden">
         <div class="modal-content glass-card modal-large">
-            <span class="close-modal-admin">&times;</span>
+            <span class="close-modal-admin close-modal-btn">&times;</span>
             <h2><i class="fa-solid fa-user-shield"></i> Painel de Moderação & Gestão</h2>
             <div class="admin-tabs">
                 <button class="tab-btn active" data-tab="users-tab">Usuários</button>
