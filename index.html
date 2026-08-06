@@ -195,6 +195,57 @@
         <div class="modal-content glass-card modal-large">
             <span class="close-profile-modal">&times;</span>
             <h2><i class="fa-solid fa-id-card"></i> Cartão de Perfil do Atleta</h2>
+            <div id="profile-modal" class="modal hidden">
+  <div class="modal-content glass-card" style="max-width: 500px;">
+    <span class="close-profile-modal">&times;</span>
+    
+    <!-- Cabeçalho Estilo Instagram -->
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+      <img id="display-avatar" src="https://via.placeholder.com/100" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary-neon); object-fit: cover;">
+      <div>
+        <h2 id="display-nickname" style="margin: 0; font-size: 20px;">@Jogador</h2>
+        <p style="margin: 5px 0 0 0; font-size: 13px; color: var(--text-secondary);">
+          <span id="display-role">Sniper</span> | <span id="display-tier">T1</span>
+        </p>
+        <p id="display-bio" style="font-size: 12px; margin-top: 5px; font-style: italic;">Bio do jogador...</p>
+      </div>
+    </div>
+
+    <!-- Formulário de Edição -->
+    <form id="profile-form">
+      <div class="input-group">
+        <label>Nickname / Tag</label>
+        <input type="text" id="profile-nickname" required>
+      </div>
+      <div class="input-group">
+        <label>Função no Game</label>
+        <select id="profile-role">
+          <option value="Sniper">Sniper</option>
+          <option value="AR / Slayer">AR / Slayer</option>
+          <option value="SMG / Entry">SMG / Entry</option>
+          <option value="Suporte / IGL">Suporte / IGL</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Tier Competitivo</label>
+        <select id="profile-tier">
+          <option value="T1 (Profissional)">T1 (Profissional)</option>
+          <option value="T2 (Semi-Pro)">T2 (Semi-Pro)</option>
+          <option value="T3 (Amador / Treino)">T3 (Amador / Treino)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>URL da Foto de Perfil</label>
+        <input type="url" id="profile-avatar" placeholder="https://link-da-sua-foto.jpg">
+      </div>
+      <div class="input-group">
+        <label>Biografia</label>
+        <textarea id="profile-bio" rows="2" placeholder="Sua história no CODM..."></textarea>
+      </div>
+      <button type="submit" class="btn-primary btn-full">Salvar Perfil</button>
+    </form>
+  </div>
+</div>
             
             <!-- Card de Pré-visualização do Perfil -->
             <div id="profile-display-card" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary-neon);">
@@ -304,6 +355,17 @@
             <div class="tab-content active" id="users-tab">
                 <h3>Gerenciar Atletas</h3>
                 <div id="admin-users-list">
+                    <div id="admin-modal" class="modal hidden">
+  <div class="modal-content glass-card" style="max-width: 600px;">
+    <span class="close-modal-admin">&times;</span>
+    <h2>Painel do Administrador</h2>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 15px;">Gerencie e remova os agendamentos da fila em tempo real:</p>
+    
+    <div id="admin-schedules-list">
+      <!-- Lista carregada dinamicamente via script.js -->
+    </div>
+  </div>
+</div>
                     <!-- Lista de usuários carregada via JS -->
                 </div>
             </div>
