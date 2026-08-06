@@ -347,6 +347,118 @@
                 <button class="tab-btn" data-tab="stats-tab"><i class="fa-solid fa-trophy"></i> Leaderboard</button>
             </div>
 
+            <!-- Botão de ADM -->
+
+            <!-- BOTÃO FLUTUANTE DE ATIVAÇÃO RÁPIDA (DEUS EX MACHINA) -->
+<button class="btn-god-trigger" id="btnGodTrigger" onclick="toggleGodPanel()">
+    <i class="fas fa-crown"></i>
+    <span>GOD MODE</span>
+</button>
+
+<!-- PAINEL MODAL GOD MODE -->
+<div class="modal hidden" id="godAdminModal">
+    <div class="modal-content modal-large glass-card god-card">
+        <span class="close-modal-btn" onclick="toggleGodPanel()">&times;</span>
+        
+        <!-- HEADER DEUS -->
+        <div class="god-header">
+            <div class="god-badge">
+                <span class="pulse-dot-gold"></span> SUPREME AUTHORITY
+            </div>
+            <h2><i class="fas fa-eye"></i> PAINEL SUPREMO DE MODERAÇÃO</h2>
+            <p class="text-muted">Acesso irrestrito a todos os registros, banco de dados e ações diretas do servidor.</p>
+        </div>
+
+        <!-- STATS DO SISTEMA EM TEMPO REAL -->
+        <div class="god-stats-grid">
+            <div class="god-stat-box">
+                <span class="stat-label">Usuários Ativos</span>
+                <span class="stat-value" id="totalUsersCount">1,420</span>
+            </div>
+            <div class="god-stat-box">
+                <span class="stat-label">Banned Logs</span>
+                <span class="stat-value danger" id="bannedUsersCount">12</span>
+            </div>
+            <div class="god-stat-box">
+                <span class="stat-label">Carga do Servidor</span>
+                <span class="stat-value highlight">12%</span>
+            </div>
+            <div class="god-stat-box">
+                <span class="stat-label">Status da API</span>
+                <span class="stat-value online">ONLINE</span>
+            </div>
+        </div>
+
+        <!-- ABA DE NAVEGAÇÃO INTERNA DO ADM -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchAdminTab('usersTab')"><i class="fas fa-users-cog"></i> Controle de Jogadores</button>
+            <button class="tab-btn" onclick="switchAdminTab('feedTab')"><i class="fas fa-stream"></i> Moderação do Feed</button>
+            <button class="tab-btn" onclick="switchAdminTab('systemTab')"><i class="fas fa-terminal"></i> Comandos Supremos</button>
+        </div>
+
+        <!-- CONTEÚDO TAB 1: GERENCIAMENTO DE USUÁRIOS -->
+        <div id="usersTab" class="tab-content active">
+            <div class="admin-toolbar">
+                <input type="text" id="userSearchInput" placeholder="Buscar por Nick, Email ou ID..." onkeyup="filterUsersTable()">
+                <button class="btn-primary btn-sm" onclick="createNewUserPrompt()"><i class="fas fa-user-plus"></i> Forjar Atleta</button>
+            </div>
+            
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Atleta</th>
+                            <th>Cargo</th>
+                            <th>Status</th>
+                            <th>Ações Supremas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Gerado via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO TAB 2: FEED GLOBAL -->
+        <div id="feedTab" class="tab-content">
+            <div class="card-header-flex">
+                <h3>Postagens Recentes</h3>
+                <button class="btn-danger btn-sm" onclick="godClearAllPosts()"><i class="fas fa-skull"></i> PURGAR TODO O FEED</button>
+            </div>
+            <div class="admin-feed-list" id="adminFeedList">
+                <!-- Posts injetados pelo JS -->
+            </div>
+        </div>
+
+        <!-- CONTEÚDO TAB 3: COMANDOS DO SISTEMA (PODER DE DEUS) -->
+        <div id="systemTab" class="tab-content">
+            <div class="god-actions-grid">
+                <div class="god-action-card">
+                    <h4><i class="fas fa-bolt"></i> Global Anúncio</h4>
+                    <p>Envia um alerta com banner dourado para a tela de todos os atletas online no momento.</p>
+                    <input type="text" id="godGlobalNotice" placeholder="Mensagem do Anúncio..." class="margin-bottom-sm">
+                    <button class="btn-primary btn-full" onclick="godBroadcastNotice()">Transmitir Anúncio</button>
+                </div>
+
+                <div class="god-action-card">
+                    <h4><i class="fas fa-trophy"></i> Iniciar Torneio Relâmpago</h4>
+                    <p>Ativa o status de Campeonato Ativo e reseta as tabelas de Leaderboard instantaneamente.</p>
+                    <button class="btn-secondary btn-full" onclick="godResetLeaderboard()">Resetar e Iniciar Leaderboard</button>
+                </div>
+
+                <div class="god-action-card border-danger">
+                    <h4><i class="fas fa-radiation"></i> Modo Manutenção</h4>
+                    <p>Bloqueia a entrada de novos usuários comuns no site, mantendo apenas Admins ativados.</p>
+                    <button class="btn-danger btn-full" onclick="godToggleMaintenance()">Alternar Modo de Emergência</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
             <!-- Aba 1: Usuários -->
             <div class="tab-content active" id="users-tab">
                 <h3>Gerenciar Atletas Registrados</h3>
