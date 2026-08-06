@@ -23,7 +23,7 @@ let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
 
-const mockLeaderboard = [
+let mockLeaderboard = [
     { rank: 1, name: "Viking_Viper", kd: "3.42", wins: 320, points: 2850 },
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
     { rank: 3, name: "Valhalla_Ghost", kd: "2.75", wins: 245, points: 2150 },
@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCounters();
     renderLeaderboard(mockLeaderboard);
     setupEventListeners();
+    setupModalOverlayListeners();
     if (auth) listenAuthState();
     if (db) {
         listenGlobalFeed();
@@ -48,11 +49,11 @@ function initParticles() {
         particlesJS('particles-js', {
             particles: {
                 number: { value: 50, density: { enable: true, value_area: 800 } },
-                color: { value: '#00f0ff' },
+                color: { value: '#d4af37' },
                 shape: { type: 'circle' },
                 opacity: { value: 0.25, random: true },
                 size: { value: 3, random: true },
-                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.12, width: 1 },
+                line_linked: { enable: true, distance: 150, color: '#d4af37', opacity: 0.12, width: 1 },
                 move: { enable: true, speed: 1.5, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
             },
             interactivity: {
@@ -88,18 +89,35 @@ function renderLeaderboard(data) {
     const tbody = document.getElementById('leaderboard-body');
     if (!tbody) return;
     tbody.innerHTML = '';
-    data.forEach((item) => {
-        const rankClass = item.rank === 1 ? 'top-1' : item.rank === 2 ? 'top-2' : item.rank === 3 ? 'top-3' : '';
+    data.forEach((item, index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
         const row = `
             <tr>
-                <td class="rank-position ${rankClass}">#${item.rank}</td>
+                <td class="rank-position ${rankClass}">#${rank}</td>
                 <td><strong>${item.name}</strong></td>
-                <td>${item.kd}</td>
-                <td>${item.wins}</td>
+                <td>${item.kd || '2.00'}</td>
+                <td>${item.wins || 100}</td>
                 <td class="highlight">${item.points} pts</td>
             </tr>
         `;
         tbody.innerHTML += row;
+    });
+}
+
+function setupModalOverlayListeners() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+        }
     });
 }
 
@@ -122,7 +140,7 @@ function setupEventListeners() {
 
     if (loginBtn && authModal) {
         loginBtn.addEventListener('click', () => {
-            if (currentUser) {
+            if (currentUser && auth) {
                 auth.signOut();
             } else {
                 authModal.classList.remove('hidden');
@@ -182,11 +200,11 @@ function setupEventListeners() {
             const mode = e.target.getAttribute('data-mode');
             if (!currentUser) {
                 alert('Faça login para se inscrever!');
-                authModal.classList.remove('hidden');
+                if (authModal) authModal.classList.remove('hidden');
                 return;
             }
             document.getElementById('match-mode-selected').value = mode;
-            matchModal.classList.remove('hidden');
+            if (matchModal) matchModal.classList.remove('hidden');
         });
     });
 
@@ -202,13 +220,12 @@ function setupEventListeners() {
 
     function promptAdminAccess(e) {
         if (e) e.preventDefault();
-        const adminModal = document.getElementById('admin-modal');
-        if (adminModal) {
-            adminModal.classList.remove('hidden');
-            loadAdminUsersList();
-            loadAdminPostsList();
-            loadAdminMatchesList();
+        if (!currentUser) {
+            alert('Faça login com sua conta para acessar a área administrativa.');
+            if (authModal) authModal.classList.remove('hidden');
+            return;
         }
+        if (adminPassModal) adminPassModal.classList.remove('hidden');
     }
 
     if (navAdminLink) navAdminLink.addEventListener('click', promptAdminAccess);
@@ -230,7 +247,7 @@ function setupEventListeners() {
                 loadAdminPostsList();
                 loadAdminMatchesList();
             }).catch((err) => {
-                alert('Senha incorreta! Acesso negado. ' + err.message);
+                alert('Senha incorreta ou erro na autenticação! ' + err.message);
             });
         });
     }
@@ -241,11 +258,11 @@ function setupEventListeners() {
 
     if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
-    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabBtns = document.querySelectorAll('#admin-modal .tab-btn');
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             tabBtns.forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#admin-modal .tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             const targetTab = btn.getAttribute('data-tab');
             if (targetTab && document.getElementById(targetTab)) {
@@ -271,7 +288,8 @@ function loadUserProfileData() {
             document.getElementById('display-role').innerText = data.gameRole || 'Sniper';
             document.getElementById('display-bio').innerText = data.bio || 'Sem biografia informada.';
             if (data.avatarUrl) {
-                document.getElementById('user-avatar-preview').src = data.avatarUrl;
+                const avatarImg = document.getElementById('user-avatar-preview');
+                if (avatarImg) avatarImg.src = data.avatarUrl;
             }
         }
     });
@@ -438,8 +456,6 @@ function handleAuthSubmit(e) {
 function listenAuthState() {
     auth.onAuthStateChanged((user) => {
         const authBtnText = document.getElementById('auth-btn-text');
-        const adminBtn = document.getElementById('btn-admin');
-        const navAdminLink = document.getElementById('nav-admin-link');
         const profileSection = document.getElementById('profile-section');
         const navProfileLink = document.getElementById('nav-profile-link');
 
@@ -457,12 +473,7 @@ function listenAuthState() {
                         auth.signOut();
                         return;
                     }
-
-                    if (data.role === 'admin') {
-                        isAdmin = true;
-                    } else {
-                        isAdmin = false;
-                    }
+                    isAdmin = (data.role === 'admin' || data.role === 'GOD_ADM');
                 }
                 loadUserProfileData();
             });
@@ -517,8 +528,8 @@ function listenGlobalFeed() {
                         </div>
                         <p class="post-content">${data.content}</p>
                         <div style="margin-top: 10px;">
-                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 14px; border-color: ${isLiked ? 'var(--secondary-neon)' : 'var(--primary-neon)'}">
-                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--secondary-neon)' : 'inherit'}"></i> ${likesCount} Curtidas
+                            <button onclick="toggleLikePost('${doc.id}')" class="btn-outline" style="padding: 4px 12px; font-size: 14px; border-color: ${isLiked ? 'var(--gold-primary)' : 'var(--border-card)'}">
+                                <i class="fa-solid fa-heart" style="color: ${isLiked ? 'var(--gold-primary)' : 'inherit'}"></i> ${likesCount} Curtidas
                             </button>
                         </div>
                     </div>
@@ -770,7 +781,11 @@ function handleAdminStatUpdate(e) {
         alert(`Placar de ${playerName} atualizado!`);
         document.getElementById('admin-update-stats').reset();
     } else {
-        alert('Jogador não encontrado no Leaderboard.');
+        mockLeaderboard.push({ rank: mockLeaderboard.length + 1, name: playerName, kd: "2.50", wins: 10, points: pointsToAdd });
+        mockLeaderboard.sort((a, b) => b.points - a.points);
+        renderLeaderboard(mockLeaderboard);
+        alert(`Novo jogador ${playerName} adicionado ao Leaderboard!`);
+        document.getElementById('admin-update-stats').reset();
     }
 }
 
@@ -797,17 +812,32 @@ function toggleGodPanel() {
         if (!modal.classList.contains('hidden')) {
             renderUsersTable();
             renderAdminFeed();
+            updateGodStats();
         }
     }
 }
 
-function switchAdminTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+function updateGodStats() {
+    const activeUsers = usersDatabase.filter(u => u.status === 'Active').length;
+    const bannedUsers = usersDatabase.filter(u => u.status === 'Banned').length;
+    
+    const activeEl = document.getElementById('totalUsersCount');
+    const bannedEl = document.getElementById('bannedUsersCount');
+    
+    if (activeEl) activeEl.innerText = activeUsers;
+    if (bannedEl) bannedEl.innerText = bannedUsers;
+}
+
+function switchAdminTab(tabId, ev) {
+    document.querySelectorAll('#godAdminModal .tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('#godAdminModal .tab-btn').forEach(el => el.classList.remove('active'));
     
     const target = document.getElementById(tabId);
     if (target) target.classList.add('active');
-    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+    
+    if (ev && ev.currentTarget) {
+        ev.currentTarget.classList.add('active');
+    }
 }
 
 function renderUsersTable() {
@@ -831,7 +861,7 @@ function renderUsersTable() {
                         ${user.role === 'Admin' ? 'Promover para Player' : 'Tornar ADM'}
                     </button>
                     <button class="btn-danger btn-sm" onclick="godToggleBan('${user.id}')">
-                        ${isBanned ? 'Desbanir' : ' BANIR'}
+                        ${isBanned ? 'Desbanir' : 'BANIR'}
                     </button>
                 ` : '<span class="text-muted" style="font-size:11px;">INTOCÁVEL</span>'}
             </td>
@@ -840,11 +870,39 @@ function renderUsersTable() {
     });
 }
 
+function filterUsersTable() {
+    const input = document.getElementById('userSearchInput');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+}
+
+function createNewUserPrompt() {
+    const name = prompt("Nome / Nick do novo atleta:");
+    if (!name) return;
+    const role = prompt("Cargo (Player / Admin / GOD_ADM):", "Player") || "Player";
+    const newUser = {
+        id: String(usersDatabase.length + 1).padStart(3, '0'),
+        name: name,
+        role: role,
+        status: "Active"
+    };
+    usersDatabase.push(newUser);
+    renderUsersTable();
+    updateGodStats();
+    alert(`Atleta ${name} forjado com sucesso!`);
+}
+
 function godToggleBan(userId) {
     const user = usersDatabase.find(u => u.id === userId);
     if (user) {
         user.status = user.status === 'Banned' ? 'Active' : 'Banned';
         renderUsersTable();
+        updateGodStats();
         alert(`[PODER DE DEUS]: O status de ${user.name} foi alterado para ${user.status}.`);
     }
 }
@@ -861,6 +919,11 @@ function renderAdminFeed() {
     const feedContainer = document.getElementById('adminFeedList');
     if (!feedContainer) return;
     feedContainer.innerHTML = '';
+
+    if (globalFeedPosts.length === 0) {
+        feedContainer.innerHTML = '<p class="text-muted">Nenhuma publicação registrada.</p>';
+        return;
+    }
 
     globalFeedPosts.forEach(post => {
         const item = document.createElement('div');
@@ -890,19 +953,24 @@ function godClearAllPosts() {
 }
 
 function godBroadcastNotice() {
-    const text = document.getElementById('godGlobalNotice').value;
+    const input = document.getElementById('godGlobalNotice');
+    if (!input) return;
+    const text = input.value.trim();
     if (!text) return;
-    alert(`[TRANSMISSÃO SUPREMA PARA O SITE]\n\n"${text.toUpperCase()}"`);
-    document.getElementById('godGlobalNotice').value = '';
+    alert(`📢 [TRANSMISSÃO SUPREMA PARA O SITE]\n\n"${text.toUpperCase()}"`);
+    input.value = '';
 }
 
 function godResetLeaderboard() {
     if (confirm("Deseja zerar a pontuação de todos os jogadores para o novo Torneio?")) {
+        mockLeaderboard.forEach(item => item.points = 0);
+        renderLeaderboard(mockLeaderboard);
         alert("[PODER DE DEUS]: Leaderboard resetada com sucesso!");
     }
 }
 
 function godToggleMaintenance() {
     document.body.classList.toggle('maintenance-mode');
-    alert("[PODER DE DEUS]: Estado do Servidor alterado!");
+    const isMaint = document.body.classList.contains('maintenance-mode');
+    alert(`[PODER DE DEUS]: Modo de Manutenção de Emergência ${isMaint ? 'ATIVADO' : 'DESATIVADO'}!`);
 }
