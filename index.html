@@ -3,369 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOBARK // ESPORTS & RANKING PLATFORM</title>
-
-    <!-- Fontes Externas e Ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>CODM eSports Hub | Profile & Tournament Management</title>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Estilos da Aplicação -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Principal -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-theme">
 
-    <!-- Canvas de Partículas em Segundo Plano -->
-    <canvas id="particles-canvas"></canvas>
+    <!-- Fundo de Partículas -->
+    <div id="particles-js"></div>
 
-    <!-- BARRA DE NAVEGAÇÃO -->
-    <header class="navbar glass-panel">
-        <div class="logo-container" onclick="switchTab('home')">
-            <h1 class="glow-text">LOBARK <span class="sub-logo">HUB</span></h1>
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-crosshair neon-icon"></i>
+            <span>CODM<span class="highlight">HUB</span></span>
         </div>
-
         <nav class="nav-links">
-            <button class="nav-btn active" id="btn-tab-home" onclick="switchTab('home')">
-                <i class="fa-solid fa-house"></i> Início
-            </button>
-            <button class="nav-btn" id="btn-tab-ranking" onclick="switchTab('ranking')">
-                <i class="fa-solid fa-trophy"></i> Ranking
-            </button>
-            <button class="nav-btn" id="btn-tab-players" onclick="switchTab('players')">
-                <i class="fa-solid fa-users"></i> Jogadores
-            </button>
-            <button class="nav-btn hidden" id="btn-tab-profile" onclick="switchTab('profile')">
-                <i class="fa-solid fa-user"></i> Meu Perfil
-            </button>
-            <button class="nav-btn btn-adm-tab hidden" id="btn-tab-admin" onclick="switchTab('admin')">
-                <i class="fa-solid fa-user-shield"></i> Painel ADM
-            </button>
+            <a href="#hero">Início</a>
+            <a href="#rules">Regras</a>
+            <a href="#modes">Modos</a>
+            <a href="#leaderboard">Ranking</a>
+            <a href="#trophies">Troféus</a>
+            <a href="#feed">Comunidade</a>
         </nav>
-
-        <div class="user-auth-control">
-            <div id="auth-guest-view">
-                <button class="btn-primary" onclick="openModal('modal-login')">
-                    <i class="fa-solid fa-right-to-bracket"></i> Entrar
-                </button>
-            </div>
-            <div id="auth-user-view" style="display: none;">
-                <span id="user-display-name" class="user-tag"></span>
-                <span id="user-role-badge" class="badge-role"></span>
-                <button class="btn-outline" onclick="logout()">
-                    <i class="fa-solid fa-sign-out-alt"></i> Sair
-                </button>
-            </div>
+        <div class="nav-actions">
+            <button id="theme-toggle" class="btn-icon" title="Alternar Tema">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button id="btn-login" class="btn-primary">
+                <i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span>
+            </button>
+            <button id="btn-admin" class="btn-secondary hidden">
+                <i class="fa-solid fa-shield-halved"></i> Admin
+            </button>
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="main-container">
-
-        <!-- ABA 1: INÍCIO -->
-        <section id="tab-home" class="tab-content active">
-            <div class="hero-banner glass-panel">
-                <div class="hero-glow-effect"></div>
-                <div class="hero-content">
-                    <span class="badge badge-t3">
-                        <i class="fa-solid fa-bolt"></i> ESPORTS ECOSYSTEM
-                    </span>
-                    <h1 class="hero-title">ECOSSISTEMA DE COMPETIÇÃO & <span class="text-neon">RANKING</span></h1>
-                    <p class="hero-description">Acompanhe estatísticas, vote nos melhores pro-players da comunidade LOBARK e gerencie o ecossistema competitivo em tempo real.</p>
-                    <div class="hero-actions">
-                        <button class="btn-primary" onclick="switchTab('ranking')">
-                            <i class="fa-solid fa-trophy"></i> Ver Leaderboard
-                        </button>
-                        <button class="btn-secondary" onclick="switchTab('players')">
-                            <i class="fa-solid fa-magnifying-glass"></i> Explorar Jogadores
-                        </button>
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content">
+                <span class="badge-neon">CODM COMPETITIVE HUB</span>
+                <h1>DOMINE O <span class="text-gradient">CAMPO DE BATALHA</span></h1>
+                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, regras oficiais e gestão de perfis eSports.</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <h3 class="counter" data-target="1450">0</h3>
+                        <p>Vitórias Totais</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="counter" data-target="3820">0</h3>
+                        <p>Kills em Torneios</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="counter" data-target="48">0</h3>
+                        <p>Troféus Obtidos</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="stats-overview-grid">
-                <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-users stat-icon icon-accent"></i>
-                    <h3 id="stat-total-players">0</h3>
-                    <span>Jogadores Registrados</span>
-                </div>
-                <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-heart stat-icon icon-crimson"></i>
-                    <h3 id="stat-total-likes">0</h3>
-                    <span>Votos Computados</span>
-                </div>
-                <div class="card glass-panel stat-box">
-                    <i class="fa-solid fa-crown stat-icon icon-gold"></i>
-                    <h3 id="stat-top-player">--</h3>
-                    <span>MVP Atual</span>
+                <div class="hero-cta">
+                    <a href="#modes" class="btn-primary btn-large">Entrar em Partida</a>
+                    <a href="#rules" class="btn-outline btn-large">Ver Regras</a>
                 </div>
             </div>
-
-            <!-- Destaques Pódio Top 3 no Início -->
-            <div class="section-header">
-                <h2><i class="fa-solid fa-crown icon-gold"></i> Pódio da Comunidade</h2>
-                <button class="btn-outline" onclick="switchTab('ranking')">Ver Todos <i class="fa-solid fa-arrow-right"></i></button>
-            </div>
-            <div id="home-podium-grid" class="podium-grid"></div>
         </section>
 
-        <!-- ABA 2: RANKING -->
-        <section id="tab-ranking" class="tab-content">
-            <div class="section-header">
-                <div>
-                    <h2><i class="fa-solid fa-trophy icon-gold"></i> Leaderboard Geral</h2>
-                    <p class="section-subtitle">Classificação oficial baseada no volume de curtidas e desempenho em partida.</p>
+        <!-- Seção de Regras Competitivas -->
+        <section id="rules" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-book-bookmark"></i> Regras <span class="highlight">Oficiais</span></h2>
+            <div class="rules-grid">
+                <div class="glass-card">
+                    <i class="fa-solid fa-ban rule-icon"></i>
+                    <h3>Itens Banidos</h3>
+                    <p>Armas de apoio sem precisão, operadores de escudo excessivo e pontuações de racha específicas são proibidas em ambiente competitivo.</p>
                 </div>
-                <div class="ranking-filters">
-                    <input type="text" id="ranking-search" class="cyber-input" placeholder="Buscar por nick..." oninput="renderRankingView()">
-                    <select id="ranking-filter-role" class="cyber-select" onchange="renderRankingView()">
-                        <option value="all">Todas as Funções</option>
-                        <option value="Entry">Entry</option>
-                        <option value="Sniper">Sniper</option>
-                        <option value="IGL">IGL</option>
-                        <option value="Support">Support</option>
-                        <option value="Flex">Flex</option>
-                    </select>
+                <div class="glass-card">
+                    <i class="fa-solid fa-stopwatch rule-icon"></i>
+                    <h3>Tempo & Tolerância</h3>
+                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. Aausência resulta em W.O. automático na rodada.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-camera rule-icon"></i>
+                    <h3>Comprovação</h3>
+                    <p>Todos os capitães devem enviar a captura de tela (print) da pontuação final ao término de cada mapa disputado.</p>
                 </div>
             </div>
+        </section>
 
-            <div class="table-container glass-panel">
-                <table class="cyber-table">
+        <!-- Seção Modos de Jogo -->
+        <section id="modes" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-gamepad"></i> Modos de <span class="highlight">Confronto</span></h2>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <div class="mode-badge">DUELO</div>
+                    <h3>1v1 Sniper / Gunfight</h3>
+                    <p>Modo puramente mecânico. Teste sua precisão, movimentação e tempo de reação no confronto direto.</p>
+                    <button class="btn-outline btn-full">Inscrever-se 1v1</button>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-badge">DUO</div>
+                    <h3>2v2 Buscar & Destruir</h3>
+                    <p>Sincronia e tática em dupla. Mapas reduzidos e rodadas rápidas sem respawn.</p>
+                    <button class="btn-outline btn-full">Inscrever Dupla</button>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-badge highlight-bg">SQUAD</div>
+                    <h3>5v5 Competitive Series</h3>
+                    <p>O formato oficial do CODM World Championship. Rotação de Hardpoint, Search & Destroy e Control.</p>
+                    <button class="btn-primary btn-full">Inscrever Squad</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Leaderboard / Ranking -->
+        <section id="leaderboard" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Leaderboard <span class="highlight">Competitivo</span></h2>
+            <div class="glass-card table-container">
+                <table class="leaderboard-table">
                     <thead>
                         <tr>
-                            <th># Pos</th>
-                            <th>Jogador</th>
-                            <th>Função</th>
-                            <th>K/D Ratio</th>
-                            <th>Vitórias</th>
-                            <th>Curtidas</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ranking-table-body">
-                        <!-- Preenchido via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- ABA 3: TODOS OS JOGADORES -->
-        <section id="tab-players" class="tab-content">
-            <div class="section-header">
-                <div>
-                    <h2><i class="fa-solid fa-users icon-accent"></i> Elenco da Plataforma</h2>
-                    <p class="section-subtitle">Vote e confira o perfil detalhado de cada pro-player.</p>
-                </div>
-            </div>
-            <div id="all-players-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- ABA 4: MEU PERFIL -->
-        <section id="tab-profile" class="tab-content">
-            <div class="insta-profile-card glass-panel">
-                <div class="insta-header">
-                    <div class="insta-avatar-container">
-                        <div class="insta-avatar-ring">
-                            <div class="avatar-box">
-                                <img id="my-avatar-img" src="" alt="Avatar">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="insta-details">
-                        <div class="insta-user-row">
-                            <h2 id="my-profile-nick">--</h2>
-                            <span class="verified-badge" id="my-verified-tag"><i class="fa-solid fa-circle-check"></i> PRO PLAYER</span>
-                            <button class="btn-outline" onclick="openModal('modal-edit-profile')">
-                                <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
-                            </button>
-                        </div>
-
-                        <div class="insta-stats-row">
-                            <div class="insta-stat">
-                                <strong id="my-profile-likes">0</strong>
-                                <span>Curtidas</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="my-profile-role">Flex</strong>
-                                <span>Função</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="my-profile-kd">0.00</strong>
-                                <span>K/D Global</span>
-                            </div>
-                            <div class="insta-stat">
-                                <strong id="my-profile-winrate">0%</strong>
-                                <span>Winrate</span>
-                            </div>
-                        </div>
-
-                        <div class="insta-bio">
-                            <p id="my-profile-bio">Sem biografia cadastrada.</p>
-                            <div class="social-links" id="my-profile-socials"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Histórico de Partidas Recentes -->
-                <div class="profile-history-section">
-                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Histórico de Partidas Recentes</h3>
-                    <div class="history-grid" id="my-match-history"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABA 5: PAINEL ADM (Exclusivo para Administradores) -->
-        <section id="tab-admin" class="tab-content">
-            <div class="section-header">
-                <div>
-                    <h2><i class="fa-solid fa-user-shield icon-crimson"></i> Painel de Administração LOBARK</h2>
-                    <p class="section-subtitle">Gestão de usuários, moderação de votos e inclusão de novos atletas.</p>
-                </div>
-                <button class="btn-primary" onclick="openModal('modal-add-player')">
-                    <i class="fa-solid fa-plus"></i> Adicionar Novo Jogador
-                </button>
-            </div>
-
-            <!-- Tabela de Gerenciamento ADM -->
-            <div class="table-container glass-panel">
-                <table class="cyber-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Avatar</th>
-                            <th>Nick</th>
-                            <th>Função</th>
+                            <th>Posição</th>
+                            <th>Jogador / Lineup</th>
                             <th>K/D</th>
-                            <th>Curtidas</th>
-                            <th>Permissão</th>
-                            <th>Ações de ADM</th>
+                            <th>Vitórias</th>
+                            <th>Pontos</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-table-body">
-                        <!-- Preenchido dinamicamente pelo JS -->
+                    <tbody id="leaderboard-body">
+                        <!-- Preenchido via JavaScript -->
                     </tbody>
                 </table>
             </div>
         </section>
 
+        <!-- Seção Galeria de Troféus -->
+        <section id="trophies" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-award"></i> Galeria de <span class="highlight">Conquistas</span></h2>
+            <div class="trophy-grid" id="trophy-container">
+                <!-- Preenchido via JavaScript -->
+            </div>
+        </section>
+
+        <!-- Seção Feed da Comunidade -->
+        <section id="feed" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-comments"></i> Feed da <span class="highlight">Comunidade</span></h2>
+            <div class="glass-card feed-box">
+                <div class="post-creator">
+                    <textarea id="post-input" placeholder="Compartilhe uma jogada, estratégia ou resultado de treino..."></textarea>
+                    <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
+                </div>
+                <div id="posts-container" class="posts-list">
+                    <!-- Posts dinâmicos via Firebase -->
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- MODAL 1: LOGIN / REGISTRO -->
-    <div id="modal-login" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-lock"></i> Acessar LOBARK HUB</h3>
-                <span class="close-modal" onclick="closeModal('modal-login')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Selecione a Conta para Simular Login:</label>
-                    <select id="login-account-select" class="cyber-select" style="width: 100%;">
-                        <!-- Opções preenchidas via JS -->
-                    </select>
+    <!-- Modal de Autenticação / Login -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Acessar CODM Hub</h2>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required placeholder="seu@email.com">
                 </div>
-                <p class="hint-text">* Selecione a conta com permissão ADM para testar o Painel de Administração.</p>
-                <div class="modal-actions">
-                    <button class="btn-primary" style="width: 100%;" onclick="executeLogin()">Entrar na Plataforma</button>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="••••••••">
                 </div>
-            </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+            </form>
+            <p class="modal-footer">Não tem conta? <a href="#" id="toggle-auth-mode">Cadastre-se</a></p>
         </div>
     </div>
 
-    <!-- MODAL 2: EDITAR PERFIL -->
-    <div id="modal-edit-profile" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-gear"></i> Editar Meu Perfil</h3>
-                <span class="close-modal" onclick="closeModal('modal-edit-profile')">&times;</span>
+    <!-- Modal do Painel de Administração -->
+    <div id="admin-modal" class="modal hidden">
+        <div class="modal-content glass-card modal-large">
+            <span class="close-modal-admin">&times;</span>
+            <h2><i class="fa-solid fa-user-shield"></i> Painel de Moderação & Gestão</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="users-tab">Usuários</button>
+                <button class="tab-btn" data-tab="stats-tab">Estatísticas do Torneio</button>
             </div>
-            <div class="modal-body">
-                <form id="form-edit-profile" onsubmit="saveProfileChanges(event)">
-                    <div class="form-group">
-                        <label>Nick Name:</label>
-                        <input type="text" id="edit-nick" class="cyber-input" required>
+            <div class="tab-content active" id="users-tab">
+                <h3>Gerenciar Atletas</h3>
+                <div id="admin-users-list">
+                    <!-- Lista de usuários carregada via JS -->
+                </div>
+            </div>
+            <div class="tab-content" id="stats-tab">
+                <h3>Atualizar Placar Global</h3>
+                <form id="admin-update-stats">
+                    <div class="input-group">
+                        <label>Nome do Jogador/Time</label>
+                        <input type="text" id="admin-player-name" required>
                     </div>
-                    <div class="form-group">
-                        <label>Função Principal:</label>
-                        <select id="edit-role" class="cyber-select">
-                            <option value="Entry">Entry</option>
-                            <option value="Sniper">Sniper</option>
-                            <option value="IGL">IGL</option>
-                            <option value="Support">Support</option>
-                            <option value="Flex">Flex</option>
-                        </select>
+                    <div class="input-group">
+                        <label>Pontos Adicionais</label>
+                        <input type="number" id="admin-player-points" required>
                     </div>
-                    <div class="form-group">
-                        <label>URL do Avatar Image:</label>
-                        <input type="url" id="edit-avatar" class="cyber-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Biografia / Apresentação:</label>
-                        <textarea id="edit-bio" class="cyber-textarea" rows="3"></textarea>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-outline" onclick="closeModal('modal-edit-profile')">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar Alterações</button>
-                    </div>
+                    <button type="submit" class="btn-primary">Atualizar Leaderboard</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 3: ADICIONAR JOGADOR (ADM) -->
-    <div id="modal-add-player" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-plus"></i> [ADM] Cadastrar Novo Pro Player</h3>
-                <span class="close-modal" onclick="closeModal('modal-add-player')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="form-add-player" onsubmit="adminAddPlayer(event)">
-                    <div class="form-group">
-                        <label>Nick Name:</label>
-                        <input type="text" id="add-nick" class="cyber-input" required placeholder="Ex: ShadowLOBARK">
-                    </div>
-                    <div class="form-group">
-                        <label>Função:</label>
-                        <select id="add-role" class="cyber-select">
-                            <option value="Entry">Entry</option>
-                            <option value="Sniper">Sniper</option>
-                            <option value="IGL">IGL</option>
-                            <option value="Support">Support</option>
-                            <option value="Flex">Flex</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>K/D Ratio Inicial:</label>
-                        <input type="number" step="0.01" id="add-kd" class="cyber-input" value="1.50" required>
-                    </div>
-                    <div class="form-group">
-                        <label>URL do Avatar Image:</label>
-                        <input type="url" id="add-avatar" class="cyber-input" required placeholder="https://images.unsplash.com/...">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn-outline" onclick="closeModal('modal-add-player')">Cancelar</button>
-                        <button type="submit" class="btn-primary">Cadastrar Atleta</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CODM eSports Hub. Todos os direitos reservados.</p>
+    </footer>
 
-    <!-- MODAL 4: DETALHES DO JOGADOR (VER PERFIL PÚBLICO) -->
-    <div id="modal-view-player" class="modal-overlay">
-        <div class="modal-content glass-panel">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-address-card"></i> Ficha de Atleta</h3>
-                <span class="close-modal" onclick="closeModal('modal-view-player')">&times;</span>
-            </div>
-            <div class="modal-body" id="view-player-body">
-                <!-- Conteúdo montado via JS -->
-            </div>
-        </div>
-    </div>
-
+    <!-- Scripts CDN (Particles.js & Firebase) -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Script Principal -->
     <script src="script.js"></script>
 </body>
 </html>
