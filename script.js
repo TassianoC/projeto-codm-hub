@@ -1,8 +1,7 @@
 /* ==========================================================================
-   CODM eSports Hub - Lógica Principal e Integrações Atualizadas
+   CODM eSports Hub - Lógica e Firebase Integrações
    ========================================================================== */
 
-// 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE (PROJETO: projeto-codm-hub)
 const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
   authDomain: "projeto-codm-hub.firebaseapp.com",
@@ -13,13 +12,13 @@ const firebaseConfig = {
   appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-if (!firebase.apps.length) {
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
-const auth = firebase.auth();
-const db = firebase.firestore();
 
-// Estado Global da Aplicação
+const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
+const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+
 let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
@@ -45,26 +44,26 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLeaderboard(mockLeaderboard);
     renderTrophies(mockTrophies);
     setupEventListeners();
-    listenAuthState();
-    listenFeedUpdates();
+    if (auth) listenAuthState();
+    if (db) listenFeedUpdates();
 });
 
 function initParticles() {
     if (typeof particlesJS !== 'undefined') {
         particlesJS('particles-js', {
             particles: {
-                number: { value: 60, density: { enable: true, value_area: 800 } },
+                number: { value: 50, density: { enable: true, value_area: 800 } },
                 color: { value: '#00f0ff' },
                 shape: { type: 'circle' },
-                opacity: { value: 0.3, random: true },
+                opacity: { value: 0.25, random: true },
                 size: { value: 3, random: true },
-                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.15, width: 1 },
-                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.12, width: 1 },
+                move: { enable: true, speed: 1.5, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
             },
             interactivity: {
                 detect_on: 'canvas',
                 events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
-                modes: { grab: { distance: 140, line_linked: { opacity: 0.4 } }, push: { particles_nb: 3 } }
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.3 } }, push: { particles_nb: 3 } }
             },
             retina_detect: true
         });
@@ -73,7 +72,7 @@ function initParticles() {
 
 function initCounters() {
     const counters = document.querySelectorAll('.counter');
-    const speed = 200;
+    const speed = 150;
 
     counters.forEach(counter => {
         const updateCount = () => {
@@ -130,7 +129,7 @@ function renderTrophies(trophies) {
 }
 
 function setupEventListeners() {
-    // Alternador de Tema
+    // Alternar tema
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -140,7 +139,7 @@ function setupEventListeners() {
         });
     }
 
-    // Modal de Auth
+    // Modal Auth
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('.close-modal');
@@ -170,33 +169,27 @@ function setupEventListeners() {
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
-    // Modal de Perfil Editável
+    // Modal Perfil
     const btnProfile = document.getElementById('btn-profile');
     const profileModal = document.getElementById('profile-modal');
-    const closeProfileModal = document.querySelector('.close-profile-modal');
+    const closeProfile = document.querySelector('.close-profile-modal');
     const profileForm = document.getElementById('profile-form');
 
-    if (btnProfile && profileModal) {
-        btnProfile.addEventListener('click', openProfileModal);
-    }
-    if (closeProfileModal) {
-        closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
-    }
-    if (profileForm) {
-        profileForm.addEventListener('submit', handleProfileSave);
-    }
+    if (btnProfile && profileModal) btnProfile.addEventListener('click', openProfileModal);
+    if (closeProfile) closeProfile.addEventListener('click', () => profileModal.classList.add('hidden'));
+    if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
 
-    // Modais e Botões de Inscrever-se em Partidas
+    // Modal Partida
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
-    const closeMatchModal = document.querySelector('.close-match-modal');
+    const closeMatch = document.querySelector('.close-match-modal');
     const matchForm = document.getElementById('match-form');
 
     matchBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const mode = e.target.getAttribute('data-mode');
             if (!currentUser) {
-                alert('Faça login na sua conta para se inscrever nas partidas!');
+                alert('Faça login na sua conta para se inscrever!');
                 authModal.classList.remove('hidden');
                 return;
             }
@@ -205,15 +198,10 @@ function setupEventListeners() {
         });
     });
 
-    if (closeMatchModal) {
-        closeMatchModal.addEventListener('click', () => matchModal.classList.add('hidden'));
-    }
+    if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
+    if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    if (matchForm) {
-        matchForm.addEventListener('submit', handleMatchSubscription);
-    }
-
-    // Admin Modal
+    // Modal Admin
     const adminBtn = document.getElementById('btn-admin');
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
@@ -238,9 +226,8 @@ function setupEventListeners() {
     if (adminStatsForm) adminStatsForm.addEventListener('submit', handleAdminStatUpdate);
 }
 
-// PERFIL EDITÁVEL
 function openProfileModal() {
-    if (!currentUser) return;
+    if (!currentUser || !db) return;
     const profileModal = document.getElementById('profile-modal');
     
     db.collection('users').doc(currentUser.uid).get().then(doc => {
@@ -257,7 +244,7 @@ function openProfileModal() {
 
 function handleProfileSave(e) {
     e.preventDefault();
-    if (!currentUser) return;
+    if (!currentUser || !db) return;
 
     const nickname = document.getElementById('profile-nickname').value;
     const gameRole = document.getElementById('profile-role').value;
@@ -276,9 +263,10 @@ function handleProfileSave(e) {
     }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
 }
 
-// INSCRIÇÃO NAS PARTIDAS
 function handleMatchSubscription(e) {
     e.preventDefault();
+    if (!currentUser || !db) return;
+
     const mode = document.getElementById('match-mode-selected').value;
     const teamName = document.getElementById('match-team-name').value;
     const whatsapp = document.getElementById('match-whatsapp').value;
@@ -297,9 +285,10 @@ function handleMatchSubscription(e) {
     }).catch(err => alert('Erro na inscrição: ' + err.message));
 }
 
-// AUTH
 function handleAuthSubmit(e) {
     e.preventDefault();
+    if (!auth) return;
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -358,10 +347,9 @@ function listenAuthState() {
     });
 }
 
-// FEED COM SISTEMA DE CURTIDAS
 function handleNewPost() {
     if (!currentUser) {
-        alert('Você precisa estar logado para publicar no feed!');
+        alert('Você precisa estar logado para publicar!');
         return;
     }
 
@@ -383,7 +371,7 @@ function handleNewPost() {
 
 function toggleLikePost(postId) {
     if (!currentUser) {
-        alert('Faça login para curtir as publicações!');
+        alert('Faça login para curtir!');
         return;
     }
 
@@ -446,10 +434,9 @@ function listenFeedUpdates() {
         });
 }
 
-// ADMIN
 function loadAdminUsersList() {
     const container = document.getElementById('admin-users-list');
-    if (!container) return;
+    if (!container || !db) return;
 
     db.collection('users').get().then((snapshot) => {
         container.innerHTML = '';
@@ -469,6 +456,7 @@ function loadAdminUsersList() {
 }
 
 function toggleBanUser(userId) {
+    if (!db) return;
     const userRef = db.collection('users').doc(userId);
     userRef.get().then((doc) => {
         if (doc.exists) {
