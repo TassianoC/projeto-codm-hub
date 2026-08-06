@@ -114,7 +114,7 @@ function setupEventListeners() {
     // Modal de Login
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
-    const closeAuth = document.querySelector('.close-modal');
+    const closeAuth = document.querySelector('#auth-modal .close-modal-btn');
     const toggleAuthMode = document.getElementById('toggle-auth-mode');
 
     if (loginBtn && authModal) {
@@ -190,19 +190,56 @@ function setupEventListeners() {
     if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // Modal Admin e Abas
+    // Modal de Verificação da Senha de Admin
+    const adminPassModal = document.getElementById('admin-pass-modal');
+    const closeAdminPass = document.querySelector('.close-admin-pass-modal');
+    const adminPassForm = document.getElementById('admin-pass-form');
+    const navAdminLink = document.getElementById('nav-admin-link');
     const adminBtn = document.getElementById('btn-admin');
+
+    function promptAdminAccess(e) {
+        if (e) e.preventDefault();
+        if (!currentUser) {
+            alert('Você precisa estar logado na sua conta para acessar.');
+            authModal.classList.remove('hidden');
+            return;
+        }
+        if (!isAdmin) {
+            alert('Acesso negado. Esta conta não possui permissões administrativas.');
+            return;
+        }
+        adminPassModal.classList.remove('hidden');
+    }
+
+    if (navAdminLink) navAdminLink.addEventListener('click', promptAdminAccess);
+    if (adminBtn) adminBtn.addEventListener('click', promptAdminAccess);
+    if (closeAdminPass) closeAdminPass.addEventListener('click', () => adminPassModal.classList.add('hidden'));
+
+    if (adminPassForm) {
+        adminPassForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputPass = document.getElementById('admin-password').value;
+            if (!currentUser) return;
+
+            // Autentica re-inserindo a senha no Firebase Auth para validar a conta do Admin
+            const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, inputPass);
+            currentUser.reauthenticateWithCredential(credential).then(() => {
+                adminPassModal.classList.add('hidden');
+                document.getElementById('admin-password').value = '';
+                document.getElementById('admin-modal').classList.remove('hidden');
+                loadAdminUsersList();
+                loadAdminPostsList();
+                loadAdminMatchesList();
+            }).catch((err) => {
+                alert('Senha incorreta! Acesso negado. ' + err.message);
+            });
+        });
+    }
+
+    // Modal Admin e Abas
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
 
-    if (adminBtn && adminModal) {
-        adminBtn.addEventListener('click', () => {
-            adminModal.classList.remove('hidden');
-            loadAdminUsersList();
-            loadAdminPostsList();
-            loadAdminMatchesList();
-        });
-    }
     if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -400,6 +437,7 @@ function listenAuthState() {
     auth.onAuthStateChanged((user) => {
         const authBtnText = document.getElementById('auth-btn-text');
         const adminBtn = document.getElementById('btn-admin');
+        const navAdminLink = document.getElementById('nav-admin-link');
         const profileSection = document.getElementById('profile-section');
         const navProfileLink = document.getElementById('nav-profile-link');
 
@@ -421,9 +459,11 @@ function listenAuthState() {
                     if (data.role === 'admin') {
                         isAdmin = true;
                         if (adminBtn) adminBtn.classList.remove('hidden');
+                        if (navAdminLink) navAdminLink.classList.remove('hidden');
                     } else {
                         isAdmin = false;
                         if (adminBtn) adminBtn.classList.add('hidden');
+                        if (navAdminLink) navAdminLink.classList.add('hidden');
                     }
                 }
                 loadUserProfileData();
@@ -433,6 +473,7 @@ function listenAuthState() {
             isAdmin = false;
             if (authBtnText) authBtnText.innerText = 'Entrar';
             if (adminBtn) adminBtn.classList.add('hidden');
+            if (navAdminLink) navAdminLink.classList.add('hidden');
             if (profileSection) profileSection.classList.add('hidden');
             if (navProfileLink) navProfileLink.classList.add('hidden');
         }
@@ -532,7 +573,7 @@ function handleMatchSubscription(e) {
 }
 
 /* ==========================================================================
-   FUNCIONALIDADES DA ABA DE ADMINISTRAÇÃO SUPREMA
+   PAINEL DE ADMINISTRAÇÃO SUPREMO
    ========================================================================== */
 
 function loadAdminUsersList() {
