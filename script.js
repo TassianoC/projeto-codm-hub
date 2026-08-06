@@ -5,12 +5,13 @@
 // 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
 // Importante: Substitua as chaves abaixo pelas credenciais do seu projeto Firebase Console
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY_AQUI",
-    authDomain: "seu-projeto-codm.firebaseapp.com",
-    projectId: "seu-projeto-codm",
-    storageBucket: "seu-projeto-codm.appspot.com",
-    messagingSenderId: "123456789000",
-    appId: "1:123456789000:web:abcdef1234567890"
+  apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
+  authDomain: "projeto-codm-hub.firebaseapp.com",
+  databaseURL: "https://projeto-codm-hub-default-rtdb.firebaseio.com",
+  projectId: "projeto-codm-hub",
+  storageBucket: "projeto-codm-hub.firebasestorage.app",
+  messagingSenderId: "1038952355133",
+  appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
 // Inicializa o Firebase no app
