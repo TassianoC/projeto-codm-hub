@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CODM eSports Hub | Profile & Tournament Management</title>
+    <title>CODM eSports Hub | Match Finder & Profile</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,8 +28,8 @@
             <a href="#hero">Início</a>
             <a href="#rules">Regras</a>
             <a href="#modes">Modos</a>
+            <a href="#agenda">Agenda / Fila</a>
             <a href="#leaderboard">Ranking</a>
-            <a href="#trophies">Troféus</a>
             <a href="#feed">Comunidade</a>
         </nav>
         <div class="nav-actions">
@@ -54,7 +54,7 @@
             <div class="hero-content">
                 <span class="badge-neon">CODM COMPETITIVE HUB</span>
                 <h1>DOMINE O <span class="text-gradient">CAMPO DE BATALHA</span></h1>
-                <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, regras oficiais e gestão de perfis eSports.</p>
+                <p>Agendamento de treinos T1/T2/T3, desafios de Squads, ranking em tempo real e perfis de atletas eSports.</p>
                 <div class="hero-stats">
                     <div class="stat-card">
                         <h3 class="counter" data-target="1450">0</h3>
@@ -70,8 +70,8 @@
                     </div>
                 </div>
                 <div class="hero-cta">
-                    <a href="#modes" class="btn-primary btn-large">Entrar em Partida</a>
-                    <a href="#rules" class="btn-outline btn-large">Ver Regras</a>
+                    <a href="#agenda" class="btn-primary btn-large">Fila de Desafios</a>
+                    <a href="#modes" class="btn-outline btn-large">Inscrever Squad</a>
                 </div>
             </div>
         </section>
@@ -100,25 +100,36 @@
 
         <!-- Seção Modos de Jogo -->
         <section id="modes" class="container-section">
-            <h2 class="section-title"><i class="fa-solid fa-gamepad"></i> Modos de <span class="highlight">Confronto</span></h2>
+            <h2 class="section-title"><i class="fa-solid fa-gamepad"></i> Inscrição de <span class="highlight">Partida & Squad</span></h2>
             <div class="modes-grid">
                 <div class="mode-card">
-                    <div class="mode-badge">DUELO</div>
-                    <h3>1v1 Sniper / Gunfight</h3>
-                    <p>Modo puramente mecânico. Teste sua precisão, movimentação e tempo de reação no confronto direto.</p>
-                    <button class="btn-outline btn-full btn-match" data-mode="1v1 Sniper">Inscrever-se 1v1</button>
+                    <div class="mode-badge">DUELO 1v1</div>
+                    <h3>Duelo Sniper</h3>
+                    <p>Confronto direto individual. Teste de mira, movimentação e tempo de reação no X1.</p>
+                    <button class="btn-outline btn-full btn-match" data-mode="1v1 Sniper" data-players="1">Marcar Duelo X1</button>
                 </div>
                 <div class="mode-card">
-                    <div class="mode-badge">DUO</div>
-                    <h3>2v2 Buscar & Destruir</h3>
-                    <p>Sincronia e tática em dupla. Mapas reduzidos e rodadas rápidas sem respawn.</p>
-                    <button class="btn-outline btn-full btn-match" data-mode="2v2 Buscar & Destruir">Inscrever Dupla</button>
+                    <div class="mode-badge">DUO 2v2</div>
+                    <h3>Duo Busca & Destruir</h3>
+                    <p>Sincronia tática em dupla. Cadastro individual para os 2 jogadores do Duo.</p>
+                    <button class="btn-outline btn-full btn-match" data-mode="2v2 Buscar & Destruir" data-players="2">Marcar Duo (2v2)</button>
                 </div>
                 <div class="mode-card">
-                    <div class="mode-badge highlight-bg">SQUAD</div>
-                    <h3>5v5 Competitive Series</h3>
-                    <p>O formato oficial do CODM World Championship. Rotação de Hardpoint, Search & Destroy e Control.</p>
-                    <button class="btn-primary btn-full btn-match" data-mode="5v5 Squad Competitive">Inscrever Squad</button>
+                    <div class="mode-badge highlight-bg">SQUAD 5v5</div>
+                    <h3>Lineup 5v5 Competitive</h3>
+                    <p>Cadastro completo da Lineup com os 5 jogadores (Capitão + 4 Membros) e agendamento por Horário/Tier.</p>
+                    <button class="btn-primary btn-full btn-match" data-mode="5v5 Squad Competitive" data-players="5">Inscrever Squad 5v5</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Agenda & Fila de Desafios (Scrim Finder) -->
+        <section id="agenda" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> Agenda & Fila de <span class="highlight">Desafios</span></h2>
+            <p style="color: var(--text-secondary); margin-bottom: 25px;">Confira os horários lançados pelos times na fila. Escolha contra quem jogar e confirme o desafio no horário desejado!</p>
+            <div class="glass-card">
+                <div id="schedule-queue-container" class="queue-grid">
+                    <!-- Fila de horários e times carregada dinamicamente via Firebase -->
                 </div>
             </div>
         </section>
@@ -144,24 +155,16 @@
             </div>
         </section>
 
-        <!-- Seção Galeria de Troféus -->
-        <section id="trophies" class="container-section">
-            <h2 class="section-title"><i class="fa-solid fa-award"></i> Galeria de <span class="highlight">Conquistas</span></h2>
-            <div class="trophy-grid" id="trophy-container">
-                <!-- Preenchido via JavaScript -->
-            </div>
-        </section>
-
         <!-- Seção Feed da Comunidade -->
         <section id="feed" class="container-section">
             <h2 class="section-title"><i class="fa-solid fa-comments"></i> Feed da <span class="highlight">Comunidade</span></h2>
             <div class="glass-card feed-box">
                 <div class="post-creator">
-                    <textarea id="post-input" placeholder="Compartilhe uma jogada, estratégia ou resultado de treino..."></textarea>
+                    <textarea id="post-input" placeholder="Compartilhe uma jogada, procure treinos ou mande um recado no feed..."></textarea>
                     <button id="btn-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
                 </div>
                 <div id="posts-container" class="posts-list">
-                    <!-- Posts dinâmicos com curtidas via Firebase -->
+                    <!-- Posts com curtidas via Firebase -->
                 </div>
             </div>
         </section>
@@ -187,57 +190,104 @@
         </div>
     </div>
 
-    <!-- Modal de Perfil Editável do Jogador -->
+    <!-- Modal de Perfil Editável do Atleta -->
     <div id="profile-modal" class="modal hidden">
-        <div class="modal-content glass-card">
+        <div class="modal-content glass-card modal-large">
             <span class="close-profile-modal">&times;</span>
-            <h2><i class="fa-solid fa-user-gear"></i> Perfil do Atleta</h2>
+            <h2><i class="fa-solid fa-id-card"></i> Cartão de Perfil do Atleta</h2>
+            
+            <!-- Card de Pré-visualização do Perfil -->
+            <div id="profile-display-card" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary-neon);">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <img id="display-avatar" src="https://via.placeholder.com/80" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary-neon); object-fit: cover;">
+                    <div>
+                        <h3 id="display-nickname" style="color: var(--primary-neon); margin-bottom: 5px;">Carregando...</h3>
+                        <p style="font-size: 14px; margin-bottom: 3px;"><strong>Função:</strong> <span id="display-role" class="highlight">-</span> | <strong>Nível/Tier:</strong> <span id="display-tier" style="color: var(--secondary-neon); font-weight: bold;">-</span></p>
+                        <p id="display-bio" style="font-size: 14px; color: var(--text-secondary); font-style: italic;">"-"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form para editar -->
+            <h3>Editar Informações</h3>
             <form id="profile-form">
                 <div class="input-group">
                     <label for="profile-nickname">Nick / Tag CODM</label>
-                    <input type="text" id="profile-nickname" required placeholder="Ex: Ghost_Viper#123">
+                    <input type="text" id="profile-nickname" required placeholder="Ex: Viper_eSports#123">
                 </div>
-                <div class="input-group">
-                    <label for="profile-role">Função Principal</label>
-                    <select id="profile-role" style="background: rgba(0,0,0,0.3); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
-                        <option value="Sniper">Sniper</option>
-                        <option value="Rusher">Rusher / Entry</option>
-                        <option value="Support">Support / Anchor</option>
-                        <option value="IGL">IGL (Capitão)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="profile-bio">Biografia / Descrição</label>
-                    <input type="text" id="profile-bio" placeholder="Sua história no CODM, time atual, etc.">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <label for="profile-role">Função Principal</label>
+                        <select id="profile-role" style="background: rgba(0,0,0,0.4); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                            <option value="Sniper">Sniper</option>
+                            <option value="Rusher / Entry">Rusher / Entry</option>
+                            <option value="Support / Anchor">Support / Anchor</option>
+                            <option value="IGL (Capitão)">IGL (Capitão)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="profile-tier">Tier Habitual</label>
+                        <select id="profile-tier" style="background: rgba(0,0,0,0.4); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                            <option value="T1 (Profissional)">T1 (Profissional)</option>
+                            <option value="T2 (Semi-Pro)">T2 (Semi-Pro)</option>
+                            <option value="T3 (Amador / Treino)">T3 (Amador / Treino)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="profile-avatar">URL Foto de Perfil (Avatar)</label>
                     <input type="url" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
                 </div>
-                <button type="submit" class="btn-primary btn-full">Salvar Perfil</button>
+                <div class="input-group">
+                    <label for="profile-bio">Biografia / Sobre Você</label>
+                    <input type="text" id="profile-bio" placeholder="Histórico em campeonatos, clan atual, etc.">
+                </div>
+                <button type="submit" class="btn-primary btn-full"><i class="fa-solid fa-floppy-disk"></i> Salvar Alterações</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal de Inscrição em Partida -->
+    <!-- Modal Dinâmico de Inscrição em Partida / Squad -->
     <div id="match-modal" class="modal hidden">
-        <div class="modal-content glass-card">
+        <div class="modal-content glass-card modal-large">
             <span class="close-match-modal">&times;</span>
-            <h2><i class="fa-solid fa-crosshair"></i> Inscrever em Partida</h2>
+            <h2><i class="fa-solid fa-users"></i> Agendamento de Desafio / Squad</h2>
             <form id="match-form">
-                <div class="input-group">
-                    <label>Modo Escolhido</label>
-                    <input type="text" id="match-mode-selected" readonly style="color: var(--primary-neon); font-weight: bold;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="input-group">
+                        <label>Modo</label>
+                        <input type="text" id="match-mode-selected" readonly style="color: var(--primary-neon); font-weight: bold;">
+                    </div>
+                    <div class="input-group">
+                        <label for="match-tier">Nível / Tier</label>
+                        <select id="match-tier" style="background: rgba(0,0,0,0.4); color: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-card);">
+                            <option value="T1">T1 (Profissional)</option>
+                            <option value="T2">T2 (Semi-Pro)</option>
+                            <option value="T3">T3 (Amador)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="match-time">Horário Desejado</label>
+                        <input type="time" id="match-time" required style="background: rgba(0,0,0,0.4); color: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card);">
+                    </div>
                 </div>
+
                 <div class="input-group">
-                    <label for="match-team-name">Nome do Time / Nick do Duo/Squad</label>
-                    <input type="text" id="match-team-name" required placeholder="Ex: Clan Alpha / Viper & Ghost">
+                    <label for="match-team-name">Nome da Lineup / Clan</label>
+                    <input type="text" id="match-team-name" required placeholder="Ex: Black Dragons eSports">
                 </div>
+
+                <!-- Campos Dinâmicos dos Jogadores do Time -->
+                <div id="players-input-container" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <!-- Preenchido via Javascript dependendo do número de jogadores -->
+                </div>
+
                 <div class="input-group">
-                    <label for="match-whatsapp">WhatsApp para Contato/Sala</label>
+                    <label for="match-whatsapp">WhatsApp do Capitão (para envio da Sala)</label>
                     <input type="tel" id="match-whatsapp" required placeholder="(00) 90000-0000">
                 </div>
-                <button type="submit" class="btn-primary btn-full">Confirmar Inscrição</button>
+
+                <button type="submit" class="btn-primary btn-full"><i class="fa-solid fa-calendar-check"></i> Publicar Desafio na Fila</button>
             </form>
         </div>
     </div>
