@@ -12,19 +12,20 @@
 </head>
 <body class="dark-theme">
     <div id="particles-js"></div>
+    
     <header class="navbar">
         <div class="logo">
             <i class="fa-solid fa-shield-halved highlight"></i>
             <span>VIKING <span class="highlight">HUB</span></span>
         </div>
         <nav class="nav-links">
-            <a href="index.html" class="highlight-link">Início</a>
+            <a href="index.html" class="highlight-link active">Início</a>
             <a href="regras.html">Regras</a>
             <a href="modos.html">Modos</a>
             <a href="agenda.html">Agenda</a>
             <a href="ranking.html">Ranking</a>
             <a href="comunidade.html">Comunidade</a>
-            <a href="#profile-section" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
+            <a href="perfil.html" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
             <a href="#" id="nav-admin-link" class="highlight-link" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
         </nav>
         <div class="nav-actions">
@@ -60,39 +61,46 @@
                 </div>
             </div>
         </section>
-
-        <section id="profile-section" class="container-section profile-page hidden">
-            <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Guerreiro</span></h2>
-            <div class="profile-layout">
-                <div class="glass-card profile-sidebar">
-                    <div class="avatar-container"><img src="/img/studio (3).png" alt="Avatar do Jogador" id="display-avatar" class="profile-avatar"></div>
-                    <h3 id="display-nickname">Seu Nickname</h3>
-                    <span class="role-badge" id="display-role">Sniper</span>
-                    <p id="display-bio" class="user-bio">Sua biografia aparecerá aqui...</p>
-                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top"><i class="fa-solid fa-user-pen"></i> Editar Perfil</button>
-                </div>
-                <div class="profile-main-content">
-                    <div class="glass-card margin-bottom-card">
-                        <div class="card-header-flex">
-                            <h3><i class="fa-solid fa-trophy highlight"></i> Minhas Conquistas</h3>
-                            <button id="btn-add-achievement" class="btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar Conquista</button>
-                        </div>
-                        <div id="user-achievements-grid" class="user-trophy-grid"></div>
-                    </div>
-                    <div class="glass-card">
-                        <h3><i class="fa-solid fa-rss highlight"></i> Minhas Publicações</h3>
-                        <div class="post-creator margin-top">
-                            <textarea id="user-post-input" placeholder="O que você está aprontando no CODM hoje?"></textarea>
-                            <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar no Meu Feed</button>
-                        </div>
-                        <div id="user-posts-list" class="posts-list margin-top"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
-    <!-- Modais e Scripts mantidos iguais -->
+    <!-- Modal de Login/Cadastro -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <button class="close-modal-btn">&times;</button>
+            <h2 id="modal-title">Acessar Viking Hub</h2>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label>E-mail</label>
+                    <input type="email" id="email" required placeholder="seuemail@codm.com">
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" id="password" required placeholder="******">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+            </form>
+            <p style="margin-top: 15px; text-align: center;">
+                <a href="#" id="toggle-auth-mode" style="color: var(--gold-primary);">Cadastre-se</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal de Verificação ADM -->
+    <div id="admin-pass-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <button class="close-admin-pass-modal close-modal-btn">&times;</button>
+            <h2>Autenticação de Segurança</h2>
+            <p style="margin-bottom: 15px; color: var(--text-secondary);">Digite sua senha para acessar o Painel Administrativo.</p>
+            <form id="admin-pass-form">
+                <div class="input-group">
+                    <label>Senha de Confirmação</label>
+                    <input type="password" id="admin-password" required placeholder="******">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Acessar Painel</button>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
