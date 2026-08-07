@@ -27,7 +27,7 @@ let mockLeaderboard = [
     { rank: 1, name: "Viking_Viper", kd: "3.42", wins: 320, points: 2850 },
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
     { rank: 3, name: "Valhalla_Ghost", kd: "2.75", wins: 245, points: 2150 },
-    { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 210, points: 1980 },
+    { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 1980 },
     { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
 ];
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initParticles() {
-    if (typeof particlesJS !== 'undefined') {
+    if (typeof particlesJS !== 'undefined' && document.getElementById('particles-js')) {
         particlesJS('particles-js', {
             particles: {
                 number: { value: 50, density: { enable: true, value_area: 800 } },
@@ -284,13 +284,15 @@ function loadUserProfileData() {
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('display-nickname').innerText = data.nickname || currentUser.email.split('@')[0];
-            document.getElementById('display-role').innerText = data.gameRole || 'Sniper';
-            document.getElementById('display-bio').innerText = data.bio || 'Sem biografia informada.';
-            if (data.avatarUrl) {
-                const avatarImg = document.getElementById('user-avatar-preview');
-                if (avatarImg) avatarImg.src = data.avatarUrl;
-            }
+            const nicknameEl = document.getElementById('display-nickname');
+            const roleEl = document.getElementById('display-role');
+            const bioEl = document.getElementById('display-bio');
+            const avatarImg = document.getElementById('display-avatar');
+
+            if (nicknameEl) nicknameEl.innerText = data.nickname || currentUser.email.split('@')[0];
+            if (roleEl) roleEl.innerText = data.gameRole || 'Sniper';
+            if (bioEl) bioEl.innerText = data.bio || 'Sem biografia informada.';
+            if (avatarImg && data.avatarUrl) avatarImg.src = data.avatarUrl;
         }
     });
 
@@ -373,6 +375,7 @@ function listenUserAchievements() {
 
 function handleNewUserPost() {
     const input = document.getElementById('user-post-input');
+    if (!input) return;
     const content = input.value.trim();
     if (!content || !currentUser || !db) return;
 
@@ -490,6 +493,7 @@ function listenAuthState() {
 function handleNewGlobalPost() {
     if (!currentUser) { alert('Faça login para publicar!'); return; }
     const input = document.getElementById('post-input');
+    if (!input) return;
     const content = input.value.trim();
     if (!content) return;
 
