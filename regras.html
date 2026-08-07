@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIKING eSports Hub | Regras</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div id="particles-js"></div>
+    <header class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved highlight"></i>
+            <span>VIKING <span class="highlight">HUB</span></span>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Início</a>
+            <a href="regras.html" class="highlight-link">Regras</a>
+            <a href="modos.html">Modos</a>
+            <a href="agenda.html">Agenda</a>
+            <a href="ranking.html">Ranking</a>
+            <a href="comunidade.html">Comunidade</a>
+            <a href="#profile-section" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
+            <a href="#" id="nav-admin-link" class="highlight-link" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
+        </nav>
+        <div class="nav-actions">
+            <button id="theme-toggle" class="btn-icon" title="Alternar Tema"><i class="fa-solid fa-moon"></i></button>
+            <button id="btn-login" class="btn-primary"><i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span></button>
+            <button id="btn-admin" class="btn-secondary"><i class="fa-solid fa-shield-halved"></i> Painel ADM</button>
+        </div>
+    </header>
+
+    <main style="padding-top: 100px;">
+        <section id="rules" class="container-section">
+            <h2 class="section-title"><i class="fa-solid fa-book-bookmark"></i> Regras <span class="highlight">Oficiais</span></h2>
+            <div class="rules-grid">
+                <div class="glass-card">
+                    <i class="fa-solid fa-ban rule-icon"></i>
+                    <h3>Itens Banidos</h3>
+                    <p>Armas de apoio sem precisão, operadores de escudo excessivo e scorestreaks específicas são proibidas no competitivo.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-stopwatch rule-icon"></i>
+                    <h3>Tempo & Tolerância</h3>
+                    <p>Tolerância máxima de 10 minutos após a criação da sala no jogo. A ausência resulta em W.O. automático.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fa-solid fa-camera rule-icon"></i>
+                    <h3>Comprovação</h3>
+                    <p>Todos os capitães devem enviar a captura de tela (print) da pontuação final ao término de cada mapa disputado.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
