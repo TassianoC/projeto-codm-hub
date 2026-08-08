@@ -944,3 +944,58 @@ function switchProfileTab(tabId) {
         window.event.currentTarget.classList.add('active');
     }
 }
+// Inicializar Firebase Storage
+const storage = typeof firebase !== 'undefined' ? firebase.storage() : null;
+
+// Manipular o Envio de Fotos/Vídeos do Dispositivo
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadForm = document.getElementById('media-upload-form');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', handleMediaUpload);
+    }
+});
+
+async function handleMediaUpload(e) {
+    e.preventDefault();
+    if (!currentUser || !storage || !db) return alert("Você precisa estar logado!");
+
+    const fileInput = document.getElementById('media-file-input');
+    const titleInput = document.getElementById('media-title');
+    const file = fileInput.files[0];
+
+    if (!file) return alert("Selecione um arquivo!");
+
+    const btnUpload = document.getElementById('btn-upload-media');
+    btnUpload.disabled = true;
+    btnUpload.innerText = "Enviando mídia...";
+
+    try {
+        // Criar caminho único de armazenamento: gallery/UID/timestamp_nome
+        const fileRef = storage.ref(`gallery/${currentUser.uid}/${Date.now()}_${file.name}`);
+        
+        // Fazer upload do arquivo vindo do aparelho do usuário
+        const snapshot = await fileRef.put(file);
+        const downloadURL = await snapshot.ref.getDownloadURL();
+        
+        // Identificar o tipo de mídia
+        const isVideo = file.type.startsWith('video/');
+
+        // Salvar referência da mídia no Firestore (Galeria do Usuário)
+        await db.collection('users').doc(currentUser.uid).collection('gallery').add({
+            title: titleInput.value,
+            url: downloadURL,
+            storagePath: snapshot.ref.fullPath,
+            type: isVideo ? 'video' : 'image',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("Mídia publicada com sucesso!");
+        uploadForm.reset();
+    } catch (error) {
+        console.error("Erro no upload:", error);
+        alert("Falha ao enviar mídia: " + error.message);
+    } finally {
+        btnUpload.disabled = false;
+        btnUpload.innerHTML = '<i class="fa-solid fa-upload"></i> Publicar no Feed';
+    }
+}
