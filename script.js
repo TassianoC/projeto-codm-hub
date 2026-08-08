@@ -979,38 +979,55 @@ function godToggleMaintenance() {
     alert(`[PODER DE DEUS]: Modo de Manutenção de Emergência ${isMaint ? 'ATIVADO' : 'DESATIVADO'}!`);
 }
 // ==========================================
-// CONFIGURAÇÃO DO PARTICLES.JS
+// CONFIGURAÇÃO DO PARTICLES.JS (EFEITO FOGO/FAÍSCAS)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('particles-js')) {
         particlesJS('particles-js', {
             "particles": {
                 "number": {
-                    "value": 80,
+                    "value": 110, // Quantidade de faíscas
                     "density": { "enable": true, "value_area": 800 }
                 },
-                "color": { "value": "#ff3b3b" }, // Cor das partículas (combine com o tema)
-                "shape": { "type": "circle" },
+                "color": {
+                    // Gradiente de cores de fogo e faíscas
+                    "value": ["#ff4500", "#ff8c00", "#ffd700", "#ff0000"] 
+                },
+                "shape": {
+                    "type": "circle"
+                },
                 "opacity": {
-                    "value": 0.5,
-                    "random": false
+                    "value": 0.8,
+                    "random": true, // Faz algumas faíscas piscarem mais que outras
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0.2,
+                        "sync": false
+                    }
                 },
                 "size": {
-                    "value": 3,
-                    "random": true
+                    "value": 3.5,
+                    "random": true, // Tamanhos variados para dar profundidade
+                    "anim": {
+                        "enable": true,
+                        "speed": 3,
+                        "size_min": 1,
+                        "sync": false
+                    }
                 },
                 "line_linked": {
-                    "enable": true,
-                    "distance": 150,
-                    "color": "#ff3b3b",
-                    "opacity": 0.3,
-                    "width": 1
+                    "enable": false // Desativamos as linhas para parecer faíscas soltas
                 },
                 "move": {
                     "enable": true,
-                    "speed": 2.5,
-                    "direction": "none",
-                    "out_mode": "out"
+                    "speed": 4, // Velocidade de subida das faíscas
+                    "direction": "top", // Faz as partículas subirem como brasa de fogo
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 }
                 }
             },
             "interactivity": {
@@ -1018,15 +1035,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 "events": {
                     "onhover": {
                         "enable": true,
-                        "mode": "grab" // Cria teias com o ponteiro do mouse
+                        "mode": "bubble" // Aumenta levemente as faíscas onde o mouse passa
                     },
                     "onclick": {
                         "enable": true,
-                        "mode": "push" // Adiciona partículas ao clicar
+                        "mode": "push" // Dispara um estouro de faíscas ao clicar
                     }
                 },
                 "modes": {
-                    "grab": { "distance": 180, "line_linked": { "opacity": 0.7 } }
+                    "bubble": {
+                        "distance": 200,
+                        "size": 6,
+                        "duration": 0.3,
+                        "opacity": 1
+                    },
+                    "push": {
+                        "particles_nb": 15 // Quantidade de faíscas geradas no clique
+                    }
                 }
             },
             "retina_detect": true
