@@ -2,12 +2,7 @@
    VIKING eSports Hub - Lógica Principal e Administração Suprema
    ========================================================================== */
 
-/* ==========================================================================
-   VIKING eSports Hub - Lógica Principal e Administração Suprema
-   ========================================================================== */
-
-// SEU EMAIL DE ADMINISTRADOR EXCLUSIVO / SUPREMO
-const MASTER_ADMIN_EMAIL = "fallk.codm@gmail.com"; // Ajuste aqui para o seu e-mail exato cadastrado no Firebase
+const MASTER_ADMIN_EMAIL = "fallk.codm@gmail.com"; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
@@ -30,63 +25,48 @@ let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
 
-// ... (resto do arquivo permanece com suas funções normais)
+let mockLeaderboard = [
+    { rank: 1, name: "VK_Valkyrie", kd: "3.42", wins: 142, points: 2850 },
+    { rank: 2, name: "Ragnar_L", kd: "2.95", wins: 118, points: 2410 },
+    { rank: 3, name: "Thor_CODM", kd: "2.81", wins: 95, points: 2100 },
+    { rank: 4, name: "Odin_Sniper", kd: "2.64", wins: 82, points: 1890 },
+    { rank: 5, name: "Loki_Entry", kd: "2.45", wins: 76, points: 1650 }
+];
 
-/* ==========================================================================
-   AUTENTICAÇÃO E GERENCIAMENTO DE PERMISSÕES (RESTRITO AO MASTER ADMIN)
-   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    initParticles();
+    initEventListeners();
+    if (auth) listenAuthState();
+    if (db) {
+        listenGlobalFeed();
+        listenAgendaMatches();
+        listenLeaderboard();
+    }
+});
 
-function listenAuthState() {
-    auth.onAuthStateChanged((user) => {
-        const authBtnText = document.getElementById('auth-btn-text');
-        const profileSection = document.getElementById('profile-section');
-        const navProfileLink = document.getElementById('nav-profile-link');
-
-        if (user) {
-            currentUser = user;
-            if (authBtnText) authBtnText.innerText = 'Sair';
-            if (profileSection) profileSection.classList.remove('hidden');
-            if (navProfileLink) navProfileLink.classList.remove('hidden');
-
-            ensureUserProfileExists(user);
-
-            // Verifica se o e-mail logado bate exatamente com o MASTER_ADMIN_EMAIL
-            const isUserMaster = user.email && user.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase();
-
-            db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.banned) {
-                        alert('SUA CONTA FOI BANIDA PELO ADMINISTRADOR POR VIOLAÇÃO DAS REGRAS.');
-                        auth.signOut();
-                        return;
-                    }
-                    // Apenas a conta MASTER_ADMIN terá status de Admin ativo no painel
-                    isAdmin = isUserMaster;
-                } else {
-                    isAdmin = isUserMaster;
-                }
-
-                toggleAdminButtonsUI(isAdmin);
-                loadUserProfileData();
-            }).catch(() => {
-                isAdmin = isUserMaster;
-                toggleAdminButtonsUI(isAdmin);
-                loadUserProfileData();
-            });
-        } else {
-            currentUser = null;
-            isAdmin = false;
-            if (authBtnText) authBtnText.innerText = 'Entrar';
-            if (profileSection) profileSection.classList.add('hidden');
-            if (navProfileLink) navProfileLink.classList.add('hidden');
-
-            toggleAdminButtonsUI(false);
-            loadUserProfileData();
-        }
-    });
+function initParticles() {
+    if (typeof particlesJS !== 'undefined' && document.getElementById('particles-js')) {
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 40, density: { enable: true, value_area: 800 } },
+                color: { value: "#d4af37" },
+                shape: { type: "circle" },
+                opacity: { value: 0.3, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#d4af37", opacity: 0.15, width: 1 },
+                move: { enable: true, speed: 1.5, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: false } },
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.4 } } }
+            },
+            retina_detect: true
+        });
+    }
 }
-    // Alternar Tema
+
+function initEventListeners() {
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -98,7 +78,6 @@ function listenAuthState() {
         });
     }
 
-    // Modal de Login
     const loginBtn = document.getElementById('btn-login');
     const authModal = document.getElementById('auth-modal');
     const closeAuth = document.querySelector('#auth-modal .close-modal-btn');
@@ -130,7 +109,6 @@ function listenAuthState() {
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
-    // Modal Perfil
     const editProfileBtn = document.getElementById('btn-edit-profile-modal');
     const profileModal = document.getElementById('profile-modal');
     const closeProfile = document.querySelector('.close-profile-modal');
@@ -140,7 +118,6 @@ function listenAuthState() {
     if (closeProfile && profileModal) closeProfile.addEventListener('click', () => profileModal.classList.add('hidden'));
     if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
 
-    // Modal Conquistas
     const addAchBtn = document.getElementById('btn-add-achievement');
     const achModal = document.getElementById('achievement-modal');
     const closeAch = document.querySelector('.close-achievement-modal');
@@ -150,14 +127,12 @@ function listenAuthState() {
     if (closeAch && achModal) closeAch.addEventListener('click', () => achModal.classList.add('hidden'));
     if (achForm) achForm.addEventListener('submit', handleAddAchievement);
 
-    // Publicações
     const userPostBtn = document.getElementById('btn-user-post');
     if (userPostBtn) userPostBtn.addEventListener('click', handleNewUserPost);
 
     const globalPostBtn = document.getElementById('btn-post');
     if (globalPostBtn) globalPostBtn.addEventListener('click', handleNewGlobalPost);
 
-    // Inscrição em Partida
     const matchBtns = document.querySelectorAll('.btn-match');
     const matchModal = document.getElementById('match-modal');
     const closeMatch = document.querySelector('.close-match-modal');
@@ -180,11 +155,8 @@ function listenAuthState() {
     if (closeMatch && matchModal) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // Acesso Administrativo
     const navAdminLink = document.getElementById('nav-admin-link');
     const adminBtn = document.getElementById('btn-admin');
-    const godBtn = document.getElementById('btn-god-panel');
-    const godAdminBtn = document.getElementById('godAdminBtn');
 
     function directAdminAccess(e) {
         if (e) e.preventDefault();
@@ -213,10 +185,6 @@ function listenAuthState() {
     if (navAdminLink) navAdminLink.addEventListener('click', directAdminAccess);
     if (adminBtn) adminBtn.addEventListener('click', directAdminAccess);
 
-    if (godBtn) godBtn.addEventListener('click', toggleGodPanel);
-    if (godAdminBtn) godAdminBtn.addEventListener('click', toggleGodPanel);
-
-    // Modal Admin e Abas
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
 
@@ -234,14 +202,7 @@ function listenAuthState() {
             }
         });
     });
-
-    const adminStatsForm = document.getElementById('admin-update-stats');
-    if (adminStatsForm) adminStatsForm.addEventListener('submit', handleAdminStatUpdate);
 }
-
-/* ==========================================================================
-   AUTENTICAÇÃO E GERENCIAMENTO DE PERMISSÕES
-   ========================================================================== */
 
 function listenAuthState() {
     auth.onAuthStateChanged((user) => {
@@ -267,7 +228,7 @@ function listenAuthState() {
                         auth.signOut();
                         return;
                     }
-                    isAdmin = isUserMaster || (data.role === 'admin' || data.role === 'GOD_ADM' || data.role === 'god');
+                    isAdmin = isUserMaster || (data.role === 'admin' || data.role === 'GOD_ADM');
                 } else {
                     isAdmin = isUserMaster;
                 }
@@ -295,19 +256,15 @@ function listenAuthState() {
 function toggleAdminButtonsUI(show) {
     const elementsToToggle = [
         document.getElementById('nav-admin-link'),
-        document.getElementById('btn-admin'),
-        document.getElementById('btn-god-panel'),
-        document.getElementById('godAdminBtn')
+        document.getElementById('btn-admin')
     ];
 
     elementsToToggle.forEach(el => {
         if (el) {
             if (show) {
                 el.classList.remove('hidden');
-                el.style.display = 'inline-block';
             } else {
                 el.classList.add('hidden');
-                el.style.display = 'none';
             }
         }
     });
@@ -345,10 +302,6 @@ function handleAuthSubmit(e) {
             .catch((error) => alert('Erro no login: ' + error.message));
     }
 }
-
-/* ==========================================================================
-   LÓGICA PÚBLICA DE PERFIL
-   ========================================================================== */
 
 function setElementText(id, text) {
     const el = document.getElementById(id);
@@ -409,14 +362,12 @@ function ensureUserProfileExists(user) {
                 bio: 'Novo jogador na comunidade VIKING eSports.',
                 role: 'player',
                 banned: false,
-                
                 kdRatio: '0.00',
                 totalKills: '0',
                 winRate: '0%',
                 mvpCount: '0',
                 currentRank: 'Não Rankeado',
                 rankHistory: [],
-                
                 favoriteWeapons: [],
                 favoriteMaps: [],
                 clanHistory: [],
@@ -537,7 +488,6 @@ function handleProfileSave(e) {
     });
 }
 
-/* --- GALERIA & FEED DA COMUNIDADE --- */
 function listenUserGallery(targetUid) {
     const galleryGrid = document.getElementById('user-gallery-grid');
     if (!galleryGrid || !db) return;
@@ -591,7 +541,7 @@ function listenUserAchievements(targetUid) {
           snapshot.forEach(doc => {
               const ach = doc.data();
               grid.innerHTML += `
-                  <div class="trophy-card">
+                  <div class="user-trophy-card">
                       <i class="fa-solid ${ach.icon || 'fa-trophy'} highlight trophy-icon"></i>
                       <h4>${ach.title}</h4>
                       <p>${ach.desc}</p>
@@ -790,9 +740,35 @@ function listenAgendaMatches() {
     });
 }
 
-/* ==========================================================================
-   PAINEL DE ADMINISTRAÇÃO SUPREMO
-   ========================================================================== */
+function listenLeaderboard() {
+    const body = document.getElementById('leaderboard-body');
+    if (!body) return;
+
+    renderLeaderboard(mockLeaderboard);
+}
+
+function renderLeaderboard(data) {
+    const body = document.getElementById('leaderboard-body');
+    if (!body) return;
+    body.innerHTML = '';
+
+    data.forEach((item, index) => {
+        let rankClass = '';
+        if (index === 0) rankClass = 'top-1';
+        else if (index === 1) rankClass = 'top-2';
+        else if (index === 2) rankClass = 'top-3';
+
+        body.innerHTML += `
+            <tr>
+                <td class="rank-position ${rankClass}">#${index + 1}</td>
+                <td><strong>${item.name}</strong></td>
+                <td>${item.kd}</td>
+                <td>${item.wins}</td>
+                <td><span class="highlight">${item.points} pts</span></td>
+            </tr>
+        `;
+    });
+}
 
 function loadAdminUsersList() {
     const container = document.getElementById('admin-users-list');
@@ -952,63 +928,19 @@ function adminDeleteMatch(matchId) {
     }
 }
 
-function handleAdminStatUpdate(e) {
-    e.preventDefault();
-    const playerName = document.getElementById('admin-player-name').value;
-    const pointsToAdd = parseInt(document.getElementById('admin-player-points').value);
-
-    const existingPlayer = mockLeaderboard.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-    if (existingPlayer) {
-        existingPlayer.points += pointsToAdd;
-        mockLeaderboard.sort((a, b) => b.points - a.points);
-        renderLeaderboard(mockLeaderboard);
-        alert(`Placar de ${playerName} atualizado!`);
-        document.getElementById('admin-update-stats').reset();
-    } else {
-        mockLeaderboard.push({ rank: mockLeaderboard.length + 1, name: playerName, kd: "2.50", wins: 10, points: pointsToAdd });
-        mockLeaderboard.sort((a, b) => b.points - a.points);
-        renderLeaderboard(mockLeaderboard);
-        alert(`Novo jogador ${playerName} adicionado ao Leaderboard!`);
-        document.getElementById('admin-update-stats').reset();
-    }
-}
-
-/* ==========================================================================
-   PAINEL DE CONTROLE GOD MODE
-   ========================================================================== */
-
-function toggleGodPanel(e) {
-    if (e) e.preventDefault();
-    if (!isAdmin) {
-        alert("Acesso Negado: Apenas a conta GOD_ADM possui permissão para acessar este painel.");
-        return;
-    }
-
-    const modal = document.getElementById('godAdminModal');
-    if (modal) {
-        modal.classList.toggle('hidden');
-    }
-}
-/* ==========================================================================
-   TROCA DE ABAS DO PERFIL ESTILO INSTAGRAM
-   ========================================================================== */
 function switchProfileTab(tabId) {
-    // Esconde todos os conteúdos das abas
     const contents = document.querySelectorAll('.insta-tab-content');
     contents.forEach(content => content.classList.remove('active'));
 
-    // Desativa o estado ativo de todos os botões
     const buttons = document.querySelectorAll('.insta-tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
 
-    // Ativa o conteúdo e o botão selecionado
     const selectedTab = document.getElementById(tabId);
     if (selectedTab) {
         selectedTab.classList.add('active');
     }
 
-    // Marca o botão clicado
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
     }
 }
