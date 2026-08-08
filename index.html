@@ -26,12 +26,12 @@
             <a href="ranking.html">Ranking</a>
             <a href="comunidade.html">Comunidade</a>
             <a href="perfil.html" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
-            <a href="#" id="nav-admin-link" class="highlight-link" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
+            <a href="#" id="nav-admin-link" class="highlight-link hidden" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
         </nav>
         <div class="nav-actions">
             <button id="theme-toggle" class="btn-icon" title="Alternar Tema"><i class="fa-solid fa-moon"></i></button>
             <button id="btn-login" class="btn-primary"><i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span></button>
-            <button id="btn-admin" class="btn-secondary"><i class="fa-solid fa-shield-halved"></i> Painel ADM</button>
+            <button id="btn-admin" class="btn-secondary hidden"><i class="fa-solid fa-shield-halved"></i> Painel ADM</button>
         </div>
     </header>
 
@@ -51,9 +51,9 @@
                 <h1>DOMINE O <br><span class="text-gradient">CAMPO DE BATALHA</span></h1>
                 <p>Estatísticas em tempo real, torneios 1v1, 2v2 e 5v5, gestão de equipes e o ranking supremo dos atalaias e guerreiros do Call of Duty: Mobile.</p>
                 <div class="hero-stats">
-                    <div class="stat-card"><i class="fa-solid fa-trophy stat-icon"></i><h3 class="counter" data-target="1450">0</h3><p>Vitórias Totais</p></div>
-                    <div class="stat-card"><i class="fa-solid fa-skull stat-icon"></i><h3 class="counter" data-target="3820">0</h3><p>Kills em Torneios</p></div>
-                    <div class="stat-card"><i class="fa-solid fa-award stat-icon"></i><h3 class="counter" data-target="48">0</h3><p>Troféus Entregues</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-trophy stat-icon"></i><h3 class="counter" data-target="1450">1450</h3><p>Vitórias Totais</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-skull stat-icon"></i><h3 class="counter" data-target="3820">3820</h3><p>Kills em Torneios</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-award stat-icon"></i><h3 class="counter" data-target="48">48</h3><p>Troféus Entregues</p></div>
                 </div>
                 <div class="hero-cta">
                     <a href="modos.html" class="btn-primary btn-large"><i class="fa-solid fa-gamepad"></i> Entrar em Partida</a>
@@ -85,27 +85,10 @@
         </div>
     </div>
 
-    <!-- Modal de Verificação ADM -->
-    <div id="admin-pass-modal" class="modal hidden">
-        <div class="modal-content glass-card">
-            <button class="close-admin-pass-modal close-modal-btn">&times;</button>
-            <h2>Autenticação de Segurança</h2>
-            <p style="margin-bottom: 15px; color: var(--text-secondary);">Digite sua senha para acessar o Painel Administrativo.</p>
-            <form id="admin-pass-form">
-                <div class="input-group">
-                    <label>Senha de Confirmação</label>
-                    <input type="password" id="admin-password" required placeholder="******">
-                </div>
-                <button type="submit" class="btn-primary btn-full">Acessar Painel</button>
-            </form>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
-    
 </body>
 </html>
