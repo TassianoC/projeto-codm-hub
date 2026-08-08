@@ -171,87 +171,66 @@
         </section>
     </main>
 
-    <!-- Modal Editar Perfil (Apenas para o Proprietário) -->
-    <div id="profile-modal" class="modal hidden">
-        <div class="modal-content glass-card large-modal">
-            <button class="close-profile-modal close-modal-btn">&times;</button>
-            <h2>Editar Perfil do Jogador</h2>
-            <form id="profile-form">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label>Nickname / Tag</label>
-                        <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper">
-                    </div>
-                    <div class="input-group">
-                        <label>Função / Role</label>
-                        <select id="profile-role">
-                            <option value="Sniper">Sniper</option>
-                            <option value="Rusher">Rusher</option>
-                            <option value="Suporte">Suporte</option>
-                            <option value="Capitão / IGL">Capitão / IGL</option>
-                            <option value="Flex">Flexível</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>URL do Avatar</label>
-                        <input type="text" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
-                    </div>
-                    <div class="input-group">
-                        <label>Rank Atual</label>
-                        <input type="text" id="profile-current-rank" placeholder="Ex: Lendário (10.500 pts)">
-                    </div>
-                    <div class="input-group">
-                        <label>K/D Ratio</label>
-                        <input type="text" id="profile-kd" placeholder="Ex: 2.45">
-                    </div>
-                    <div class="input-group">
-                        <label>Abates Totais</label>
-                        <input type="text" id="profile-total-kills" placeholder="Ex: 12450">
-                    </div>
-                    <div class="input-group">
-                        <label>Taxa de Vitória (%)</label>
-                        <input type="text" id="profile-winrate" placeholder="Ex: 68%">
-                    </div>
-                    <div class="input-group">
-                        <label>MVPs Totais</label>
-                        <input type="text" id="profile-mvp-count" placeholder="Ex: 142">
-                    </div>
+   <!-- Modal Editar Perfil (Apenas para o Proprietário - Sem campos de Estatísticas) -->
+<div id="profile-modal" class="modal hidden">
+    <div class="modal-content glass-card large-modal">
+        <button class="close-profile-modal close-modal-btn">&times;</button>
+        <h2><i class="fa-solid fa-user-pen highlight"></i> Editar Meu Perfil</h2>
+        <form id="profile-form">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Nickname / Gamertag</label>
+                    <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper">
                 </div>
-
-                <div class="input-group margin-top">
-                    <label>Armas Mais Utilizadas (separadas por vírgula)</label>
-                    <input type="text" id="profile-favorite-weapons" placeholder="Ex: DL Q33, KRM-262, CBR4">
+                <div class="input-group">
+                    <label>Função / Role Principal</label>
+                    <select id="profile-role">
+                        <option value="Sniper">Sniper</option>
+                        <option value="Rusher">Rusher</option>
+                        <option value="Suporte">Suporte</option>
+                        <option value="Capitão / IGL">Capitão / IGL</option>
+                        <option value="Flex">Flexível</option>
+                    </select>
                 </div>
-
-                <div class="input-group margin-top">
-                    <label>Mapas Favoritos (separados por vírgula)</label>
-                    <input type="text" id="profile-favorite-maps" placeholder="Ex: Standoff, Firing Range, Raid">
+                <div class="input-group">
+                    <label>URL do Avatar / Foto de Perfil</label>
+                    <input type="text" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
                 </div>
-
-                <div class="input-group margin-top">
-                    <label>Histórico de Ranks (separados por vírgula)</label>
-                    <input type="text" id="profile-rank-history" placeholder="Ex: S5: Lendário Top 5000, S4: Lendário">
+                <div class="input-group">
+                    <label>Clã Atual / Histórico</label>
+                    <input type="text" id="profile-clan-history" placeholder="Ex: [Atual] VIKING eSports">
                 </div>
+            </div>
 
-                <div class="input-group margin-top">
-                    <label>Clãs (Atual e Antigos)</label>
-                    <input type="text" id="profile-clan-history" placeholder="Ex: [Atual] VIKING eSports, [Antigo] Alpha Warriors">
-                </div>
+            <div class="input-group margin-top">
+                <label>Armas Favoritas (separadas por vírgula)</label>
+                <input type="text" id="profile-favorite-weapons" placeholder="Ex: DL Q33, KRM-262, CBR4">
+            </div>
 
-                <div class="input-group margin-top">
-                    <label>Currículo Competitivo</label>
-                    <textarea id="profile-competitive-cv" rows="3" placeholder="Descreva sua bagagem em campeonatos, scrims e horários disponíveis..."></textarea>
-                </div>
+            <div class="input-group margin-top">
+                <label>Mapas Favoritos (separados por vírgula)</label>
+                <input type="text" id="profile-favorite-maps" placeholder="Ex: Standoff, Firing Range, Raid">
+            </div>
 
-                <div class="input-group margin-top">
-                    <label>Biografia / Descrição Resumida</label>
-                    <textarea id="profile-bio" rows="2" placeholder="Fale brevemente sobre sua trajetória..."></textarea>
-                </div>
+            <div class="input-group margin-top">
+                <label>Currículo Competitivo / Experiências</label>
+                <textarea id="profile-competitive-cv" rows="3" placeholder="Descreva sua bagagem em campeonatos, scrims e disponibilidade..."></textarea>
+            </div>
 
-                <button type="submit" class="btn-primary btn-full margin-top">Salvar Alterações do Perfil</button>
-            </form>
-        </div>
+            <div class="input-group margin-top">
+                <label>Biografia / Apresentação</label>
+                <textarea id="profile-bio" rows="2" placeholder="Fale brevemente sobre você..."></textarea>
+            </div>
+
+            <!-- AVISO VISÍVEL SOBRE AS ESTATÍSTICAS -->
+            <div class="info-banner margin-top">
+                <p><i class="fa-solid fa-shield-halved"></i> <strong>Aviso:</strong> Suas estatísticas de K/D, Vitórias, Ranks e Abates são validadas e atualizadas exclusivamente pelos administradores e organizadores de torneios.</p>
+            </div>
+
+            <button type="submit" class="btn-primary btn-full margin-top">Salvar Alterações</button>
+        </form>
     </div>
+</div>
 
     <!-- Modal Adicionar Conquista -->
     <div id="achievement-modal" class="modal hidden">
