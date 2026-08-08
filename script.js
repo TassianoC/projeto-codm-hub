@@ -945,45 +945,95 @@ function switchProfileTab(tabId) {
     }
 }
 
-// Inicializar Firebase Storage
-const storage = typeof firebase !== 'undefined' ? firebase.storage() : null;
+/* ==========================================================================
+   ATUALIZAÇÃO DA GALERIA E UPLOAD DE MÍDIA NO PERFIL
+   ========================================================================== */
 
-// Manipular o Envio de Fotos/Vídeos do Dispositivo
-document.addEventListener('DOMContentLoaded', () => {
-    const uploadForm = document.getElementById('media-upload-form');
-    if (uploadForm) {
-        uploadForm.addEventListener('submit', handleMediaUpload);
-    }
-});
+// 1. Renderização e Escuta da Galeria
+function listenUserGallery(targetUid) {
+    const galleryGrid = document.getElementById('user-gallery-grid');
+    if (!galleryGrid || !db) return;
 
+    db.collection('users').doc(targetUid).collection('gallery')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+          galleryGrid.innerHTML = '';
+          if (snapshot.empty) {
+              galleryGrid.innerHTML = '<p class="text-muted">Nenhuma foto ou vídeo publicado nesta galeria.</p>';
+              return;
+          }
+
+          const isOwner = currentUser && (currentUser.uid === targetUid);
+
+          snapshot.forEach(doc => {
+              const media = doc.data();
+              const mediaId = doc.id;
+              let mediaHTML = '';
+
+              // Botão de exclusão para o dono do perfil ou Admin
+              const deleteBtn = (isOwner || isAdmin) ? `
+                  <button onclick="deleteGalleryItem('${targetUid}', '${mediaId}', '${media.storagePath || ''}')" class="btn-danger btn-sm" style="margin-top: 8px; width: 100%;">
+                      <i class="fa-solid fa-trash"></i> Excluir
+                  </button>` : '';
+
+              if (media.type === 'video') {
+                  const isYouTube = media.url && (media.url.includes("youtube.com") || media.url.includes("youtu.be"));
+                  
+                  const videoPlayer = isYouTube 
+                      ? `<iframe src="${media.url.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen class="gallery-img"></iframe>`
+                      : `<video src="${media.url}" controls class="gallery-img"></video>`;
+
+                  mediaHTML = `
+                      <div class="gallery-item glass-card">
+                          ${videoPlayer}
+                          <p class="media-title">${media.title || 'Vídeo'}</p>
+                          ${deleteBtn}
+                      </div>
+                  `;
+              } else {
+                  mediaHTML = `
+                      <div class="gallery-item glass-card">
+                          <img src="${media.url}" alt="${media.title}" class="gallery-img">
+                          <p class="media-title">${media.title || 'Foto'}</p>
+                          ${deleteBtn}
+                      </div>
+                  `;
+              }
+              galleryGrid.innerHTML += mediaHTML;
+          });
+      });
+}
+
+// 2. Manipular Upload de Mídias (Fotos e Vídeos)
 async function handleMediaUpload(e) {
     e.preventDefault();
     if (!currentUser || !storage || !db) return alert("Você precisa estar logado!");
 
     const fileInput = document.getElementById('media-file-input');
     const titleInput = document.getElementById('media-title');
-    const file = fileInput.files[0];
+    const file = fileInput ? fileInput.files[0] : null;
 
-    if (!file) return alert("Selecione um arquivo!");
+    if (!file) return alert("Selecione um arquivo de imagem ou vídeo!");
 
     const btnUpload = document.getElementById('btn-upload-media');
-    btnUpload.disabled = true;
-    btnUpload.innerText = "Enviando mídia...";
+    if (btnUpload) {
+        btnUpload.disabled = true;
+        btnUpload.innerText = "Enviando mídia...";
+    }
 
     try {
-        // Criar caminho único de armazenamento: gallery/UID/timestamp_nome
+        // Criar caminho único no Storage
         const fileRef = storage.ref(`gallery/${currentUser.uid}/${Date.now()}_${file.name}`);
         
-        // Fazer upload do arquivo vindo do aparelho do usuário
+        // Upload do arquivo do dispositivo
         const snapshot = await fileRef.put(file);
         const downloadURL = await snapshot.ref.getDownloadURL();
         
-        // Identificar o tipo de mídia
         const isVideo = file.type.startsWith('video/');
 
-        // Salvar referência da mídia no Firestore (Galeria do Usuário)
+        // Salvar referência no Firestore
         await db.collection('users').doc(currentUser.uid).collection('gallery').add({
-            title: titleInput.value,
+            title: titleInput.value || (isVideo ? 'Vídeo' : 'Foto'),
             url: downloadURL,
             storagePath: snapshot.ref.fullPath,
             type: isVideo ? 'video' : 'image',
@@ -991,12 +1041,36 @@ async function handleMediaUpload(e) {
         });
 
         alert("Mídia publicada com sucesso!");
-        uploadForm.reset();
+        const uploadForm = document.getElementById('media-upload-form');
+        if (uploadForm) uploadForm.reset();
     } catch (error) {
         console.error("Erro no upload:", error);
         alert("Falha ao enviar mídia: " + error.message);
     } finally {
-        btnUpload.disabled = false;
-        btnUpload.innerHTML = '<i class="fa-solid fa-upload"></i> Publicar no Feed';
+        if (btnUpload) {
+            btnUpload.disabled = false;
+            btnUpload.innerHTML = '<i class="fa-solid fa-upload"></i> Publicar no Feed';
+        }
+    }
+}
+
+// 3. Excluir Mídia da Galeria
+async function deleteGalleryItem(targetUid, docId, storagePath) {
+    if (!currentUser || !db) return;
+    
+    if (confirm("Deseja realmente apagar esta mídia da galeria?")) {
+        try {
+            // Remover do Firebase Storage se houver caminho gravado
+            if (storagePath && storage) {
+                const fileRef = storage.ref(storagePath);
+                await fileRef.delete().catch(err => console.warn("Arquivo do Storage não localizado:", err));
+            }
+
+            // Remover do Firestore
+            await db.collection('users').doc(targetUid).collection('gallery').doc(docId).delete();
+            alert("Mídia removida com sucesso!");
+        } catch (error) {
+            alert("Erro ao excluir mídia: " + error.message);
+        }
     }
 }
