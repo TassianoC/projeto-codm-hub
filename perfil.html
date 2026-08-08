@@ -37,7 +37,7 @@
 
     <main style="padding-top: 100px;">
         <section id="profile-section" class="container-section profile-page">
-            <h2 class="section-title"><i class="fa-solid fa-id-card"></i> Perfil Profissional do <span class="highlight">Jogador</span></h2>
+            <h2 class="section-title"><i class="fa-solid fa-id-card"></i> Perfil do <span class="highlight" id="profile-owner-title">Jogador</span></h2>
             
             <div class="profile-layout">
                 <!-- Sidebar do Jogador -->
@@ -45,143 +45,124 @@
                     <div class="avatar-container">
                         <img src="/img/studio (3).png" alt="Avatar do Jogador" id="display-avatar" class="profile-avatar">
                     </div>
-                    <h3 id="display-nickname">Seu Nickname</h3>
-                    <span class="role-badge" id="display-role">Sniper</span>
+                    <h3 id="display-nickname">Carregando...</h3>
+                    <span class="role-badge" id="display-role">Carregando...</span>
                     
-                    <!-- Rank Atual -->
                     <div class="rank-badge-box margin-top">
                         <i class="fa-solid fa-ranking-star highlight"></i>
                         <div>
                             <small class="text-muted">Rank Atual</small>
-                            <h4 id="display-current-rank">Lendário (10.500 pts)</h4>
+                            <h4 id="display-current-rank">Nenhum rank informado</h4>
                         </div>
                     </div>
 
-                    <p id="display-bio" class="user-bio margin-top">Sua biografia aparecerá aqui...</p>
-                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top"><i class="fa-solid fa-user-pen"></i> Editar Perfil Completo</button>
+                    <p id="display-bio" class="user-bio margin-top">Sem biografia informada.</p>
+                    
+                    <!-- Botão que SÓ O DONO pode ver -->
+                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top owner-only-btn hidden">
+                        <i class="fa-solid fa-user-pen"></i> Editar Meu Perfil
+                    </button>
                 </div>
 
-                <!-- Conteúdo Principal - LinkedIn CODM -->
+                <!-- Conteúdo Principal -->
                 <div class="profile-main-content">
                     
-                    <!-- 1. K/D e Estatísticas -->
+                    <!-- 1. Estatísticas -->
                     <div class="glass-card margin-bottom-card">
                         <h3><i class="fa-solid fa-chart-line highlight"></i> Estatísticas Principais</h3>
                         <div class="stats-overview-grid margin-top">
                             <div class="stat-box">
-                                <span class="stat-number highlight" id="display-kd">2.45</span>
+                                <span class="stat-number highlight" id="display-kd">0.00</span>
                                 <span class="stat-label">K/D Ratio</span>
                             </div>
                             <div class="stat-box">
-                                <span class="stat-number" id="display-total-kills">12.450</span>
+                                <span class="stat-number" id="display-total-kills">0</span>
                                 <span class="stat-label">Abates Totais</span>
                             </div>
                             <div class="stat-box">
-                                <span class="stat-number" id="display-winrate">68%</span>
+                                <span class="stat-number" id="display-winrate">0%</span>
                                 <span class="stat-label">Taxa de Vitória</span>
                             </div>
                             <div class="stat-box">
-                                <span class="stat-number" id="display-mvp-count">142</span>
+                                <span class="stat-number" id="display-mvp-count">0</span>
                                 <span class="stat-label">MVPs</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. Armas Favoritas & Mapas Favoritos -->
+                    <!-- 2. Armas & Mapas Favoritos -->
                     <div class="profile-two-columns margin-bottom-card">
                         <div class="glass-card">
-                            <h3><i class="fa-solid fa-gun highlight"></i> Armas Mais Utilizadas</h3>
-                            <ul class="profile-list margin-top" id="display-favorite-weapons">
-                                <li><i class="fa-solid fa-crosshairs"></i> DL Q33 (Sniper) - Master</li>
-                                <li><i class="fa-solid fa-fire"></i> KRM-262 (Escopeta)</li>
-                                <li><i class="fa-solid fa-bullseye"></i> CBR4 (SMG)</li>
-                            </ul>
+                            <h3><i class="fa-solid fa-gun highlight"></i> Armas Favoritas</h3>
+                            <ul class="profile-list margin-top" id="display-favorite-weapons"></ul>
                         </div>
                         <div class="glass-card">
                             <h3><i class="fa-solid fa-map-location-dot highlight"></i> Mapas Favoritos</h3>
-                            <ul class="profile-list margin-top" id="display-favorite-maps">
-                                <li><i class="fa-solid fa-map"></i> Standoff (Buscar & Destruir)</li>
-                                <li><i class="fa-solid fa-map"></i> Firing Range (Zona de Conflito)</li>
-                                <li><i class="fa-solid fa-map"></i> Raid (Geral)</li>
-                            </ul>
+                            <ul class="profile-list margin-top" id="display-favorite-maps"></ul>
                         </div>
                     </div>
 
-                    <!-- 3. Histórico de Rank & Clãs -->
+                    <!-- 3. Ranks & Clãs -->
                     <div class="profile-two-columns margin-bottom-card">
                         <div class="glass-card">
                             <h3><i class="fa-solid fa-trophy highlight"></i> Histórico de Ranks</h3>
-                            <div class="timeline-list margin-top" id="display-rank-history">
-                                <div class="timeline-item">
-                                    <strong>Season 5 2026:</strong> Lendário Top 5000
-                                </div>
-                                <div class="timeline-item">
-                                    <strong>Season 4 2026:</strong> Lendário
-                                </div>
-                            </div>
+                            <div class="timeline-list margin-top" id="display-rank-history"></div>
                         </div>
                         <div class="glass-card">
-                            <h3><i class="fa-solid fa-users-rays highlight"></i> Clã Atual e Antigos</h3>
-                            <div class="timeline-list margin-top" id="display-clan-history">
-                                <div class="timeline-item">
-                                    <span class="highlight">[Atual]</span> <strong>VIKING eSports</strong> (Capitão/Lineup A)
-                                </div>
-                                <div class="timeline-item">
-                                    <span class="text-muted">[Antigo]</span> Alpha Warriors (Sniper)
-                                </div>
-                            </div>
+                            <h3><i class="fa-solid fa-users-rays highlight"></i> Clã Atual e Histórico</h3>
+                            <div class="timeline-list margin-top" id="display-clan-history"></div>
                         </div>
                     </div>
 
                     <!-- 4. Currículo Competitivo -->
                     <div class="glass-card margin-bottom-card">
                         <h3><i class="fa-solid fa-file-contract highlight"></i> Currículo Competitivo</h3>
-                        <p class="margin-top text-secondary" id="display-competitive-cv">
-                            Experiência em campeonatos tier 2/3 de CODM, focado em chamadas táticas (IGL) e suporte avançado em SnD. Disponível para treinos diários no período noturno.
-                        </p>
+                        <p class="margin-top text-secondary" id="display-competitive-cv">Nenhum currículo informado.</p>
                     </div>
 
                     <!-- 5. Conquistas & Medalhas -->
                     <div class="glass-card margin-bottom-card">
                         <div class="card-header-flex">
                             <h3><i class="fa-solid fa-award highlight"></i> Conquistas & Medalhas</h3>
-                            <button id="btn-add-achievement" class="btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar Conquista</button>
+                            <!-- Apenas o Dono pode adicionar -->
+                            <button id="btn-add-achievement" class="btn-primary btn-sm owner-only-btn hidden">
+                                <i class="fa-solid fa-plus"></i> Nova Conquista
+                            </button>
                         </div>
-                        <div id="user-achievements-grid" class="user-trophy-grid"></div>
+                        <div id="user-achievements-grid" class="user-trophy-grid margin-top"></div>
                     </div>
 
-                    <!-- 6. Histórico de Partidas Recentes -->
+                    <!-- 6. Galeria de Fotos e Vídeos / Clips -->
                     <div class="glass-card margin-bottom-card">
-                        <h3><i class="fa-solid fa-clock-rotate-left highlight"></i> Histórico de Partidas Recentes</h3>
-                        <div class="table-container margin-top">
-                            <table class="leaderboard-table">
-                                <thead>
-                                    <tr>
-                                        <th>Modo / Mapa</th>
-                                        <th>Resultado</th>
-                                        <th>K/D Partida</th>
-                                        <th>Pontos</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="display-match-history">
-                                    <tr>
-                                        <td>5v5 SnD - Standoff</td>
-                                        <td><span class="status-badge status-active">VITÓRIA (5x3)</span></td>
-                                        <td>14 / 4 / 2</td>
-                                        <td class="highlight">+42 pts</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="card-header-flex">
+                            <h3><i class="fa-solid fa-photo-film highlight"></i> Galeria & Highlights (Vídeos/Fotos)</h3>
                         </div>
+                        
+                        <!-- Criador de Mídia (Apenas para o Dono) -->
+                        <div id="media-upload-section" class="post-creator margin-top owner-only-btn hidden">
+                            <input type="text" id="media-title" placeholder="Título da jogada / foto (Ex: Ace no Standoff S5)" class="margin-bottom-sm">
+                            <input type="text" id="media-url" placeholder="URL da Foto ou Vídeo do YouTube (Ex: https://...)" class="margin-bottom-sm">
+                            <select id="media-type" class="margin-bottom-sm">
+                                <option value="image">Foto / Imagem</option>
+                                <option value="video">Vídeo / Highlight (Link do YouTube)</option>
+                            </select>
+                            <button id="btn-publish-media" class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar na Galeria</button>
+                        </div>
+
+                        <!-- Grid Onde a Galeria de Mídias Transmitida é Exibida -->
+                        <div id="user-gallery-grid" class="user-gallery-grid margin-top"></div>
                     </div>
 
-                    <!-- 7. Feed Privado do Jogador -->
+                    <!-- 7. Feed de Recados / Posts Públicos do Jogador -->
                     <div class="glass-card">
-                        <h3><i class="fa-solid fa-rss highlight"></i> Minhas Publicações</h3>
-                        <div class="post-creator margin-top">
-                            <textarea id="user-post-input" placeholder="O que você está aprontando no CODM hoje?"></textarea>
-                            <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar no Meu Feed</button>
+                        <h3><i class="fa-solid fa-rss highlight"></i> Publicações do Jogador</h3>
+                        
+                        <!-- Post Creator (Apenas para o Dono) -->
+                        <div id="post-creator-box" class="post-creator margin-top owner-only-btn hidden">
+                            <textarea id="user-post-input" placeholder="Publique uma novidade, recrutamento ou atualização..."></textarea>
+                            <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
                         </div>
+
                         <div id="user-posts-list" class="posts-list margin-top"></div>
                     </div>
 
@@ -190,7 +171,7 @@
         </section>
     </main>
 
-    <!-- Modal Editar Perfil Completo (LinkedIn CODM) -->
+    <!-- Modal Editar Perfil (Apenas para o Proprietário) -->
     <div id="profile-modal" class="modal hidden">
         <div class="modal-content glass-card large-modal">
             <button class="close-profile-modal close-modal-btn">&times;</button>
@@ -267,7 +248,7 @@
                     <textarea id="profile-bio" rows="2" placeholder="Fale brevemente sobre sua trajetória..."></textarea>
                 </div>
 
-                <button type="submit" class="btn-primary btn-full margin-top">Salvar Currículo de Jogador</button>
+                <button type="submit" class="btn-primary btn-full margin-top">Salvar Alterações do Perfil</button>
             </form>
         </div>
     </div>
