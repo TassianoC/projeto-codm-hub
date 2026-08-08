@@ -14,6 +14,10 @@ const firebaseConfig = {
   appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
+const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
+const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+const storage = typeof firebase !== 'undefined' ? firebase.storage() : null; // Add esta linha
+
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
