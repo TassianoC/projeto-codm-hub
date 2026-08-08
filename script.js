@@ -2,7 +2,7 @@
    VIKING eSports Hub - Lógica Principal e Administração Suprema
    ========================================================================== */
 
-// SEU EMAIL DE ADMINISTRADOR / SUPREMO (Ajuste se for diferente)
+// SEU EMAIL DE ADMINISTRADOR / SUPREMO
 const MASTER_ADMIN_EMAIL = "tassianocontinidelima@gmail.com";
 
 const firebaseConfig = {
@@ -31,7 +31,7 @@ let mockLeaderboard = [
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
     { rank: 3, name: "Valhalla_Ghost", kd: "2.75", wins: 245, points: 2150 },
     { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 198, points: 1980 },
-    { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
+    { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 1720 }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -131,7 +131,9 @@ function setupEventListeners() {
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
             const icon = themeBtn.querySelector('i');
-            icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            if (icon) {
+                icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            }
         });
     }
 
@@ -150,14 +152,16 @@ function setupEventListeners() {
             }
         });
     }
-    if (closeAuth) closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
+    if (closeAuth && authModal) closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
 
     if (toggleAuthMode) {
         toggleAuthMode.addEventListener('click', (e) => {
             e.preventDefault();
             isSignUpMode = !isSignUpMode;
-            document.getElementById('modal-title').innerText = isSignUpMode ? 'Cadastrar no Viking Hub' : 'Acessar Viking Hub';
-            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
+            const title = document.getElementById('modal-title');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            if (title) title.innerText = isSignUpMode ? 'Cadastrar no Viking Hub' : 'Acessar Viking Hub';
+            if (submitBtn) submitBtn.innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
             toggleAuthMode.innerText = isSignUpMode ? 'Já tem conta? Entre aqui' : 'Cadastre-se';
         });
     }
@@ -172,7 +176,7 @@ function setupEventListeners() {
     const profileForm = document.getElementById('profile-form');
 
     if (editProfileBtn) editProfileBtn.addEventListener('click', openProfileModal);
-    if (closeProfile) closeProfile.addEventListener('click', () => profileModal.classList.add('hidden'));
+    if (closeProfile && profileModal) closeProfile.addEventListener('click', () => profileModal.classList.add('hidden'));
     if (profileForm) profileForm.addEventListener('submit', handleProfileSave);
 
     // Modal Conquistas
@@ -181,8 +185,8 @@ function setupEventListeners() {
     const closeAch = document.querySelector('.close-achievement-modal');
     const achForm = document.getElementById('achievement-form');
 
-    if (addAchBtn) addAchBtn.addEventListener('click', () => achModal.classList.remove('hidden'));
-    if (closeAch) closeAch.addEventListener('click', () => achModal.classList.add('hidden'));
+    if (addAchBtn && achModal) addAchBtn.addEventListener('click', () => achModal.classList.remove('hidden'));
+    if (closeAch && achModal) closeAch.addEventListener('click', () => achModal.classList.add('hidden'));
     if (achForm) achForm.addEventListener('submit', handleAddAchievement);
 
     // Publicações
@@ -206,15 +210,16 @@ function setupEventListeners() {
                 if (authModal) authModal.classList.remove('hidden');
                 return;
             }
-            document.getElementById('match-mode-selected').value = mode;
+            const matchModeInput = document.getElementById('match-mode-selected');
+            if (matchModeInput) matchModeInput.value = mode;
             if (matchModal) matchModal.classList.remove('hidden');
         });
     });
 
-    if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
+    if (closeMatch && matchModal) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // --- ACESSO DIRETO SEM SENHA AO PAINEL DE ADMINISTRAÇÃO E GOD MODE ---
+    // Acesso Administrativo
     const navAdminLink = document.getElementById('nav-admin-link');
     const adminBtn = document.getElementById('btn-admin');
     const godBtn = document.getElementById('btn-god-panel');
@@ -239,6 +244,8 @@ function setupEventListeners() {
             loadAdminUsersList();
             loadAdminPostsList();
             loadAdminMatchesList();
+        } else {
+            alert('Painel administrativo indisponível nesta página.');
         }
     }
 
@@ -252,7 +259,7 @@ function setupEventListeners() {
     const adminModal = document.getElementById('admin-modal');
     const closeAdmin = document.querySelector('.close-modal-admin');
 
-    if (closeAdmin) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
+    if (closeAdmin && adminModal) closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
     const tabBtns = document.querySelectorAll('#admin-modal .tab-btn');
     tabBtns.forEach(btn => {
@@ -289,7 +296,6 @@ function listenAuthState() {
 
             ensureUserProfileExists(user);
 
-            // VERIFICAÇÃO SE É O EMAIL DA SUA CONTA OU ROLE NO BANCO
             const isUserMaster = user.email && user.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase();
 
             db.collection('users').doc(user.uid).get().then((doc) => {
@@ -300,7 +306,6 @@ function listenAuthState() {
                         auth.signOut();
                         return;
                     }
-                    
                     isAdmin = isUserMaster || (data.role === 'admin' || data.role === 'GOD_ADM' || data.role === 'god');
                 } else {
                     isAdmin = isUserMaster;
@@ -326,7 +331,6 @@ function listenAuthState() {
     });
 }
 
-// Oculta/Exibe todos os controles de Admin no Header / Menu
 function toggleAdminButtonsUI(show) {
     const elementsToToggle = [
         document.getElementById('nav-admin-link'),
@@ -352,8 +356,12 @@ function handleAuthSubmit(e) {
     e.preventDefault();
     if (!auth) return;
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    if (!emailInput || !passwordInput) return;
+
+    const email = emailInput.value;
+    const password = passwordInput.value;
 
     if (isSignUpMode) {
         auth.createUserWithEmailAndPassword(email, password)
@@ -363,13 +371,15 @@ function handleAuthSubmit(e) {
             })
             .then(() => {
                 alert('Conta criada com sucesso!');
-                document.getElementById('auth-modal').classList.add('hidden');
+                const modal = document.getElementById('auth-modal');
+                if (modal) modal.classList.add('hidden');
             })
             .catch((error) => alert('Erro no cadastro: ' + error.message));
     } else {
         auth.signInWithEmailAndPassword(email, password)
             .then(() => {
-                document.getElementById('auth-modal').classList.add('hidden');
+                const modal = document.getElementById('auth-modal');
+                if (modal) modal.classList.add('hidden');
             })
             .catch((error) => alert('Erro no login: ' + error.message));
     }
@@ -436,7 +446,7 @@ function ensureUserProfileExists(user) {
                 gameRole: 'Flex',
                 avatarUrl: user.photoURL || '/img/studio (3).png',
                 bio: 'Novo jogador na comunidade VIKING eSports.',
-                role: 'GOD_ADM',
+                role: 'player',
                 banned: false,
                 
                 kdRatio: '0.00',
@@ -532,7 +542,8 @@ function openProfileModal() {
             if (document.getElementById('profile-clan-history')) document.getElementById('profile-clan-history').value = (d.clanHistory || []).join(', ');
             if (document.getElementById('profile-competitive-cv')) document.getElementById('profile-competitive-cv').value = d.competitiveCv || '';
             
-            document.getElementById('profile-modal').classList.remove('hidden');
+            const modal = document.getElementById('profile-modal');
+            if (modal) modal.classList.remove('hidden');
         }
     });
 }
@@ -541,21 +552,24 @@ function handleProfileSave(e) {
     e.preventDefault();
     if (!currentUser || !db) return;
 
+    const getVal = id => document.getElementById(id) ? document.getElementById(id).value : '';
+
     const updatedData = {
-        nickname: document.getElementById('profile-nickname').value,
-        gameRole: document.getElementById('profile-role').value,
-        avatarUrl: document.getElementById('profile-avatar').value,
-        bio: document.getElementById('profile-bio').value,
-        favoriteWeapons: document.getElementById('profile-favorite-weapons').value.split(',').map(s => s.trim()).filter(Boolean),
-        favoriteMaps: document.getElementById('profile-favorite-maps').value.split(',').map(s => s.trim()).filter(Boolean),
-        clanHistory: document.getElementById('profile-clan-history').value.split(',').map(s => s.trim()).filter(Boolean),
-        competitiveCv: document.getElementById('profile-competitive-cv').value,
+        nickname: getVal('profile-nickname'),
+        gameRole: getVal('profile-role'),
+        avatarUrl: getVal('profile-avatar'),
+        bio: getVal('profile-bio'),
+        favoriteWeapons: getVal('profile-favorite-weapons').split(',').map(s => s.trim()).filter(Boolean),
+        favoriteMaps: getVal('profile-favorite-maps').split(',').map(s => s.trim()).filter(Boolean),
+        clanHistory: getVal('profile-clan-history').split(',').map(s => s.trim()).filter(Boolean),
+        competitiveCv: getVal('profile-competitive-cv'),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     db.collection('users').doc(currentUser.uid).update(updatedData).then(() => {
         alert('Seu perfil foi atualizado com sucesso!');
-        document.getElementById('profile-modal').classList.add('hidden');
+        const modal = document.getElementById('profile-modal');
+        if (modal) modal.classList.add('hidden');
         loadUserProfileData();
     }).catch(err => {
         alert('Erro ao salvar perfil: ' + err.message);
@@ -565,7 +579,7 @@ function handleProfileSave(e) {
 /* --- GALERIA & FEED DA COMUNIDADE --- */
 function listenUserGallery(targetUid) {
     const galleryGrid = document.getElementById('user-gallery-grid');
-    if (!galleryGrid) return;
+    if (!galleryGrid || !db) return;
 
     db.collection('users').doc(targetUid).collection('gallery')
       .orderBy('createdAt', 'desc')
@@ -581,7 +595,7 @@ function listenUserGallery(targetUid) {
               let mediaHTML = '';
 
               if (media.type === 'video') {
-                  let embedUrl = media.url.replace("watch?v=", "embed/");
+                  let embedUrl = media.url ? media.url.replace("watch?v=", "embed/") : '';
                   mediaHTML = `
                       <div class="gallery-item glass-card">
                           <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
@@ -603,7 +617,7 @@ function listenUserGallery(targetUid) {
 
 function listenUserAchievements(targetUid) {
     const grid = document.getElementById('user-achievements-grid');
-    if (!grid) return;
+    if (!grid || !db) return;
 
     db.collection('users').doc(targetUid).collection('achievements')
       .orderBy('createdAt', 'desc')
@@ -628,7 +642,7 @@ function listenUserAchievements(targetUid) {
 
 function handleAddAchievement(e) {
     e.preventDefault();
-    if (!currentUser) return;
+    if (!currentUser || !db) return;
 
     const title = document.getElementById('ach-title').value;
     const desc = document.getElementById('ach-desc').value;
@@ -641,14 +655,16 @@ function handleAddAchievement(e) {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         alert('Conquista adicionada!');
-        document.getElementById('achievement-modal').classList.add('hidden');
-        document.getElementById('achievement-form').reset();
+        const modal = document.getElementById('achievement-modal');
+        if (modal) modal.classList.add('hidden');
+        const form = document.getElementById('achievement-form');
+        if (form) form.reset();
     });
 }
 
 function listenUserFeed(targetUid) {
     const list = document.getElementById('user-posts-list');
-    if (!list) return;
+    if (!list || !db) return;
 
     db.collection('users').doc(targetUid).collection('posts')
       .orderBy('createdAt', 'desc')
@@ -672,20 +688,22 @@ function listenUserFeed(targetUid) {
 }
 
 function handleNewUserPost() {
-    if (!currentUser) return alert('Você precisa estar logado.');
-    const text = document.getElementById('user-post-input').value.trim();
+    if (!currentUser || !db) return alert('Você precisa estar logado.');
+    const input = document.getElementById('user-post-input');
+    if (!input) return;
+    const text = input.value.trim();
     if (!text) return;
 
     db.collection('users').doc(currentUser.uid).collection('posts').add({
         content: text,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        document.getElementById('user-post-input').value = '';
+        input.value = '';
     });
 }
 
 function handleNewGlobalPost() {
-    if (!currentUser) { alert('Faça login para publicar!'); return; }
+    if (!currentUser || !db) { alert('Faça login para publicar!'); return; }
     const input = document.getElementById('post-input');
     if (!input) return;
     const content = input.value.trim();
@@ -703,7 +721,7 @@ function handleNewGlobalPost() {
 
 function listenGlobalFeed() {
     const postsContainer = document.getElementById('posts-container');
-    if (!postsContainer) return;
+    if (!postsContainer || !db) return;
 
     db.collection('posts').orderBy('timestamp', 'desc').limit(20)
         .onSnapshot((snapshot) => {
@@ -739,7 +757,7 @@ function listenGlobalFeed() {
 }
 
 function toggleLikePost(postId) {
-    if (!currentUser) { alert('Faça login para curtir!'); return; }
+    if (!currentUser || !db) { alert('Faça login para curtir!'); return; }
     const postRef = db.collection('posts').doc(postId);
     postRef.get().then(doc => {
         if (doc.exists) {
@@ -765,17 +783,22 @@ function handleMatchSubscription(e) {
     if (!currentUser || !db) return;
 
     const mode = document.getElementById('match-mode-selected').value;
+    const teamName = document.getElementById('match-team-name') ? document.getElementById('match-team-name').value : '';
+    const whatsapp = document.getElementById('match-whatsapp') ? document.getElementById('match-whatsapp').value : '';
+
     db.collection('matches').add({
         userId: currentUser.uid,
         userEmail: currentUser.email,
         mode: mode,
-        teamName: document.getElementById('match-team-name').value,
-        whatsapp: document.getElementById('match-whatsapp').value,
+        teamName: teamName,
+        whatsapp: whatsapp,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         alert(`Inscrição confirmada para ${mode}! O seu confronto foi agendado com sucesso.`);
-        document.getElementById('match-modal').classList.add('hidden');
-        document.getElementById('match-form').reset();
+        const modal = document.getElementById('match-modal');
+        if (modal) modal.classList.add('hidden');
+        const form = document.getElementById('match-form');
+        if (form) form.reset();
     }).catch(err => alert('Erro na inscrição: ' + err.message));
 }
 
