@@ -25,12 +25,12 @@
             <a href="ranking.html">Ranking</a>
             <a href="comunidade.html" class="highlight-link">Comunidade</a>
             <a href="perfil.html" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
-            <a href="#" id="nav-admin-link" class="highlight-link" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
+            <a href="#" id="nav-admin-link" class="highlight-link hidden" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
         </nav>
         <div class="nav-actions">
             <button id="theme-toggle" class="btn-icon" title="Alternar Tema"><i class="fa-solid fa-moon"></i></button>
             <button id="btn-login" class="btn-primary"><i class="fa-solid fa-user"></i> <span id="auth-btn-text">Entrar</span></button>
-            <button id="btn-admin" class="btn-secondary"><i class="fa-solid fa-shield-halved"></i> Painel ADM</button>
+            <button id="btn-admin" class="btn-secondary hidden"><i class="fa-solid fa-shield-halved"></i> Painel ADM</button>
         </div>
     </header>
 
@@ -46,6 +46,28 @@
             </div>
         </section>
     </main>
+
+    <!-- Modal de Login/Cadastro -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <button class="close-modal-btn">&times;</button>
+            <h2 id="modal-title">Acessar Viking Hub</h2>
+            <form id="auth-form">
+                <div class="input-group">
+                    <label>E-mail</label>
+                    <input type="email" id="email" required placeholder="seuemail@codm.com">
+                </div>
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" id="password" required placeholder="******">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
+            </form>
+            <p style="margin-top: 15px; text-align: center;">
+                <a href="#" id="toggle-auth-mode" style="color: var(--gold-primary);">Cadastre-se</a>
+            </p>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
