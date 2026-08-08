@@ -830,7 +830,9 @@ footer {
     .stat-card { min-width: 130px; padding: 12px; }
     .admin-feed-item { flex-direction: column; align-items: flex-start; }
 }
-/* Fundo com iluminação de fogo/brasa */
+/* ==========================================
+   ILUMINAÇÃO DE EXPLOSÃO & IMPACTO DA HERO
+   ========================================== */
 .hero-section {
     position: relative;
     width: 100%;
@@ -839,29 +841,60 @@ footer {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    /* Gradiente escuro com centro avermelhado estilo chama */
-    background: radial-gradient(circle at bottom, #2b0800 0%, #0d0e15 80%);
+    background: #08090d;
 }
 
-/* Destaque das palavras em Laranja/Fogo */
-.glow-text .highlight {
-    color: #ff5500;
-    text-shadow: 0 0 20px rgba(255, 85, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.5);
+/* Camada do Flash de Explosão */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 68, 0, 0.25) 0%, rgba(255, 170, 0, 0.08) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+    animation: flashExplosion 2.5s infinite alternate ease-in-out;
 }
 
-/* Botão em estilo Chamas */
+/* Animação que simula flashes de tiros/explosão de fundo */
+@keyframes flashExplosion {
+    0% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    15% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    20% {
+        opacity: 0.4;
+    }
+    35% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+}
+
+/* Efeito de choque visual no botão */
 .glow-button {
-    background: linear-gradient(45deg, #ff3b00, #ff8800);
+    background: linear-gradient(135deg, #ff0000, #ff6600);
     color: #fff;
     padding: 14px 32px;
-    border-radius: 8px;
-    font-weight: bold;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    box-shadow: 0 0 20px rgba(255, 68, 0, 0.6);
-    transition: all 0.3s ease;
+    border-radius: 6px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 25px rgba(255, 51, 0, 0.7);
+    transition: all 0.2s ease;
 }
 
 .glow-button:hover {
-    transform: translateY(-3px) scale(1.04);
-    box-shadow: 0 0 35px rgba(255, 102, 0, 0.9);
+    transform: scale(1.05);
+    box-shadow: 0 0 45px rgba(255, 102, 0, 1), 0 0 10px #ffffff;
 }
