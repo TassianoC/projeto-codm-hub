@@ -1002,3 +1002,185 @@ footer {
     font-size: 13px;
     color: var(--gold-primary);
 }
+/* ==========================================================================
+   PERFIL ESTILO INSTAGRAM
+   ========================================================================== */
+.insta-profile-card {
+    padding: 0 !important;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-card);
+    margin-bottom: 30px;
+}
+
+.insta-cover {
+    height: 140px;
+    background: linear-gradient(135deg, #111111 0%, #221a00 50%, #d4af37 100%);
+    border-bottom: 1px solid var(--border-card);
+}
+
+.insta-header-content {
+    padding: 0 30px 20px 30px;
+    display: flex;
+    gap: 25px;
+    margin-top: -50px;
+    align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+    .insta-header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+.insta-avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.insta-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid #000000;
+    box-shadow: 0 0 0 2px var(--gold-primary), 0 8px 20px rgba(0, 0, 0, 0.8);
+    object-fit: cover;
+    background: #000;
+}
+
+.insta-online-dot {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 14px;
+    height: 14px;
+    background: #10b981;
+    border: 2px solid #000000;
+    border-radius: 50%;
+}
+
+.insta-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 10px;
+}
+
+.insta-top-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.insta-username {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ffffff;
+}
+
+.insta-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .insta-actions { margin-left: 0; }
+}
+
+.insta-stats-row {
+    display: flex;
+    gap: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .insta-stats-row { justify-content: center; width: 100%; }
+}
+
+.insta-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.insta-stat-num {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--gold-primary);
+}
+
+.insta-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rank-badge-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.insta-bio-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Abas Instagram */
+.insta-tabs {
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid var(--border-card);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.insta-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 14px 24px;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 2px solid transparent;
+}
+
+.insta-tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.insta-tab-btn.active {
+    color: var(--gold-primary);
+    border-top-color: var(--gold-primary);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.insta-tab-content {
+    display: none;
+}
+
+.insta-tab-content.active {
+    display: block;
+}
