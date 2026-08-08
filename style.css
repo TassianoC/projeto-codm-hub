@@ -48,22 +48,6 @@ body.light-theme {
     --gold-border: rgba(184, 134, 11, 0.4);
 }
 
-body.maintenance-mode::before {
-    content: "⚠️ MODO MANUTENÇÃO ATIVO - ACESSO RESTRITO A ADMINISTRADORES ⚠️";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: #dc2626;
-    color: #ffffff;
-    text-align: center;
-    font-size: 13px;
-    font-weight: bold;
-    padding: 6px;
-    z-index: 10000;
-    letter-spacing: 1px;
-}
-
 /* ==========================================================================
    RESET E BASE
    ========================================================================== */
@@ -418,58 +402,204 @@ button {
 .hero-cta { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
 
 /* ==========================================================================
-   PERFIL DO ATLETA
+   PERFIL ESTILO INSTAGRAM
    ========================================================================== */
 .profile-page { padding-top: 110px; }
-.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 30px; }
-.profile-sidebar { display: flex; flex-direction: column; align-items: center; text-align: center; }
 
-.avatar-container { 
-    width: 120px; 
-    height: 120px; 
-    border-radius: 50%; 
-    border: 1px solid var(--gold-primary); 
-    box-shadow: 0 0 15px var(--gold-glow); 
-    overflow: hidden; 
-    margin-bottom: 15px; 
-    background: #000000; 
+.insta-profile-card {
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.insta-cover {
+    height: 140px;
+    background: linear-gradient(135deg, #1f1c2c 0%, #928dab 100%);
+    border-bottom: 1px solid var(--border-card);
+}
+
+.insta-header-content {
+    padding: 0 30px 20px 30px;
+    display: flex;
+    gap: 30px;
+    position: relative;
+}
+
+.insta-avatar-wrapper {
+    position: relative;
+    margin-top: -60px;
+    flex-shrink: 0;
+}
+
+.insta-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-main);
+    background: var(--bg-main);
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.insta-online-dot {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 16px;
+    height: 16px;
+    background-color: #22c55e;
+    border: 3px solid var(--bg-main);
+    border-radius: 50%;
+}
+
+.insta-user-info {
+    flex-grow: 1;
+    padding-top: 15px;
+}
+
+.insta-top-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.insta-username {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.insta-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.insta-stats-row {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 15px;
+}
+
+.insta-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.insta-stat-num {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.insta-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.insta-bio-box {
+    margin-top: 10px;
+}
+
+.rank-badge-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.insta-bio-text {
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+/* ABAS DO PERFIL */
+.insta-tabs {
+    display: flex;
+    border-top: 1px solid var(--border-card);
+    background: rgba(0,0,0,0.2);
+}
+
+.insta-tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    transition: var(--transition-fast);
+    border-bottom: 2px solid transparent;
 }
 
-.avatar-container img { width: 100%; height: 100%; object-fit: cover; }
-
-.role-badge { 
-    background: transparent; 
-    border: 1px solid var(--gold-primary); 
-    color: var(--gold-primary); 
-    font-family: var(--font-heading); 
-    font-size: 11px; 
-    font-weight: 700; 
-    padding: 2px 10px; 
-    border-radius: 20px; 
-    margin: 8px 0 15px 0; 
-    letter-spacing: 1px; 
+.insta-tab-btn:hover {
+    color: var(--text-primary);
 }
 
-.user-bio { font-size: 15px; color: var(--text-secondary); word-break: break-word; }
-.card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.user-trophy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-
-.user-trophy-card { 
-    background: rgba(0, 0, 0, 0.4); 
-    border: 1px solid var(--border-card); 
-    border-radius: var(--radius-sm); 
-    padding: 15px; 
-    text-align: center; 
-    transition: var(--transition-fast); 
+.insta-tab-btn.active {
+    color: var(--gold-primary);
+    border-bottom-color: var(--gold-primary);
+    background: rgba(212, 175, 55, 0.05);
 }
 
-.user-trophy-card:hover { border-color: var(--gold-primary); transform: translateY(-2px); }
-.user-trophy-card i { font-size: 28px; color: var(--gold-primary); margin-bottom: 8px; }
-.user-trophy-card h4 { font-size: 15px; margin-bottom: 4px; }
-.user-trophy-card p { font-size: 12px; color: var(--text-muted); }
+.insta-tab-content {
+    display: none;
+}
+
+.insta-tab-content.active {
+    display: block;
+}
+
+.user-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.gallery-item {
+    position: relative;
+    padding: 10px;
+    text-align: center;
+}
+
+.gallery-img, .gallery-item iframe {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+}
+
+.media-title {
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--text-secondary);
+}
+
+.profile-two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.profile-list, .timeline-list {
+    list-style: none;
+}
+
+.profile-list li, .timeline-item {
+    font-size: 15px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
 /* ==========================================================================
    SEÇÕES GERAIS, REGRAS & MODOS
@@ -571,6 +701,32 @@ button {
 /* ==========================================================================
    PAINEL ADMIN & MODERAÇÃO
    ========================================================================== */
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-card);
+    padding-bottom: 10px;
+}
+
+.admin-tabs .tab-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    transition: var(--transition-fast);
+}
+
+.admin-tabs .tab-btn.active {
+    background: var(--gold-primary);
+    color: #000;
+    font-weight: bold;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; letter-spacing: 1px; }
 .status-active { background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); }
 .status-banned { background: rgba(220, 38, 38, 0.2); color: var(--danger-red); border: 1px solid var(--danger-red); }
@@ -624,563 +780,29 @@ button {
     border: 1px solid var(--border-card); 
     padding: 10px 14px; 
     border-radius: var(--radius-sm); 
-    color: var(--text-primary); 
-    font-size: 15px; 
-    font-family: var(--font-body); 
-}
-
-.input-group input:focus, .custom-select:focus { 
-    border-color: var(--gold-primary); 
-    outline: none; 
-    box-shadow: 0 0 10px var(--gold-glow); 
-}
-
-.custom-select option { background: #000000; color: #ffffff; }
-
-.modal-footer { margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-secondary); }
-.modal-footer a { color: var(--gold-primary); font-weight: 700; }
-
-.admin-tabs { display: flex; gap: 8px; margin: 18px 0; border-bottom: 1px solid var(--border-card); padding-bottom: 10px; flex-wrap: wrap; }
-.tab-btn { background: transparent; color: var(--text-muted); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; transition: var(--transition-fast); }
-.tab-btn.active { background: #ffffff; color: #000000; font-weight: 800; }
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #000000; }
-::-webkit-scrollbar-thumb { background: #222222; border-radius: 4px; border: 1px solid var(--border-card); }
-::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
-
-/* ==========================================================================
-   FOOTER MONOCROMÁTICO
-   ========================================================================== */
-footer { 
-    text-align: center; 
-    padding: 30px; 
-    border-top: 1px solid var(--border-card); 
-    color: var(--text-muted); 
-    font-size: 14px; 
-    background: #000000; 
-    letter-spacing: 1px; 
-}
-
-/* ==========================================================================
-   GOD MODE ADM PANEL
-   ========================================================================== */
-.btn-god-trigger {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background: #000000;
-    color: var(--gold-primary);
-    border: 1px solid var(--gold-primary);
-    padding: 10px 18px;
-    border-radius: 50px;
-    font-weight: 800;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 0 15px var(--gold-glow);
-    z-index: 1500;
-    transition: var(--transition-normal);
-}
-
-.btn-god-trigger:hover {
-    background: var(--gold-primary);
-    color: #000000;
-    box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
-    transform: translateY(-3px) scale(1.05);
-}
-
-.god-card {
-    border: 1px solid var(--gold-primary) !important;
-    box-shadow: 0 0 40px var(--gold-glow), inset 0 0 15px rgba(212, 175, 55, 0.05) !important;
-}
-
-.god-header {
-    text-align: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border-card);
-}
-
-.god-header h2 {
-    font-size: 26px;
-    color: #ffffff;
-    margin-top: 6px;
-}
-
-.god-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: var(--gold-primary);
-    background: rgba(212, 175, 55, 0.08);
-    border: 1px solid var(--gold-border);
-    padding: 3px 12px;
-    border-radius: 20px;
-}
-
-.pulse-dot-gold {
-    width: 6px;
-    height: 6px;
-    background: var(--gold-primary);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--gold-primary);
-    animation: pulse 1.5s infinite;
-}
-
-.god-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.god-stat-box {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    text-align: center;
-}
-
-.stat-label {
-    display: block;
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: var(--font-heading);
-}
-
-.stat-value {
-    font-family: var(--font-heading);
-    font-size: 22px;
-    font-weight: 800;
-    color: #ffffff;
-}
-
-.stat-value.danger { color: var(--danger-red); }
-.stat-value.highlight { color: var(--gold-primary); }
-.stat-value.online { color: #10b981; }
-
-.admin-toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.admin-toolbar input {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    color: #ffffff;
+    color: var(--text-primary);
     font-family: var(--font-body);
-}
-
-.god-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-}
-
-.god-action-card {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-card);
-    padding: 20px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.god-action-card h4 {
-    color: var(--gold-primary);
     font-size: 16px;
-    margin-bottom: 8px;
+    outline: none;
 }
 
-.god-action-card p {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 15px;
-}
-
-.border-danger {
-    border-color: rgba(220, 38, 38, 0.4);
-}
-.border-danger h4 { color: var(--danger-red); }
-
-/* ==========================================================================
-   RESPONSIVIDADE
-   ========================================================================== */
-@media (max-width: 900px) {
-    .profile-layout { grid-template-columns: 1fr; }
-    .hero-content h1 { font-size: 38px; }
-    .nav-links { display: none; }
-    .hero-stats { gap: 12px; }
-    .stat-card { min-width: 130px; padding: 12px; }
-    .admin-feed-item { flex-direction: column; align-items: flex-start; }
-}
-/* ==========================================================================
-   ESTILOS EXPANDIDOS - LINKEDIN DO CODM
-   ========================================================================== */
-
-.profile-two-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-@media (max-width: 768px) {
-    .profile-layout { grid-template-columns: 1fr; }
-    .profile-two-columns { grid-template-columns: 1fr; }
-}
-
-.stats-overview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 15px;
-    text-align: center;
-}
-
-.stat-box {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-card);
-    padding: 15px 10px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.stat-number {
-    font-family: var(--font-heading);
-    font-size: 26px;
-    font-weight: 800;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.rank-badge-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(212, 175, 55, 0.08);
-    border: 1px solid var(--gold-border);
-    padding: 10px 16px;
-    border-radius: var(--radius-md);
-    width: 100%;
-}
-
-.rank-badge-box i {
-    font-size: 24px;
-}
-
-.profile-list {
-    list-style: none;
-    padding: 0;
-}
-
-.profile-list li {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.profile-list li i {
-    color: var(--gold-primary);
-}
-
-.timeline-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.timeline-item {
-    background: rgba(255, 255, 255, 0.02);
-    border-left: 3px solid var(--gold-primary);
-    padding: 8px 12px;
-    font-size: 14px;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.large-modal {
-    max-width: 800px;
-    max-height: 85vh;
-    overflow-y: auto;
+.input-group input:focus, .custom-select:focus {
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 10px var(--gold-glow);
 }
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
 }
 
-.status-active {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.status-badge {
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
-}
-/* ==========================================================================
-   ESTILOS DA GALERIA PÚBLICA DE FOTOS/VÍDEOS
-   ========================================================================== */
-
-.user-gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 15px;
-}
-
-.gallery-item {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-}
-
-.gallery-img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    transition: transform 0.3s ease;
-}
-
-.gallery-img:hover {
-    transform: scale(1.03);
-}
-
-.gallery-item iframe {
-    width: 100%;
-    height: 160px;
-    border-radius: var(--radius-sm);
-}
-
-.media-title {
-    font-size: 13px;
-    font-weight: 600;
-    margin-top: 8px;
-    text-align: center;
-    color: var(--text-primary);
-}
-
-.margin-bottom-sm {
-    margin-bottom: 8px;
-    width: 100%;
-}
-.info-banner {
-    background: rgba(255, 215, 0, 0.08);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    font-size: 13px;
-    color: var(--gold-primary);
-}
-/* ==========================================================================
-   PERFIL ESTILO INSTAGRAM
-   ========================================================================== */
-.insta-profile-card {
-    padding: 0 !important;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid var(--border-card);
-    margin-bottom: 30px;
-}
-
-.insta-cover {
-    height: 140px;
-    background: linear-gradient(135deg, #111111 0%, #221a00 50%, #d4af37 100%);
-    border-bottom: 1px solid var(--border-card);
-}
-
-.insta-header-content {
-    padding: 0 30px 20px 30px;
-    display: flex;
-    gap: 25px;
-    margin-top: -50px;
-    align-items: flex-start;
-}
-
 @media (max-width: 768px) {
-    .insta-header-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-}
-
-.insta-avatar-wrapper {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    flex-shrink: 0;
-}
-
-.insta-avatar {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 3px solid #000000;
-    box-shadow: 0 0 0 2px var(--gold-primary), 0 8px 20px rgba(0, 0, 0, 0.8);
-    object-fit: cover;
-    background: #000;
-}
-
-.insta-online-dot {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    width: 14px;
-    height: 14px;
-    background: #10b981;
-    border: 2px solid #000000;
-    border-radius: 50%;
-}
-
-.insta-user-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-top: 10px;
-}
-
-.insta-top-row {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.insta-username {
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: #ffffff;
-}
-
-.insta-actions {
-    display: flex;
-    gap: 8px;
-    margin-left: auto;
-}
-
-@media (max-width: 768px) {
-    .insta-actions { margin-left: 0; }
-}
-
-.insta-stats-row {
-    display: flex;
-    gap: 30px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 10px 0;
-}
-
-@media (max-width: 768px) {
-    .insta-stats-row { justify-content: center; width: 100%; }
-}
-
-.insta-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.insta-stat-num {
-    font-family: var(--font-heading);
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--gold-primary);
-}
-
-.insta-stat-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.rank-badge-inline {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-
-.insta-bio-text {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-/* Abas Instagram */
-.insta-tabs {
-    display: flex;
-    justify-content: center;
-    border-top: 1px solid var(--border-card);
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.insta-tab-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: 14px 24px;
-    font-family: var(--font-heading);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-top: 2px solid transparent;
-}
-
-.insta-tab-btn:hover {
-    color: var(--text-primary);
-}
-
-.insta-tab-btn.active {
-    color: var(--gold-primary);
-    border-top-color: var(--gold-primary);
-    background: rgba(212, 175, 55, 0.05);
-}
-
-.insta-tab-content {
-    display: none;
-}
-
-.insta-tab-content.active {
-    display: block;
+    .navbar { padding: 0 3%; }
+    .nav-links { display: none; }
+    .profile-two-columns { grid-template-columns: 1fr; }
+    .insta-header-content { flex-direction: column; align-items: center; text-align: center; }
+    .insta-avatar-wrapper { margin-top: -50px; }
+    .insta-actions { margin-left: 0; justify-content: center; width: 100%; }
+    .insta-stats-row { justify-content: center; }
 }
