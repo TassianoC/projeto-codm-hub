@@ -944,6 +944,7 @@ function switchProfileTab(tabId) {
         window.event.currentTarget.classList.add('active');
     }
 }
+
 // Inicializar Firebase Storage
 const storage = typeof firebase !== 'undefined' ? firebase.storage() : null;
 
