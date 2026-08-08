@@ -1,3 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0D0F12;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
