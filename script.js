@@ -979,55 +979,54 @@ function godToggleMaintenance() {
     alert(`[PODER DE DEUS]: Modo de Manutenção de Emergência ${isMaint ? 'ATIVADO' : 'DESATIVADO'}!`);
 }
 // ==========================================
-// CONFIGURAÇÃO DO PARTICLES.JS (EFEITO FOGO/FAÍSCAS)
+// EFEITO PARTICULAS: TIROS E ESTILHAÇOS DE EXPLOSÃO
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('particles-js')) {
         particlesJS('particles-js', {
             "particles": {
                 "number": {
-                    "value": 110, // Quantidade de faíscas
+                    "value": 90, // Quantidade de projéteis/fagulhas na tela
                     "density": { "enable": true, "value_area": 800 }
                 },
                 "color": {
-                    // Gradiente de cores de fogo e faíscas
-                    "value": ["#ff4500", "#ff8c00", "#ffd700", "#ff0000"] 
+                    // Cores de tiros/balas traçantes e brasa (branco incandescente, amarelo, laranja, vermelho)
+                    "value": ["#ffffff", "#ffee55", "#ff5500", "#ff0000"]
                 },
                 "shape": {
                     "type": "circle"
                 },
                 "opacity": {
-                    "value": 0.8,
-                    "random": true, // Faz algumas faíscas piscarem mais que outras
+                    "value": 0.9,
+                    "random": true,
                     "anim": {
                         "enable": true,
-                        "speed": 1,
-                        "opacity_min": 0.2,
+                        "speed": 8, // Pisca rápido igual estilhaço de explosão
+                        "opacity_min": 0.1,
                         "sync": false
                     }
                 },
                 "size": {
-                    "value": 3.5,
-                    "random": true, // Tamanhos variados para dar profundidade
+                    "value": 3,
+                    "random": true,
                     "anim": {
                         "enable": true,
-                        "speed": 3,
-                        "size_min": 1,
+                        "speed": 5,
+                        "size_min": 0.5,
                         "sync": false
                     }
                 },
                 "line_linked": {
-                    "enable": false // Desativamos as linhas para parecer faíscas soltas
+                    "enable": false // Sem teias entre as partículas
                 },
                 "move": {
                     "enable": true,
-                    "speed": 4, // Velocidade de subida das faíscas
-                    "direction": "top", // Faz as partículas subirem como brasa de fogo
+                    "speed": 9, // Velocidade alta estilo tiro/projétil
+                    "direction": "none", // Movimento dinâmico em todas as direções
                     "random": true,
-                    "straight": false,
+                    "straight": false, // Pequeno desvio de trajetória
                     "out_mode": "out",
-                    "bounce": false,
-                    "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 }
+                    "bounce": false
                 }
             },
             "interactivity": {
@@ -1035,22 +1034,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 "events": {
                     "onhover": {
                         "enable": true,
-                        "mode": "bubble" // Aumenta levemente as faíscas onde o mouse passa
+                        "mode": "repulse" // Afasta as partículas rápido quando o mouse passa
                     },
                     "onclick": {
                         "enable": true,
-                        "mode": "push" // Dispara um estouro de faíscas ao clicar
+                        "mode": "push" // Dispara uma explosão instantânea de estilhaços
                     }
                 },
                 "modes": {
-                    "bubble": {
-                        "distance": 200,
-                        "size": 6,
-                        "duration": 0.3,
-                        "opacity": 1
+                    "repulse": {
+                        "distance": 120,
+                        "duration": 0.2
                     },
                     "push": {
-                        "particles_nb": 15 // Quantidade de faíscas geradas no clique
+                        "particles_nb": 25 // Quantidade de faíscas disparadas na explosão do clique
                     }
                 }
             },
