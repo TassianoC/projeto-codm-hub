@@ -276,7 +276,7 @@ function setupEventListeners() {
 }
 
 /* ==========================================================================
-   Perfil do Jogador / Guerreiro
+   Perfil do Jogador / Guerreiro (LinkedIn do CODM)
    ========================================================================== */
 function loadUserProfileData() {
     if (!currentUser || !db) return;
@@ -284,20 +284,74 @@ function loadUserProfileData() {
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
-            const nicknameEl = document.getElementById('display-nickname');
-            const roleEl = document.getElementById('display-role');
-            const bioEl = document.getElementById('display-bio');
+            
+            // Dados Basicos
+            setElementText('display-nickname', data.nickname || currentUser.email.split('@')[0]);
+            setElementText('display-role', data.gameRole || 'Sniper');
+            setElementText('display-bio', data.bio || 'Sem biografia informada.');
+            setElementText('display-current-rank', data.currentRank || 'Lendário');
+            
             const avatarImg = document.getElementById('display-avatar');
-
-            if (nicknameEl) nicknameEl.innerText = data.nickname || currentUser.email.split('@')[0];
-            if (roleEl) roleEl.innerText = data.gameRole || 'Sniper';
-            if (bioEl) bioEl.innerText = data.bio || 'Sem biografia informada.';
             if (avatarImg && data.avatarUrl) avatarImg.src = data.avatarUrl;
+
+            // Stats
+            setElementText('display-kd', data.kdRatio || '2.00');
+            setElementText('display-total-kills', data.totalKills || '0');
+            setElementText('display-winrate', data.winRate || '50%');
+            setElementText('display-mvp-count', data.mvpCount || '0');
+
+            // Armas Favoritas
+            renderList('display-favorite-weapons', data.favoriteWeapons, 'fa-crosshairs');
+            
+            // Mapas Favoritos
+            renderList('display-favorite-maps', data.favoriteMaps, 'fa-map');
+
+            // Histórico de Ranks
+            renderTimeline('display-rank-history', data.rankHistory);
+
+            // Clãs
+            renderTimeline('display-clan-history', data.clanHistory);
+
+            // Currículo Competitivo
+            setElementText('display-competitive-cv', data.competitiveCv || 'Nenhum currículo cadastrado ainda.');
         }
     });
 
     listenUserAchievements();
     listenUserFeed();
+}
+
+function setElementText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+}
+
+function renderList(containerId, itemsString, defaultIcon) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!itemsString) {
+        container.innerHTML = '<li>Nenhum item informado.</li>';
+        return;
+    }
+    const items = itemsString.split(',');
+    items.forEach(item => {
+        container.innerHTML += `<li><i class="fa-solid ${defaultIcon}"></i> ${item.trim()}</li>`;
+    });
+}
+
+function renderTimeline(containerId, itemsString) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!itemsString) {
+        container.innerHTML = '<div class="timeline-item">Nenhum registro informado.</div>';
+        return;
+    }
+    const items = itemsString.split(',');
+    items.forEach(item => {
+        container.innerHTML += `<div class="timeline-item">${item.trim()}</div>`;
+    });
 }
 
 function openProfileModal() {
@@ -311,6 +365,18 @@ function openProfileModal() {
             document.getElementById('profile-role').value = data.gameRole || 'Sniper';
             document.getElementById('profile-bio').value = data.bio || '';
             document.getElementById('profile-avatar').value = data.avatarUrl || '';
+            
+            document.getElementById('profile-current-rank').value = data.currentRank || '';
+            document.getElementById('profile-kd').value = data.kdRatio || '';
+            document.getElementById('profile-total-kills').value = data.totalKills || '';
+            document.getElementById('profile-winrate').value = data.winRate || '';
+            document.getElementById('profile-mvp-count').value = data.mvpCount || '';
+            
+            document.getElementById('profile-favorite-weapons').value = data.favoriteWeapons || '';
+            document.getElementById('profile-favorite-maps').value = data.favoriteMaps || '';
+            document.getElementById('profile-rank-history').value = data.rankHistory || '';
+            document.getElementById('profile-clan-history').value = data.clanHistory || '';
+            document.getElementById('profile-competitive-cv').value = data.competitiveCv || '';
         }
         profileModal.classList.remove('hidden');
     });
@@ -325,100 +391,25 @@ function handleProfileSave(e) {
         gameRole: document.getElementById('profile-role').value,
         bio: document.getElementById('profile-bio').value,
         avatarUrl: document.getElementById('profile-avatar').value,
+        
+        currentRank: document.getElementById('profile-current-rank').value,
+        kdRatio: document.getElementById('profile-kd').value,
+        totalKills: document.getElementById('profile-total-kills').value,
+        winRate: document.getElementById('profile-winrate').value,
+        mvpCount: document.getElementById('profile-mvp-count').value,
+        
+        favoriteWeapons: document.getElementById('profile-favorite-weapons').value,
+        favoriteMaps: document.getElementById('profile-favorite-maps').value,
+        rankHistory: document.getElementById('profile-rank-history').value,
+        clanHistory: document.getElementById('profile-clan-history').value,
+        competitiveCv: document.getElementById('profile-competitive-cv').value,
+        
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(() => {
-        alert('Perfil atualizado com sucesso!');
+        alert('Perfil e Currículo do Jogador salvos com sucesso!');
         document.getElementById('profile-modal').classList.add('hidden');
         loadUserProfileData();
     }).catch(err => alert('Erro ao salvar perfil: ' + err.message));
-}
-
-function handleAddAchievement(e) {
-    e.preventDefault();
-    if (!currentUser || !db) return;
-
-    db.collection('users').doc(currentUser.uid).collection('achievements').add({
-        title: document.getElementById('ach-title').value,
-        desc: document.getElementById('ach-desc').value,
-        icon: document.getElementById('ach-icon').value,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        alert('Conquista adicionada!');
-        document.getElementById('achievement-modal').classList.add('hidden');
-        document.getElementById('achievement-form').reset();
-    }).catch(err => alert('Erro: ' + err.message));
-}
-
-function listenUserAchievements() {
-    const container = document.getElementById('user-achievements-grid');
-    if (!container || !currentUser || !db) return;
-
-    db.collection('users').doc(currentUser.uid).collection('achievements').orderBy('createdAt', 'desc')
-        .onSnapshot(snapshot => {
-            container.innerHTML = '';
-            if (snapshot.empty) {
-                container.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nenhuma conquista cadastrada ainda.</p>';
-                return;
-            }
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                container.innerHTML += `
-                    <div class="user-trophy-card">
-                        <i class="fa-solid ${data.icon || 'fa-award'}"></i>
-                        <h4>${data.title}</h4>
-                        <p>${data.desc}</p>
-                    </div>
-                `;
-            });
-        });
-}
-
-function handleNewUserPost() {
-    const input = document.getElementById('user-post-input');
-    if (!input) return;
-    const content = input.value.trim();
-    if (!content || !currentUser || !db) return;
-
-    db.collection('posts').add({
-        author: currentUser.email.split('@')[0],
-        userId: currentUser.uid,
-        content: content,
-        likes: 0,
-        likedBy: [],
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => { input.value = ''; });
-}
-
-function listenUserFeed() {
-    const container = document.getElementById('user-posts-list');
-    if (!container || !currentUser || !db) return;
-
-    db.collection('posts')
-        .where('userId', '==', currentUser.uid)
-        .orderBy('timestamp', 'desc')
-        .onSnapshot(snapshot => {
-            container.innerHTML = '';
-            if (snapshot.empty) {
-                container.innerHTML = '<p class="text-muted">Você ainda não possui publicações.</p>';
-                return;
-            }
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const timeStr = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Agora';
-                container.innerHTML += `
-                    <div class="post-card">
-                        <div class="post-header">
-                            <span class="post-author">@${data.author}</span>
-                            <span class="post-date">${timeStr}</span>
-                        </div>
-                        <p class="post-content">${data.content}</p>
-                        <div style="margin-top: 8px;">
-                            <small class="highlight"><i class="fa-solid fa-heart"></i> ${data.likes || 0} Curtidas</small>
-                        </div>
-                    </div>
-                `;
-            });
-        });
 }
 
 /* ==========================================================================
