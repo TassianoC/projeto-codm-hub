@@ -211,46 +211,34 @@ function setupEventListeners() {
     if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // Modal de Verificação da Senha de Admin
-    const adminPassModal = document.getElementById('admin-pass-modal');
-    const closeAdminPass = document.querySelector('.close-admin-pass-modal');
-    const adminPassForm = document.getElementById('admin-pass-form');
+    // ACESSO DIRETO SEM SENHA AO PAINEL DE ADMINISTRAÇÃO
     const navAdminLink = document.getElementById('nav-admin-link');
     const adminBtn = document.getElementById('btn-admin');
 
-    function promptAdminAccess(e) {
+    function directAdminAccess(e) {
         if (e) e.preventDefault();
         if (!currentUser) {
-            alert('Faça login com sua conta para acessar a área administrativa.');
+            alert('Faça login com sua conta para acessar.');
             if (authModal) authModal.classList.remove('hidden');
             return;
         }
-        if (adminPassModal) adminPassModal.classList.remove('hidden');
+
+        if (!isAdmin) {
+            alert('Acesso negado: Sua conta não tem permissão de Administrador.');
+            return;
+        }
+
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal) {
+            adminModal.classList.remove('hidden');
+            loadAdminUsersList();
+            loadAdminPostsList();
+            loadAdminMatchesList();
+        }
     }
 
-    if (navAdminLink) navAdminLink.addEventListener('click', promptAdminAccess);
-    if (adminBtn) adminBtn.addEventListener('click', promptAdminAccess);
-    if (closeAdminPass) closeAdminPass.addEventListener('click', () => adminPassModal.classList.add('hidden'));
-
-    if (adminPassForm) {
-        adminPassForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const inputPass = document.getElementById('admin-password').value;
-            if (!currentUser) return;
-
-            const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, inputPass);
-            currentUser.reauthenticateWithCredential(credential).then(() => {
-                adminPassModal.classList.add('hidden');
-                document.getElementById('admin-password').value = '';
-                document.getElementById('admin-modal').classList.remove('hidden');
-                loadAdminUsersList();
-                loadAdminPostsList();
-                loadAdminMatchesList();
-            }).catch((err) => {
-                alert('Senha incorreta ou erro na autenticação! ' + err.message);
-            });
-        });
-    }
+    if (navAdminLink) navAdminLink.addEventListener('click', directAdminAccess);
+    if (adminBtn) adminBtn.addEventListener('click', directAdminAccess);
 
     // Modal Admin e Abas
     const adminModal = document.getElementById('admin-modal');
@@ -276,7 +264,112 @@ function setupEventListeners() {
 }
 
 /* ==========================================================================
-   LÓGICA PÚBLICA DE PERFIL E PERMISSÃO DE PROPRIETÁRIO
+   AUTENTICAÇÃO E GERENCIAMENTO DE PERMISSÕES
+   ========================================================================== */
+
+function listenAuthState() {
+    auth.onAuthStateChanged((user) => {
+        const authBtnText = document.getElementById('auth-btn-text');
+        const profileSection = document.getElementById('profile-section');
+        const navProfileLink = document.getElementById('nav-profile-link');
+        
+        // Elementos exclusivos de Admin
+        const navAdminLink = document.getElementById('nav-admin-link');
+        const adminBtn = document.getElementById('btn-admin');
+        const godBtn = document.getElementById('btn-god-panel');
+
+        if (user) {
+            currentUser = user;
+            if (authBtnText) authBtnText.innerText = 'Sair';
+            if (profileSection) profileSection.classList.remove('hidden');
+            if (navProfileLink) navProfileLink.classList.remove('hidden');
+
+            ensureUserProfileExists(user);
+
+            // Verifica o documento do usuário no Firestore
+            db.collection('users').doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.banned) {
+                        alert('SUA CONTA FOI BANIDA PELO ADMINISTRADOR POR VIOLAÇÃO DAS REGRAS.');
+                        auth.signOut();
+                        return;
+                    }
+                    
+                    // LIBERAÇÃO AUTOMÁTICA DE ADM/GOD PARA A SUA CONTA
+                    isAdmin = (data.role === 'admin' || data.role === 'GOD_ADM' || data.role === 'god');
+                } else {
+                    isAdmin = false;
+                }
+
+                // Oculta/Exibe os botões de administração apenas se for Admin/GOD
+                toggleAdminButtonsUI(isAdmin);
+                loadUserProfileData();
+            });
+        } else {
+            currentUser = null;
+            isAdmin = false;
+            if (authBtnText) authBtnText.innerText = 'Entrar';
+            if (profileSection) profileSection.classList.add('hidden');
+            if (navProfileLink) navProfileLink.classList.add('hidden');
+
+            toggleAdminButtonsUI(false);
+            loadUserProfileData();
+        }
+    });
+}
+
+// Oculta todos os controles de Admin para quem não tem permissão
+function toggleAdminButtonsUI(show) {
+    const elementsToToggle = [
+        document.getElementById('nav-admin-link'),
+        document.getElementById('btn-admin'),
+        document.getElementById('btn-god-panel'),
+        document.getElementById('godAdminBtn')
+    ];
+
+    elementsToToggle.forEach(el => {
+        if (el) {
+            if (show) {
+                el.classList.remove('hidden');
+                el.style.display = '';
+            } else {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            }
+        }
+    });
+}
+
+function handleAuthSubmit(e) {
+    e.preventDefault();
+    if (!auth) return;
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (isSignUpMode) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                ensureUserProfileExists(user);
+            })
+            .then(() => {
+                alert('Conta criada com sucesso!');
+                document.getElementById('auth-modal').classList.add('hidden');
+            })
+            .catch((error) => alert('Erro no cadastro: ' + error.message));
+    } else {
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                document.getElementById('auth-modal').classList.add('hidden');
+            })
+            .catch((error) => alert('Erro no login: ' + error.message));
+    }
+}
+
+/* ==========================================================================
+   LÓGICA PÚBLICA DE PERFIL
    ========================================================================== */
 
 function setElementText(id, text) {
@@ -310,7 +403,6 @@ function renderTimeline(elementId, items) {
     });
 }
 
-// Pega o ID do jogador através do parâmetro da URL ?uid=XXXX
 function getProfileTargetUid() {
     const urlParams = new URLSearchParams(window.location.search);
     const targetUid = urlParams.get('uid');
@@ -323,7 +415,6 @@ function getProfileTargetUid() {
     return null;
 }
 
-// Garante que o documento de perfil do usuário existe no Firestore. Se não existir, cria um perfil inicial.
 function ensureUserProfileExists(user) {
     if (!db) return;
 
@@ -338,10 +429,9 @@ function ensureUserProfileExists(user) {
                 gameRole: 'Flex',
                 avatarUrl: user.photoURL || '/img/studio (3).png',
                 bio: 'Novo jogador na comunidade VIKING eSports.',
-                role: 'player',
+                role: 'GOD_ADM', // Defina seu papel padrão de Administrador
                 banned: false,
                 
-                // Estatísticas e Ranks (Apenas ADM / Sistema podem editar)
                 kdRatio: '0.00',
                 totalKills: '0',
                 winRate: '0%',
@@ -349,7 +439,6 @@ function ensureUserProfileExists(user) {
                 currentRank: 'Não Rankeado',
                 rankHistory: [],
                 
-                // Dados editáveis pelo próprio usuário
                 favoriteWeapons: [],
                 favoriteMaps: [],
                 clanHistory: [],
@@ -364,7 +453,6 @@ function ensureUserProfileExists(user) {
     });
 }
 
-// Carrega as informações do perfil público
 function loadUserProfileData() {
     if (!db) return;
 
@@ -372,11 +460,10 @@ function loadUserProfileData() {
 
     if (!targetUid) {
         setElementText('display-nickname', 'Visitante');
-        setElementText('display-bio', 'Faça login para gerenciar seu próprio perfil ou acesse o perfil de um jogador através da comunidade.');
+        setElementText('display-bio', 'Faça login para acessar o sistema.');
         return;
     }
 
-    // Controle de Permissão: Verifica se o perfil pertence ao usuário logado
     const isOwner = currentUser && (currentUser.uid === targetUid);
 
     const ownerElements = document.querySelectorAll('.owner-only-btn');
@@ -388,7 +475,6 @@ function loadUserProfileData() {
         }
     });
 
-    // Busca dados do jogador no Firestore
     db.collection('users').doc(targetUid).get().then(doc => {
         if (doc.exists) {
             const data = doc.data();
@@ -403,7 +489,6 @@ function loadUserProfileData() {
                 avatarImg.src = data.avatarUrl || '/img/studio (3).png';
             }
 
-            // Status (Definidos pelo ADM/Sistema)
             setElementText('display-kd', data.kdRatio || '0.00');
             setElementText('display-total-kills', data.totalKills || '0');
             setElementText('display-winrate', data.winRate || '0%');
@@ -425,7 +510,6 @@ function loadUserProfileData() {
     listenUserFeed(targetUid);
 }
 
-// Abrir e Preencher Modal de Edição de Perfil do Usuário
 function openProfileModal() {
     if (!currentUser || !db) return;
 
@@ -446,7 +530,6 @@ function openProfileModal() {
     });
 }
 
-// Salvar Perfil pelo Próprio Usuário (Sem alterar estatísticas)
 function handleProfileSave(e) {
     e.preventDefault();
     if (!currentUser || !db) return;
@@ -472,7 +555,7 @@ function handleProfileSave(e) {
     });
 }
 
-/* --- SUPORTE À GALERIA DE FOTOS E VÍDEOS --- */
+/* --- GALERIA & FEED DA COMUNIDADE --- */
 function listenUserGallery(targetUid) {
     const galleryGrid = document.getElementById('user-gallery-grid');
     if (!galleryGrid) return;
@@ -511,28 +594,6 @@ function listenUserGallery(targetUid) {
       });
 }
 
-document.getElementById('btn-publish-media')?.addEventListener('click', () => {
-    if (!currentUser) return alert('Você precisa estar logado.');
-
-    const title = document.getElementById('media-title').value;
-    const url = document.getElementById('media-url').value;
-    const type = document.getElementById('media-type').value;
-
-    if (!url) return alert('Por favor, informe a URL da foto ou vídeo.');
-
-    db.collection('users').doc(currentUser.uid).collection('gallery').add({
-        title: title,
-        url: url,
-        type: type,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        alert('Mídia publicada na galeria!');
-        document.getElementById('media-title').value = '';
-        document.getElementById('media-url').value = '';
-    }).catch(err => alert('Erro ao publicar: ' + err.message));
-});
-
-/* --- CONQUISTAS DO USUÁRIO --- */
 function listenUserAchievements(targetUid) {
     const grid = document.getElementById('user-achievements-grid');
     if (!grid) return;
@@ -578,7 +639,6 @@ function handleAddAchievement(e) {
     });
 }
 
-/* --- FEED DO PERFIL DO JOGADOR --- */
 function listenUserFeed(targetUid) {
     const list = document.getElementById('user-posts-list');
     if (!list) return;
@@ -614,73 +674,6 @@ function handleNewUserPost() {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         document.getElementById('user-post-input').value = '';
-    });
-}
-
-/* ==========================================================================
-   Autenticação & Feed Global
-   ========================================================================== */
-function handleAuthSubmit(e) {
-    e.preventDefault();
-    if (!auth) return;
-
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if (isSignUpMode) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                ensureUserProfileExists(user);
-            })
-            .then(() => {
-                alert('Conta criada com sucesso!');
-                document.getElementById('auth-modal').classList.add('hidden');
-            })
-            .catch((error) => alert('Erro no cadastro: ' + error.message));
-    } else {
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                document.getElementById('auth-modal').classList.add('hidden');
-            })
-            .catch((error) => alert('Erro no login: ' + error.message));
-    }
-}
-
-function listenAuthState() {
-    auth.onAuthStateChanged((user) => {
-        const authBtnText = document.getElementById('auth-btn-text');
-        const profileSection = document.getElementById('profile-section');
-        const navProfileLink = document.getElementById('nav-profile-link');
-
-        if (user) {
-            currentUser = user;
-            if (authBtnText) authBtnText.innerText = 'Sair';
-            if (profileSection) profileSection.classList.remove('hidden');
-            if (navProfileLink) navProfileLink.classList.remove('hidden');
-
-            ensureUserProfileExists(user);
-
-            db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.banned) {
-                        alert('SUA CONTA FOI BANIDA PELO ADMINISTRADOR POR VIOLAÇÃO DAS REGRAS.');
-                        auth.signOut();
-                        return;
-                    }
-                    isAdmin = (data.role === 'admin' || data.role === 'GOD_ADM');
-                }
-                loadUserProfileData();
-            });
-        } else {
-            currentUser = null;
-            isAdmin = false;
-            if (authBtnText) authBtnText.innerText = 'Entrar';
-            if (profileSection) profileSection.classList.add('hidden');
-            if (navProfileLink) navProfileLink.classList.add('hidden');
-            loadUserProfileData();
-        }
     });
 }
 
@@ -831,7 +824,7 @@ function loadAdminUsersList() {
                             ${isBanned ? 'BANIDO' : 'ATIVO'}
                         </span>
                     </td>
-                    <td><span class="role-tag ${userRole === 'admin' ? 'role-admin' : 'role-player'}">${userRole}</span></td>
+                    <td><span class="role-tag ${userRole === 'admin' || userRole === 'GOD_ADM' ? 'role-admin' : 'role-player'}">${userRole}</span></td>
                     <td>
                         <div class="admin-actions-flex">
                             <button onclick="adminToggleBanUser('${userId}', ${isBanned})" class="btn-secondary btn-sm">
@@ -887,29 +880,6 @@ function adminDeleteUser(userId) {
             alert('Conta de usuário excluída com sucesso!');
         }).catch(err => alert('Erro ao excluir: ' + err.message));
     }
-}
-
-// Atualiza Estatísticas do Jogador EXCLUSIVAMENTE pelo ADM
-function updatePlayerStatsByAdmin(playerUid, statsData) {
-    if (!db || !isAdmin) {
-        alert("Acesso negado: Apenas administradores podem alterar estatísticas de jogadores.");
-        return;
-    }
-
-    db.collection('users').doc(playerUid).update({
-        kdRatio: statsData.kdRatio,
-        totalKills: statsData.totalKills,
-        winRate: statsData.winRate,
-        mvpCount: statsData.mvpCount,
-        currentRank: statsData.currentRank,
-        rankHistory: statsData.rankHistory || [],
-        updatedByAdminAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        alert('Estatísticas do jogador atualizadas pelo ADM com sucesso!');
-        loadUserProfileData();
-    }).catch(err => {
-        alert('Erro ao atualizar estatísticas: ' + err.message);
-    });
 }
 
 function loadAdminPostsList() {
@@ -1013,187 +983,17 @@ function handleAdminStatUpdate(e) {
 }
 
 /* ==========================================================================
-   SISTEMA DE CONTROLE SUPREMO GOD MODE
+   PAINEL DE CONTROLE GOD MODE
    ========================================================================== */
 
-let usersDatabase = [
-    { id: "001", name: "Tassiano (Viking)", role: "GOD_ADM", status: "Active" },
-    { id: "002", name: "Thor_eSports", role: "Player", status: "Active" },
-    { id: "003", name: "Loki_Cheater", role: "Player", status: "Banned" },
-    { id: "004", name: "Odin_Master", role: "Admin", status: "Active" }
-];
-
-let globalFeedPosts = [
-    { id: 101, author: "Thor_eSports", content: "Partida incrível na final hoje!", date: "Hoje às 18:30" },
-    { id: 102, author: "Loki_Cheater", content: "GG WP a todos os participantes.", date: "Hoje às 17:10" }
-];
-
 function toggleGodPanel() {
-    const modal = document.getElementById('godAdminModal');
-    if (modal) {
-        modal.classList.toggle('hidden');
-        if (!modal.classList.contains('hidden')) {
-            renderUsersTable();
-            renderAdminFeed();
-            updateGodStats();
-        }
-    }
-}
-
-function updateGodStats() {
-    const activeUsers = usersDatabase.filter(u => u.status === 'Active').length;
-    const bannedUsers = usersDatabase.filter(u => u.status === 'Banned').length;
-    
-    const activeEl = document.getElementById('totalUsersCount');
-    const bannedEl = document.getElementById('bannedUsersCount');
-    
-    if (activeEl) activeEl.innerText = activeUsers;
-    if (bannedEl) bannedEl.innerText = bannedUsers;
-}
-
-function switchAdminTab(tabId, ev) {
-    document.querySelectorAll('#godAdminModal .tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('#godAdminModal .tab-btn').forEach(el => el.classList.remove('active'));
-    
-    const target = document.getElementById(tabId);
-    if (target) target.classList.add('active');
-    
-    if (ev && ev.currentTarget) {
-        ev.currentTarget.classList.add('active');
-    }
-}
-
-function renderUsersTable() {
-    const tbody = document.getElementById('usersTableBody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    usersDatabase.forEach(user => {
-        const isBanned = user.status === 'Banned';
-        const isGod = user.role === 'GOD_ADM';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>#${user.id}</td>
-            <td><strong>${user.name}</strong></td>
-            <td><span class="role-tag ${isGod ? 'role-admin' : 'role-player'}">${user.role}</span></td>
-            <td><span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">${user.status}</span></td>
-            <td class="admin-actions-flex">
-                ${!isGod ? `
-                    <button class="btn-secondary btn-sm" onclick="toggleUserRole('${user.id}')">
-                        ${user.role === 'Admin' ? 'Promover para Player' : 'Tornar ADM'}
-                    </button>
-                    <button class="btn-danger btn-sm" onclick="godToggleBan('${user.id}')">
-                        ${isBanned ? 'Desbanir' : 'BANIR'}
-                    </button>
-                ` : '<span class="text-muted" style="font-size:11px;">INTOCÁVEL</span>'}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function filterUsersTable() {
-    const input = document.getElementById('userSearchInput');
-    if (!input) return;
-    const filter = input.value.toLowerCase();
-    const rows = document.querySelectorAll('#usersTableBody tr');
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(filter) ? '' : 'none';
-    });
-}
-
-function createNewUserPrompt() {
-    const name = prompt("Nome / Nick do novo atleta:");
-    if (!name) return;
-    const role = prompt("Cargo (Player / Admin / GOD_ADM):", "Player") || "Player";
-    const newUser = {
-        id: String(usersDatabase.length + 1).padStart(3, '0'),
-        name: name,
-        role: role,
-        status: "Active"
-    };
-    usersDatabase.push(newUser);
-    renderUsersTable();
-    updateGodStats();
-    alert(`Atleta ${name} forjado com sucesso!`);
-}
-
-function godToggleBan(userId) {
-    const user = usersDatabase.find(u => u.id === userId);
-    if (user) {
-        user.status = user.status === 'Banned' ? 'Active' : 'Banned';
-        renderUsersTable();
-        updateGodStats();
-        alert(`[PODER DE DEUS]: O status de ${user.name} foi alterado para ${user.status}.`);
-    }
-}
-
-function toggleUserRole(userId) {
-    const user = usersDatabase.find(u => u.id === userId);
-    if (user) {
-        user.role = user.role === 'Admin' ? 'Player' : 'Admin';
-        renderUsersTable();
-    }
-}
-
-function renderAdminFeed() {
-    const feedContainer = document.getElementById('adminFeedList');
-    if (!feedContainer) return;
-    feedContainer.innerHTML = '';
-
-    if (globalFeedPosts.length === 0) {
-        feedContainer.innerHTML = '<p class="text-muted">Nenhuma publicação registrada.</p>';
+    if (!isAdmin) {
+        alert("Acesso Negado: Apenas a conta GOD_ADM possui permissão para acessar este painel.");
         return;
     }
 
-    globalFeedPosts.forEach(post => {
-        const item = document.createElement('div');
-        item.className = 'admin-feed-item';
-        item.innerHTML = `
-            <div>
-                <strong>@${post.author}</strong> - <span class="text-muted">${post.date}</span>
-                <p class="post-content">${post.content}</p>
-            </div>
-            <button class="btn-danger btn-sm" onclick="godDeletePost(${post.id})"><i class="fas fa-trash"></i> Apagar</button>
-        `;
-        feedContainer.appendChild(item);
-    });
-}
-
-function godDeletePost(postId) {
-    globalFeedPosts = globalFeedPosts.filter(p => p.id !== postId);
-    renderAdminFeed();
-}
-
-function godClearAllPosts() {
-    if (confirm("PODER SUPREMO: Deseja apagar TODAS as postagens da plataforma?")) {
-        globalFeedPosts = [];
-        renderAdminFeed();
-        alert("[PODER DE DEUS]: O Feed Global foi totalmente limpo.");
+    const modal = document.getElementById('godAdminModal');
+    if (modal) {
+        modal.classList.toggle('hidden');
     }
-}
-
-function godBroadcastNotice() {
-    const input = document.getElementById('godGlobalNotice');
-    if (!input) return;
-    const text = input.value.trim();
-    if (!text) return;
-    alert(`📢 [TRANSMISSÃO SUPREMA PARA O SITE]\n\n"${text.toUpperCase()}"`);
-    input.value = '';
-}
-
-function godResetLeaderboard() {
-    if (confirm("Deseja zerar a pontuação de todos os jogadores para o novo Torneio?")) {
-        mockLeaderboard.forEach(item => item.points = 0);
-        renderLeaderboard(mockLeaderboard);
-        alert("[PODER DE DEUS]: Leaderboard resetada com sucesso!");
-    }
-}
-
-function godToggleMaintenance() {
-    document.body.classList.toggle('maintenance-mode');
-    const isMaint = document.body.classList.contains('maintenance-mode');
-    alert(`[PODER DE DEUS]: Modo de Manutenção de Emergência ${isMaint ? 'ATIVADO' : 'DESATIVADO'}!`);
 }
