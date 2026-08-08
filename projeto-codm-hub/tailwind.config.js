@@ -7,13 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        gold: {
-          primary: '#d4af37',
+        viking: {
+          gold: '#FFD700',
+          dark: '#0D0F12',
+          card: '#161920',
+          accent: '#1F2430'
         }
-      },
-      fontFamily: {
-        orbitron: ['Orbitron', 'sans-serif'],
-        rajdhani: ['Rajdhani', 'sans-serif'],
       }
     },
   },
