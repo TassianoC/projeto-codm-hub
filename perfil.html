@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIKING eSports Hub | Meu Perfil</title>
+    <title>VIKING eSports Hub | Perfil do Jogador</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -37,25 +37,145 @@
 
     <main style="padding-top: 100px;">
         <section id="profile-section" class="container-section profile-page">
-            <h2 class="section-title"><i class="fa-solid fa-address-card"></i> Perfil do <span class="highlight">Guerreiro</span></h2>
+            <h2 class="section-title"><i class="fa-solid fa-id-card"></i> Perfil Profissional do <span class="highlight">Jogador</span></h2>
+            
             <div class="profile-layout">
+                <!-- Sidebar do Jogador -->
                 <div class="glass-card profile-sidebar">
                     <div class="avatar-container">
                         <img src="/img/studio (3).png" alt="Avatar do Jogador" id="display-avatar" class="profile-avatar">
                     </div>
                     <h3 id="display-nickname">Seu Nickname</h3>
                     <span class="role-badge" id="display-role">Sniper</span>
-                    <p id="display-bio" class="user-bio">Sua biografia aparecerá aqui...</p>
-                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top"><i class="fa-solid fa-user-pen"></i> Editar Perfil</button>
+                    
+                    <!-- Rank Atual -->
+                    <div class="rank-badge-box margin-top">
+                        <i class="fa-solid fa-ranking-star highlight"></i>
+                        <div>
+                            <small class="text-muted">Rank Atual</small>
+                            <h4 id="display-current-rank">Lendário (10.500 pts)</h4>
+                        </div>
+                    </div>
+
+                    <p id="display-bio" class="user-bio margin-top">Sua biografia aparecerá aqui...</p>
+                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top"><i class="fa-solid fa-user-pen"></i> Editar Perfil Completo</button>
                 </div>
+
+                <!-- Conteúdo Principal - LinkedIn CODM -->
                 <div class="profile-main-content">
+                    
+                    <!-- 1. K/D e Estatísticas -->
+                    <div class="glass-card margin-bottom-card">
+                        <h3><i class="fa-solid fa-chart-line highlight"></i> Estatísticas Principais</h3>
+                        <div class="stats-overview-grid margin-top">
+                            <div class="stat-box">
+                                <span class="stat-number highlight" id="display-kd">2.45</span>
+                                <span class="stat-label">K/D Ratio</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="display-total-kills">12.450</span>
+                                <span class="stat-label">Abates Totais</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="display-winrate">68%</span>
+                                <span class="stat-label">Taxa de Vitória</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="display-mvp-count">142</span>
+                                <span class="stat-label">MVPs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Armas Favoritas & Mapas Favoritos -->
+                    <div class="profile-two-columns margin-bottom-card">
+                        <div class="glass-card">
+                            <h3><i class="fa-solid fa-gun highlight"></i> Armas Mais Utilizadas</h3>
+                            <ul class="profile-list margin-top" id="display-favorite-weapons">
+                                <li><i class="fa-solid fa-crosshairs"></i> DL Q33 (Sniper) - Master</li>
+                                <li><i class="fa-solid fa-fire"></i> KRM-262 (Escopeta)</li>
+                                <li><i class="fa-solid fa-bullseye"></i> CBR4 (SMG)</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card">
+                            <h3><i class="fa-solid fa-map-location-dot highlight"></i> Mapas Favoritos</h3>
+                            <ul class="profile-list margin-top" id="display-favorite-maps">
+                                <li><i class="fa-solid fa-map"></i> Standoff (Buscar & Destruir)</li>
+                                <li><i class="fa-solid fa-map"></i> Firing Range (Zona de Conflito)</li>
+                                <li><i class="fa-solid fa-map"></i> Raid (Geral)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 3. Histórico de Rank & Clãs -->
+                    <div class="profile-two-columns margin-bottom-card">
+                        <div class="glass-card">
+                            <h3><i class="fa-solid fa-trophy highlight"></i> Histórico de Ranks</h3>
+                            <div class="timeline-list margin-top" id="display-rank-history">
+                                <div class="timeline-item">
+                                    <strong>Season 5 2026:</strong> Lendário Top 5000
+                                </div>
+                                <div class="timeline-item">
+                                    <strong>Season 4 2026:</strong> Lendário
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card">
+                            <h3><i class="fa-solid fa-users-rays highlight"></i> Clã Atual e Antigos</h3>
+                            <div class="timeline-list margin-top" id="display-clan-history">
+                                <div class="timeline-item">
+                                    <span class="highlight">[Atual]</span> <strong>VIKING eSports</strong> (Capitão/Lineup A)
+                                </div>
+                                <div class="timeline-item">
+                                    <span class="text-muted">[Antigo]</span> Alpha Warriors (Sniper)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Currículo Competitivo -->
+                    <div class="glass-card margin-bottom-card">
+                        <h3><i class="fa-solid fa-file-contract highlight"></i> Currículo Competitivo</h3>
+                        <p class="margin-top text-secondary" id="display-competitive-cv">
+                            Experiência em campeonatos tier 2/3 de CODM, focado em chamadas táticas (IGL) e suporte avançado em SnD. Disponível para treinos diários no período noturno.
+                        </p>
+                    </div>
+
+                    <!-- 5. Conquistas & Medalhas -->
                     <div class="glass-card margin-bottom-card">
                         <div class="card-header-flex">
-                            <h3><i class="fa-solid fa-trophy highlight"></i> Minhas Conquistas</h3>
+                            <h3><i class="fa-solid fa-award highlight"></i> Conquistas & Medalhas</h3>
                             <button id="btn-add-achievement" class="btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Adicionar Conquista</button>
                         </div>
                         <div id="user-achievements-grid" class="user-trophy-grid"></div>
                     </div>
+
+                    <!-- 6. Histórico de Partidas Recentes -->
+                    <div class="glass-card margin-bottom-card">
+                        <h3><i class="fa-solid fa-clock-rotate-left highlight"></i> Histórico de Partidas Recentes</h3>
+                        <div class="table-container margin-top">
+                            <table class="leaderboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Modo / Mapa</th>
+                                        <th>Resultado</th>
+                                        <th>K/D Partida</th>
+                                        <th>Pontos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="display-match-history">
+                                    <tr>
+                                        <td>5v5 SnD - Standoff</td>
+                                        <td><span class="status-badge status-active">VITÓRIA (5x3)</span></td>
+                                        <td>14 / 4 / 2</td>
+                                        <td class="highlight">+42 pts</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 7. Feed Privado do Jogador -->
                     <div class="glass-card">
                         <h3><i class="fa-solid fa-rss highlight"></i> Minhas Publicações</h3>
                         <div class="post-creator margin-top">
@@ -64,40 +184,90 @@
                         </div>
                         <div id="user-posts-list" class="posts-list margin-top"></div>
                     </div>
+
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Modal Editar Perfil -->
+    <!-- Modal Editar Perfil Completo (LinkedIn CODM) -->
     <div id="profile-modal" class="modal hidden">
-        <div class="modal-content glass-card">
+        <div class="modal-content glass-card large-modal">
             <button class="close-profile-modal close-modal-btn">&times;</button>
-            <h2>Editar Perfil</h2>
+            <h2>Editar Perfil do Jogador</h2>
             <form id="profile-form">
-                <div class="input-group">
-                    <label>Nickname / Tag</label>
-                    <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Nickname / Tag</label>
+                        <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper">
+                    </div>
+                    <div class="input-group">
+                        <label>Função / Role</label>
+                        <select id="profile-role">
+                            <option value="Sniper">Sniper</option>
+                            <option value="Rusher">Rusher</option>
+                            <option value="Suporte">Suporte</option>
+                            <option value="Capitão / IGL">Capitão / IGL</option>
+                            <option value="Flex">Flexível</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>URL do Avatar</label>
+                        <input type="text" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
+                    </div>
+                    <div class="input-group">
+                        <label>Rank Atual</label>
+                        <input type="text" id="profile-current-rank" placeholder="Ex: Lendário (10.500 pts)">
+                    </div>
+                    <div class="input-group">
+                        <label>K/D Ratio</label>
+                        <input type="text" id="profile-kd" placeholder="Ex: 2.45">
+                    </div>
+                    <div class="input-group">
+                        <label>Abates Totais</label>
+                        <input type="text" id="profile-total-kills" placeholder="Ex: 12450">
+                    </div>
+                    <div class="input-group">
+                        <label>Taxa de Vitória (%)</label>
+                        <input type="text" id="profile-winrate" placeholder="Ex: 68%">
+                    </div>
+                    <div class="input-group">
+                        <label>MVPs Totais</label>
+                        <input type="text" id="profile-mvp-count" placeholder="Ex: 142">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>Função / Role</label>
-                    <select id="profile-role">
-                        <option value="Sniper">Sniper</option>
-                        <option value="Rusher">Rusher</option>
-                        <option value="Suporte">Suporte</option>
-                        <option value="Capitão">Capitão / IGL</option>
-                        <option value="Flex">Flexível</option>
-                    </select>
+
+                <div class="input-group margin-top">
+                    <label>Armas Mais Utilizadas (separadas por vírgula)</label>
+                    <input type="text" id="profile-favorite-weapons" placeholder="Ex: DL Q33, KRM-262, CBR4">
                 </div>
-                <div class="input-group">
-                    <label>URL do Avatar (Imagem)</label>
-                    <input type="text" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
+
+                <div class="input-group margin-top">
+                    <label>Mapas Favoritos (separados por vírgula)</label>
+                    <input type="text" id="profile-favorite-maps" placeholder="Ex: Standoff, Firing Range, Raid">
                 </div>
-                <div class="input-group">
-                    <label>Biografia / Descrição</label>
-                    <textarea id="profile-bio" rows="3" placeholder="Fale brevemente sobre sua trajetória..."></textarea>
+
+                <div class="input-group margin-top">
+                    <label>Histórico de Ranks (separados por vírgula)</label>
+                    <input type="text" id="profile-rank-history" placeholder="Ex: S5: Lendário Top 5000, S4: Lendário">
                 </div>
-                <button type="submit" class="btn-primary btn-full">Salvar Alterações</button>
+
+                <div class="input-group margin-top">
+                    <label>Clãs (Atual e Antigos)</label>
+                    <input type="text" id="profile-clan-history" placeholder="Ex: [Atual] VIKING eSports, [Antigo] Alpha Warriors">
+                </div>
+
+                <div class="input-group margin-top">
+                    <label>Currículo Competitivo</label>
+                    <textarea id="profile-competitive-cv" rows="3" placeholder="Descreva sua bagagem em campeonatos, scrims e horários disponíveis..."></textarea>
+                </div>
+
+                <div class="input-group margin-top">
+                    <label>Biografia / Descrição Resumida</label>
+                    <textarea id="profile-bio" rows="2" placeholder="Fale brevemente sobre sua trajetória..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary btn-full margin-top">Salvar Currículo de Jogador</button>
             </form>
         </div>
     </div>
@@ -106,26 +276,26 @@
     <div id="achievement-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <button class="close-achievement-modal close-modal-btn">&times;</button>
-            <h2>Adicionar Conquista</h2>
+            <h2>Adicionar Conquista / Medalha</h2>
             <form id="achievement-form">
                 <div class="input-group">
                     <label>Título da Conquista</label>
-                    <input type="text" id="ach-title" required placeholder="Ex: Campeão do Torneio X">
+                    <input type="text" id="ach-title" required placeholder="Ex: Campeão do Torneio Viking 5v5">
                 </div>
                 <div class="input-group">
                     <label>Descrição</label>
-                    <input type="text" id="ach-desc" required placeholder="Ex: 1º Lugar na Season 1">
+                    <input type="text" id="ach-desc" required placeholder="Ex: 1º Lugar Invicto na Season 1">
                 </div>
                 <div class="input-group">
-                    <label>Ícone FontAwesome (Ex: fa-trophy, fa-award, fa-crown)</label>
+                    <label>Ícone FontAwesome (Ex: fa-trophy, fa-award, fa-crown, fa-medal)</label>
                     <input type="text" id="ach-icon" placeholder="fa-trophy">
                 </div>
-                <button type="submit" class="btn-primary btn-full">Salvar Conquista</button>
+                <button type="submit" class="btn-primary btn-full margin-top">Salvar Conquista</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal de Login -->
+    <!-- Modal de Login/Cadastro -->
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <button class="close-modal-btn">&times;</button>
