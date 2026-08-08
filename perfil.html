@@ -106,6 +106,24 @@
                 </div>
             </div>
 
+            <!-- Upload de mídia para galeria -->
+            <div id="media-upload-box" class="glass-card margin-bottom-card owner-only-btn hidden">
+                <h3><i class="fa-solid fa-cloud-arrow-up highlight"></i> Publicar Mídia</h3>
+                <form id="media-upload-form" class="margin-top">
+                    <div class="input-group">
+                        <label>Legenda / Título</label>
+                        <input type="text" id="media-title" placeholder="Ex: Jogada da Final" required>
+                    </div>
+                    <div class="input-group margin-top">
+                        <label>Selecione a Foto ou Vídeo do seu aparelho</label>
+                        <input type="file" id="media-file-input" accept="image/*,video/*" required>
+                    </div>
+                    <button type="submit" id="btn-upload-media" class="btn-primary margin-top">
+                        <i class="fa-solid fa-upload"></i> Publicar no Feed
+                    </button>
+                </form>
+            </div>
+
             <div id="tab-gallery" class="insta-tab-content active">
                 <div class="glass-card">
                     <div class="card-header-flex">
@@ -172,24 +190,6 @@
     </main>
 
     <!-- Modal Editar Perfil -->
-
-    <!-- Modal / Formulário para Novo Post na Galeria -->
-<div id="media-upload-box" class="glass-card margin-bottom-card owner-only-btn hidden">
-    <h3><i class="fa-solid fa-cloud-arrow-up highlight"></i> Publicar Mídia</h3>
-    <form id="media-upload-form" class="margin-top">
-        <div class="input-group">
-            <label>Legenda / Título</label>
-            <input type="text" id="media-title" placeholder="Ex: Jogada da Final" required>
-        </div>
-        <div class="input-group margin-top">
-            <label>Selecione a Foto ou Vídeo do seu aparelho</label>
-            <input type="file" id="media-file-input" accept="image/*,video/*" required>
-        </div>
-        <button type="submit" id="btn-upload-media" class="btn-primary margin-top">
-            <i class="fa-solid fa-upload"></i> Publicar no Feed
-        </button>
-    </form>
-</div>
     <div id="profile-modal" class="modal hidden">
         <div class="modal-content glass-card large-modal">
             <button class="close-profile-modal close-modal-btn">&times;</button>
@@ -337,8 +337,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <!-- SDK do Firebase Storage -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
