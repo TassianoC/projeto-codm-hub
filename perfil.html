@@ -35,245 +35,270 @@
         </div>
     </header>
 
-    <main style="padding-top: 100px;">
+    <main style="padding-top: 80px;">
         <section id="profile-section" class="container-section profile-page">
-            <h2 class="section-title"><i class="fa-solid fa-id-card"></i> Perfil do <span class="highlight" id="profile-owner-title">Jogador</span></h2>
             
-            <div class="profile-layout">
-                <!-- Sidebar do Jogador -->
-                <div class="glass-card profile-sidebar">
-                    <div class="avatar-container">
-                        <img src="/img/studio (3).png" alt="Avatar do Jogador" id="display-avatar" class="profile-avatar">
-                    </div>
-                    <h3 id="display-nickname">Carregando...</h3>
-                    <span class="role-badge" id="display-role">Carregando...</span>
-                    
-                    <div class="rank-badge-box margin-top">
-                        <i class="fa-solid fa-ranking-star highlight"></i>
-                        <div>
-                            <small class="text-muted">Rank Atual</small>
-                            <h4 id="display-current-rank">Nenhum rank informado</h4>
-                        </div>
+            <!-- Perfil Estilo Instagram / Insta-Card Header -->
+            <div class="insta-profile-card glass-card">
+                <div class="insta-cover"></div>
+                
+                <div class="insta-header-content">
+                    <div class="insta-avatar-wrapper">
+                        <img src="/img/studio (3).png" alt="Avatar do Jogador" id="display-avatar" class="insta-avatar">
+                        <span class="insta-online-dot"></span>
                     </div>
 
-                    <p id="display-bio" class="user-bio margin-top">Sem biografia informada.</p>
-                    
-                    <!-- Botão que SÓ O DONO pode ver -->
-                    <button id="btn-edit-profile-modal" class="btn-outline btn-full margin-top owner-only-btn hidden">
-                        <i class="fa-solid fa-user-pen"></i> Editar Meu Perfil
+                    <div class="insta-user-info">
+                        <div class="insta-top-row">
+                            <h2 id="display-nickname" class="insta-username">Carregando...</h2>
+                            <span class="role-badge" id="display-role">Flex</span>
+                            <div class="insta-actions">
+                                <button id="btn-edit-profile-modal" class="btn-outline btn-sm owner-only-btn hidden">
+                                    <i class="fa-solid fa-pen-to-square"></i> Editar Perfil
+                                </button>
+                                <button id="btn-add-achievement" class="btn-secondary btn-sm owner-only-btn hidden">
+                                    <i class="fa-solid fa-plus"></i> Conquista
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Contadores do Perfil -->
+                        <div class="insta-stats-row">
+                            <div class="insta-stat">
+                                <span class="insta-stat-num" id="display-kd">0.00</span>
+                                <span class="insta-stat-label">K/D Ratio</span>
+                            </div>
+                            <div class="insta-stat">
+                                <span class="insta-stat-num" id="display-winrate">0%</span>
+                                <span class="insta-stat-label">Vitórias</span>
+                            </div>
+                            <div class="insta-stat">
+                                <span class="insta-stat-num" id="display-total-kills">0</span>
+                                <span class="insta-stat-label">Abates</span>
+                            </div>
+                            <div class="insta-stat">
+                                <span class="insta-stat-num" id="display-mvp-count">0</span>
+                                <span class="insta-stat-label">MVPs</span>
+                            </div>
+                        </div>
+
+                        <div class="insta-bio-box">
+                            <div class="rank-badge-inline">
+                                <i class="fa-solid fa-ranking-star highlight"></i>
+                                <span id="display-current-rank" class="highlight">Não Rankeado</span>
+                            </div>
+                            <p id="display-bio" class="insta-bio-text">Sem biografia informada.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Abas Estilo Feed do Instagram -->
+                <div class="insta-tabs">
+                    <button class="insta-tab-btn active" onclick="switchProfileTab('tab-gallery')">
+                        <i class="fa-solid fa-border-all"></i> Galeria
+                    </button>
+                    <button class="insta-tab-btn" onclick="switchProfileTab('tab-achievements')">
+                        <i class="fa-solid fa-trophy"></i> Conquistas
+                    </button>
+                    <button class="insta-tab-btn" onclick="switchProfileTab('tab-stats')">
+                        <i class="fa-solid fa-chart-line"></i> Estatísticas
+                    </button>
+                    <button class="insta-tab-btn" onclick="switchProfileTab('tab-feed')">
+                        <i class="fa-solid fa-comments"></i> Mural
                     </button>
                 </div>
+            </div>
 
-                <!-- Conteúdo Principal -->
-                <div class="profile-main-content">
-                    
-                    <!-- 1. Estatísticas -->
-                    <div class="glass-card margin-bottom-card">
-                        <h3><i class="fa-solid fa-chart-line highlight"></i> Estatísticas Principais</h3>
-                        <div class="stats-overview-grid margin-top">
-                            <div class="stat-box">
-                                <span class="stat-number highlight" id="display-kd">0.00</span>
-                                <span class="stat-label">K/D Ratio</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-number" id="display-total-kills">0</span>
-                                <span class="stat-label">Abates Totais</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-number" id="display-winrate">0%</span>
-                                <span class="stat-label">Taxa de Vitória</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="stat-number" id="display-mvp-count">0</span>
-                                <span class="stat-label">MVPs</span>
-                            </div>
-                        </div>
+            <!-- CONTEÚDO DAS ABAS -->
+
+            <!-- Aba 1: Galeria Mídia -->
+            <div id="tab-gallery" class="insta-tab-content active">
+                <div class="glass-card">
+                    <div class="card-header-flex">
+                        <h3><i class="fa-solid fa-camera highlight"></i> Galeria de Mídias</h3>
                     </div>
-
-                    <!-- 2. Armas & Mapas Favoritos -->
-                    <div class="profile-two-columns margin-bottom-card">
-                        <div class="glass-card">
-                            <h3><i class="fa-solid fa-gun highlight"></i> Armas Favoritas</h3>
-                            <ul class="profile-list margin-top" id="display-favorite-weapons"></ul>
-                        </div>
-                        <div class="glass-card">
-                            <h3><i class="fa-solid fa-map-location-dot highlight"></i> Mapas Favoritos</h3>
-                            <ul class="profile-list margin-top" id="display-favorite-maps"></ul>
-                        </div>
+                    <div id="user-gallery-grid" class="user-gallery-grid margin-top">
+                        <p class="text-muted">Carregando galeria do atleta...</p>
                     </div>
-
-                    <!-- 3. Ranks & Clãs -->
-                    <div class="profile-two-columns margin-bottom-card">
-                        <div class="glass-card">
-                            <h3><i class="fa-solid fa-trophy highlight"></i> Histórico de Ranks</h3>
-                            <div class="timeline-list margin-top" id="display-rank-history"></div>
-                        </div>
-                        <div class="glass-card">
-                            <h3><i class="fa-solid fa-users-rays highlight"></i> Clã Atual e Histórico</h3>
-                            <div class="timeline-list margin-top" id="display-clan-history"></div>
-                        </div>
-                    </div>
-
-                    <!-- 4. Currículo Competitivo -->
-                    <div class="glass-card margin-bottom-card">
-                        <h3><i class="fa-solid fa-file-contract highlight"></i> Currículo Competitivo</h3>
-                        <p class="margin-top text-secondary" id="display-competitive-cv">Nenhum currículo informado.</p>
-                    </div>
-
-                    <!-- 5. Conquistas & Medalhas -->
-                    <div class="glass-card margin-bottom-card">
-                        <div class="card-header-flex">
-                            <h3><i class="fa-solid fa-award highlight"></i> Conquistas & Medalhas</h3>
-                            <!-- Apenas o Dono pode adicionar -->
-                            <button id="btn-add-achievement" class="btn-primary btn-sm owner-only-btn hidden">
-                                <i class="fa-solid fa-plus"></i> Nova Conquista
-                            </button>
-                        </div>
-                        <div id="user-achievements-grid" class="user-trophy-grid margin-top"></div>
-                    </div>
-
-                    <!-- 6. Galeria de Fotos e Vídeos / Clips -->
-                    <div class="glass-card margin-bottom-card">
-                        <div class="card-header-flex">
-                            <h3><i class="fa-solid fa-photo-film highlight"></i> Galeria & Highlights (Vídeos/Fotos)</h3>
-                        </div>
-                        
-                        <!-- Criador de Mídia (Apenas para o Dono) -->
-                        <div id="media-upload-section" class="post-creator margin-top owner-only-btn hidden">
-                            <input type="text" id="media-title" placeholder="Título da jogada / foto (Ex: Ace no Standoff S5)" class="margin-bottom-sm">
-                            <input type="text" id="media-url" placeholder="URL da Foto ou Vídeo do YouTube (Ex: https://...)" class="margin-bottom-sm">
-                            <select id="media-type" class="margin-bottom-sm">
-                                <option value="image">Foto / Imagem</option>
-                                <option value="video">Vídeo / Highlight (Link do YouTube)</option>
-                            </select>
-                            <button id="btn-publish-media" class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar na Galeria</button>
-                        </div>
-
-                        <!-- Grid Onde a Galeria de Mídias Transmitida é Exibida -->
-                        <div id="user-gallery-grid" class="user-gallery-grid margin-top"></div>
-                    </div>
-
-                    <!-- 7. Feed de Recados / Posts Públicos do Jogador -->
-                    <div class="glass-card">
-                        <h3><i class="fa-solid fa-rss highlight"></i> Publicações do Jogador</h3>
-                        
-                        <!-- Post Creator (Apenas para o Dono) -->
-                        <div id="post-creator-box" class="post-creator margin-top owner-only-btn hidden">
-                            <textarea id="user-post-input" placeholder="Publique uma novidade, recrutamento ou atualização..."></textarea>
-                            <button id="btn-user-post" class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar</button>
-                        </div>
-
-                        <div id="user-posts-list" class="posts-list margin-top"></div>
-                    </div>
-
                 </div>
             </div>
+
+            <!-- Aba 2: Conquistas & Troféus -->
+            <div id="tab-achievements" class="insta-tab-content">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-award highlight"></i> Conquistas do Guerreiro</h3>
+                    <div id="user-achievements-grid" class="user-trophy-grid margin-top">
+                        <p class="text-muted">Nenhuma conquista cadastrada.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba 3: Estatísticas, Clãs e Armas -->
+            <div id="tab-stats" class="insta-tab-content">
+                <div class="profile-two-columns margin-bottom-card">
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-gun highlight"></i> Armas Favoritas</h3>
+                        <ul class="profile-list margin-top" id="display-favorite-weapons"></ul>
+                    </div>
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-map-location-dot highlight"></i> Mapas Favoritos</h3>
+                        <ul class="profile-list margin-top" id="display-favorite-maps"></ul>
+                    </div>
+                </div>
+
+                <div class="profile-two-columns margin-bottom-card">
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-trophy highlight"></i> Histórico de Ranks</h3>
+                        <div class="timeline-list margin-top" id="display-rank-history"></div>
+                    </div>
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-users-rays highlight"></i> Clã Atual & Histórico</h3>
+                        <div class="timeline-list margin-top" id="display-clan-history"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-file-contract highlight"></i> Currículo Competitivo</h3>
+                    <p id="display-competitive-cv" class="user-bio margin-top">Nenhum histórico publicado.</p>
+                </div>
+            </div>
+
+            <!-- Aba 4: Mural de Recados -->
+            <div id="tab-feed" class="insta-tab-content">
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-message highlight"></i> Recados do Perfil</h3>
+                    <div class="post-creator margin-top owner-only-btn hidden">
+                        <textarea id="user-post-input" placeholder="Escreva uma mensagem no perfil..."></textarea>
+                        <button id="btn-user-post" class="btn-primary btn-sm"><i class="fa-solid fa-paper-plane"></i> Publicar Recado</button>
+                    </div>
+                    <div id="user-posts-list" class="posts-list margin-top">
+                        <p class="text-muted">Carregando mensagens...</p>
+                    </div>
+                </div>
+            </div>
+
         </section>
     </main>
 
-   <!-- Modal Editar Perfil (Apenas para o Proprietário - Sem campos de Estatísticas) -->
-<div id="profile-modal" class="modal hidden">
-    <div class="modal-content glass-card large-modal">
-        <button class="close-profile-modal close-modal-btn">&times;</button>
-        <h2><i class="fa-solid fa-user-pen highlight"></i> Editar Meu Perfil</h2>
-        <form id="profile-form">
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>Nickname / Gamertag</label>
-                    <input type="text" id="profile-nickname" required placeholder="Ex: Viking_Viper">
+    <!-- Modal Editar Perfil -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content glass-card large-modal">
+            <button class="close-profile-modal close-modal-btn">&times;</button>
+            <h2><i class="fa-solid fa-user-pen highlight"></i> Editar Meu Perfil</h2>
+            <form id="profile-form" class="margin-top">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Nickname / Tag no Jogo</label>
+                        <input type="text" id="profile-nickname" required placeholder="Ex: VK_Valkyrie">
+                    </div>
+                    <div class="input-group">
+                        <label>Função Principal</label>
+                        <select id="profile-role" class="custom-select">
+                            <option value="Assault / Entry">Assault / Entry</option>
+                            <option value="Sniper">Sniper</option>
+                            <option value="Slayer">Slayer</option>
+                            <option value="Support / Anchor">Support / Anchor</option>
+                            <option value="Flex">Flex</option>
+                            <option value="IGL / Capitão">IGL / Capitão</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>URL da Foto de Perfil (Avatar)</label>
+                        <input type="text" id="profile-avatar" placeholder="https://exemplo.com/foto.jpg">
+                    </div>
+                    <div class="input-group">
+                        <label>Biografia</label>
+                        <input type="text" id="profile-bio" placeholder="Foco total no competitivo do CODM.">
+                    </div>
+                    <div class="input-group">
+                        <label>Armas Favoritas (separadas por vírgula)</label>
+                        <input type="text" id="profile-favorite-weapons" placeholder="DL Q33, Kilo 141, Switchblade X9">
+                    </div>
+                    <div class="input-group">
+                        <label>Mapas Favoritos (separados por vírgula)</label>
+                        <input type="text" id="profile-favorite-maps" placeholder="Firing Range, Standoff, Raid">
+                    </div>
+                    <div class="input-group">
+                        <label>Histórico de Clãs (separados por vírgula)</label>
+                        <input type="text" id="profile-clan-history" placeholder="VIKING eSports, Team Liquid">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>Função / Role Principal</label>
-                    <select id="profile-role">
-                        <option value="Sniper">Sniper</option>
-                        <option value="Rusher">Rusher</option>
-                        <option value="Suporte">Suporte</option>
-                        <option value="Capitão / IGL">Capitão / IGL</option>
-                        <option value="Flex">Flexível</option>
-                    </select>
+                <div class="input-group margin-top">
+                    <label>Currículo Competitivo / Resumo de Torneios</label>
+                    <textarea id="profile-competitive-cv" style="width:100%; height:80px;" placeholder="Campeão da Copa Viking 2025, Top 4 Regional..."></textarea>
                 </div>
-                <div class="input-group">
-                    <label>URL do Avatar / Foto de Perfil</label>
-                    <input type="text" id="profile-avatar" placeholder="https://link-da-imagem.com/foto.png">
-                </div>
-                <div class="input-group">
-                    <label>Clã Atual / Histórico</label>
-                    <input type="text" id="profile-clan-history" placeholder="Ex: [Atual] VIKING eSports">
-                </div>
-            </div>
-
-            <div class="input-group margin-top">
-                <label>Armas Favoritas (separadas por vírgula)</label>
-                <input type="text" id="profile-favorite-weapons" placeholder="Ex: DL Q33, KRM-262, CBR4">
-            </div>
-
-            <div class="input-group margin-top">
-                <label>Mapas Favoritos (separados por vírgula)</label>
-                <input type="text" id="profile-favorite-maps" placeholder="Ex: Standoff, Firing Range, Raid">
-            </div>
-
-            <div class="input-group margin-top">
-                <label>Currículo Competitivo / Experiências</label>
-                <textarea id="profile-competitive-cv" rows="3" placeholder="Descreva sua bagagem em campeonatos, scrims e disponibilidade..."></textarea>
-            </div>
-
-            <div class="input-group margin-top">
-                <label>Biografia / Apresentação</label>
-                <textarea id="profile-bio" rows="2" placeholder="Fale brevemente sobre você..."></textarea>
-            </div>
-
-            <!-- AVISO VISÍVEL SOBRE AS ESTATÍSTICAS -->
-            <div class="info-banner margin-top">
-                <p><i class="fa-solid fa-shield-halved"></i> <strong>Aviso:</strong> Suas estatísticas de K/D, Vitórias, Ranks e Abates são validadas e atualizadas exclusivamente pelos administradores e organizadores de torneios.</p>
-            </div>
-
-            <button type="submit" class="btn-primary btn-full margin-top">Salvar Alterações</button>
-        </form>
+                <button type="submit" class="btn-primary btn-full margin-top"><i class="fa-solid fa-floppy-disk"></i> Salvar Perfil</button>
+            </form>
+        </div>
     </div>
-</div>
 
     <!-- Modal Adicionar Conquista -->
     <div id="achievement-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <button class="close-achievement-modal close-modal-btn">&times;</button>
-            <h2>Adicionar Conquista / Medalha</h2>
-            <form id="achievement-form">
+            <h2>Adicionar Conquista</h2>
+            <form id="achievement-form" class="margin-top">
                 <div class="input-group">
                     <label>Título da Conquista</label>
-                    <input type="text" id="ach-title" required placeholder="Ex: Campeão do Torneio Viking 5v5">
+                    <input type="text" id="ach-title" required placeholder="Ex: MVP do Torneio">
                 </div>
                 <div class="input-group">
                     <label>Descrição</label>
-                    <input type="text" id="ach-desc" required placeholder="Ex: 1º Lugar Invicto na Season 1">
+                    <input type="text" id="ach-desc" required placeholder="Ex: Maior pontuação da final 5v5">
                 </div>
                 <div class="input-group">
-                    <label>Ícone FontAwesome (Ex: fa-trophy, fa-award, fa-crown, fa-medal)</label>
-                    <input type="text" id="ach-icon" placeholder="fa-trophy">
+                    <label>Ícone (FontAwesome Class)</label>
+                    <input type="text" id="ach-icon" placeholder="fa-trophy" value="fa-trophy">
                 </div>
-                <button type="submit" class="btn-primary btn-full margin-top">Salvar Conquista</button>
+                <button type="submit" class="btn-primary btn-full margin-top">Adicionar</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal de Login/Cadastro -->
-    <div id="auth-modal" class="modal hidden">
-        <div class="modal-content glass-card">
-            <button class="close-modal-btn">&times;</button>
-            <h2 id="modal-title">Acessar Viking Hub</h2>
-            <form id="auth-form">
-                <div class="input-group">
-                    <label>E-mail</label>
-                    <input type="email" id="email" required placeholder="seuemail@codm.com">
+    <!-- Modal Painel ADM -->
+    <div id="admin-modal" class="modal hidden">
+        <div class="modal-content glass-card modal-large">
+            <button class="close-modal-admin close-modal-btn">&times;</button>
+            <h2><i class="fa-solid fa-shield-halved highlight"></i> Painel de Administração Supremo</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="admin-tab-users">Usuários</button>
+                <button class="tab-btn" data-tab="admin-tab-posts">Feed & Posts</button>
+                <button class="tab-btn" data-tab="admin-tab-matches">Inscrições Scrims</button>
+            </div>
+            <div id="admin-tab-users" class="tab-content active">
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>E-mail</th>
+                                <th>Nickname</th>
+                                <th>Status</th>
+                                <th>Cargo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list"></tbody>
+                    </table>
                 </div>
-                <div class="input-group">
-                    <label>Senha</label>
-                    <input type="password" id="password" required placeholder="******">
+            </div>
+            <div id="admin-tab-posts" class="tab-content">
+                <div id="admin-posts-list" class="admin-feed-list"></div>
+            </div>
+            <div id="admin-tab-matches" class="tab-content">
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Modo</th>
+                                <th>Time</th>
+                                <th>Contato</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-matches-list"></tbody>
+                    </table>
                 </div>
-                <button type="submit" id="auth-submit-btn" class="btn-primary btn-full">Entrar</button>
-            </form>
-            <p style="margin-top: 15px; text-align: center;">
-                <a href="#" id="toggle-auth-mode" style="color: var(--gold-primary);">Cadastre-se</a>
-            </p>
+            </div>
         </div>
     </div>
 
