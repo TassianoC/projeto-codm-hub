@@ -989,3 +989,26 @@ function toggleGodPanel(e) {
         modal.classList.toggle('hidden');
     }
 }
+/* ==========================================================================
+   TROCA DE ABAS DO PERFIL ESTILO INSTAGRAM
+   ========================================================================== */
+function switchProfileTab(tabId) {
+    // Esconde todos os conteúdos das abas
+    const contents = document.querySelectorAll('.insta-tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+
+    // Desativa o estado ativo de todos os botões
+    const buttons = document.querySelectorAll('.insta-tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Ativa o conteúdo e o botão selecionado
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+
+    // Marca o botão clicado
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
+}
