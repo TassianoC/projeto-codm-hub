@@ -978,3 +978,82 @@ function godToggleMaintenance() {
     const isMaint = document.body.classList.contains('maintenance-mode');
     alert(`[PODER DE DEUS]: Modo de Manutenção de Emergência ${isMaint ? 'ATIVADO' : 'DESATIVADO'}!`);
 }
+// ==========================================
+// PARTICULAS: FAÍSCAS ELÉTRICAS & REDE TECH
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('particles-js')) {
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 100,
+                    "density": { "enable": true, "value_area": 800 }
+                },
+                "color": {
+                    // Mix de faíscas de energia (Ciano, Amarelo Elétrico e Branco)
+                    "value": ["#00f0ff", "#ffcc00", "#ffffff", "#ff6600"]
+                },
+                "shape": { "type": "circle" },
+                "opacity": {
+                    "value": 0.8,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 6, // Piscada rápida estilo faísca/curto-circuito
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 2.5,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 4,
+                        "size_min": 0.3,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 130,
+                    "color": "#00f0ff", // Teia de circuito em azul neon
+                    "opacity": 0.25,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 6, // Movimentação ágil de corrente elétrica
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab" // Conecta os nós no cursor igual um campo magnético
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push" // Dispara um pulso de faíscas ao clicar
+                    }
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 180,
+                        "line_linked": { "opacity": 0.8 }
+                    },
+                    "push": {
+                        "particles_nb": 20
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    }
+});
