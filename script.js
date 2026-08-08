@@ -27,7 +27,7 @@ let mockLeaderboard = [
     { rank: 1, name: "Viking_Viper", kd: "3.42", wins: 320, points: 2850 },
     { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
     { rank: 3, name: "Valhalla_Ghost", kd: "2.75", wins: 245, points: 2150 },
-    { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 1980 },
+    { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 198, points: 1980 },
     { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 190, points: 1720 }
 ];
 
@@ -279,18 +279,89 @@ function setupEventListeners() {
    LÓGICA PÚBLICA DE PERFIL E PERMISSÃO DE PROPRIETÁRIO
    ========================================================================== */
 
+function setElementText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+}
+
+function renderList(elementId, items, iconClass) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!items || items.length === 0) {
+        container.innerHTML = '<li class="text-muted">Nenhum item informado.</li>';
+        return;
+    }
+    items.forEach(item => {
+        container.innerHTML += `<li><i class="fa-solid ${iconClass} highlight"></i> ${item}</li>`;
+    });
+}
+
+function renderTimeline(elementId, items) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!items || items.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum histórico registrado.</p>';
+        return;
+    }
+    items.forEach(item => {
+        container.innerHTML += `<div class="timeline-item"><i class="fa-solid fa-chevron-right highlight"></i> <span>${item}</span></div>`;
+    });
+}
+
 // Pega o ID do jogador através do parâmetro da URL ?uid=XXXX
 function getProfileTargetUid() {
     const urlParams = new URLSearchParams(window.location.search);
     const targetUid = urlParams.get('uid');
     
-    // Se houver um ID na URL, retorna ele. Senão, se o usuário estiver logado, exibe o próprio.
     if (targetUid) {
         return targetUid;
     } else if (currentUser) {
         return currentUser.uid;
     }
     return null;
+}
+
+// Garante que o documento de perfil do usuário existe no Firestore. Se não existir, cria um perfil inicial.
+function ensureUserProfileExists(user) {
+    if (!db) return;
+
+    const userRef = db.collection('users').doc(user.uid);
+
+    userRef.get().then(doc => {
+        if (!doc.exists) {
+            const initialProfile = {
+                uid: user.uid,
+                email: user.email,
+                nickname: user.displayName || user.email.split('@')[0],
+                gameRole: 'Flex',
+                avatarUrl: user.photoURL || '/img/studio (3).png',
+                bio: 'Novo jogador na comunidade VIKING eSports.',
+                role: 'player',
+                banned: false,
+                
+                // Estatísticas e Ranks (Apenas ADM / Sistema podem editar)
+                kdRatio: '0.00',
+                totalKills: '0',
+                winRate: '0%',
+                mvpCount: '0',
+                currentRank: 'Não Rankeado',
+                rankHistory: [],
+                
+                // Dados editáveis pelo próprio usuário
+                favoriteWeapons: [],
+                favoriteMaps: [],
+                clanHistory: [],
+                competitiveCv: '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            userRef.set(initialProfile).then(() => {
+                loadUserProfileData();
+            });
+        }
+    });
 }
 
 // Carrega as informações do perfil público
@@ -305,10 +376,9 @@ function loadUserProfileData() {
         return;
     }
 
-    // Verifica se o perfil carregado pertence ao usuário ATUALMENTE LOGADO
+    // Controle de Permissão: Verifica se o perfil pertence ao usuário logado
     const isOwner = currentUser && (currentUser.uid === targetUid);
 
-    // Oculta/Exibe elementos de edição dinamicamente com base na permissão
     const ownerElements = document.querySelectorAll('.owner-only-btn');
     ownerElements.forEach(el => {
         if (isOwner) {
@@ -323,9 +393,8 @@ function loadUserProfileData() {
         if (doc.exists) {
             const data = doc.data();
             
-            // Dados Gerais
             setElementText('display-nickname', data.nickname || 'Jogador Sem Tag');
-            setElementText('display-role', data.gameRole || 'Sniper');
+            setElementText('display-role', data.gameRole || 'Flex');
             setElementText('display-bio', data.bio || 'Sem biografia cadastrada.');
             setElementText('display-current-rank', data.currentRank || 'Não Rankeado');
             
@@ -334,29 +403,73 @@ function loadUserProfileData() {
                 avatarImg.src = data.avatarUrl || '/img/studio (3).png';
             }
 
-            // Status
+            // Status (Definidos pelo ADM/Sistema)
             setElementText('display-kd', data.kdRatio || '0.00');
             setElementText('display-total-kills', data.totalKills || '0');
             setElementText('display-winrate', data.winRate || '0%');
             setElementText('display-mvp-count', data.mvpCount || '0');
 
-            // Armas / Mapas / Ranks / Clãs
             renderList('display-favorite-weapons', data.favoriteWeapons, 'fa-crosshairs');
             renderList('display-favorite-maps', data.favoriteMaps, 'fa-map');
             renderTimeline('display-rank-history', data.rankHistory);
             renderTimeline('display-clan-history', data.clanHistory);
 
-            // Currículo
             setElementText('display-competitive-cv', data.competitiveCv || 'Nenhum histórico publicado.');
         } else {
             setElementText('display-nickname', 'Jogador Não Encontrado');
         }
     });
 
-    // Carrega Conquistas, Galeria e Posts do perfil em questão
     listenUserAchievements(targetUid);
     listenUserGallery(targetUid);
     listenUserFeed(targetUid);
+}
+
+// Abrir e Preencher Modal de Edição de Perfil do Usuário
+function openProfileModal() {
+    if (!currentUser || !db) return;
+
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
+        if (doc.exists) {
+            const d = doc.data();
+            if (document.getElementById('profile-nickname')) document.getElementById('profile-nickname').value = d.nickname || '';
+            if (document.getElementById('profile-role')) document.getElementById('profile-role').value = d.gameRole || 'Flex';
+            if (document.getElementById('profile-avatar')) document.getElementById('profile-avatar').value = d.avatarUrl || '';
+            if (document.getElementById('profile-bio')) document.getElementById('profile-bio').value = d.bio || '';
+            if (document.getElementById('profile-favorite-weapons')) document.getElementById('profile-favorite-weapons').value = (d.favoriteWeapons || []).join(', ');
+            if (document.getElementById('profile-favorite-maps')) document.getElementById('profile-favorite-maps').value = (d.favoriteMaps || []).join(', ');
+            if (document.getElementById('profile-clan-history')) document.getElementById('profile-clan-history').value = (d.clanHistory || []).join(', ');
+            if (document.getElementById('profile-competitive-cv')) document.getElementById('profile-competitive-cv').value = d.competitiveCv || '';
+            
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+    });
+}
+
+// Salvar Perfil pelo Próprio Usuário (Sem alterar estatísticas)
+function handleProfileSave(e) {
+    e.preventDefault();
+    if (!currentUser || !db) return;
+
+    const updatedData = {
+        nickname: document.getElementById('profile-nickname').value,
+        gameRole: document.getElementById('profile-role').value,
+        avatarUrl: document.getElementById('profile-avatar').value,
+        bio: document.getElementById('profile-bio').value,
+        favoriteWeapons: document.getElementById('profile-favorite-weapons').value.split(',').map(s => s.trim()).filter(Boolean),
+        favoriteMaps: document.getElementById('profile-favorite-maps').value.split(',').map(s => s.trim()).filter(Boolean),
+        clanHistory: document.getElementById('profile-clan-history').value.split(',').map(s => s.trim()).filter(Boolean),
+        competitiveCv: document.getElementById('profile-competitive-cv').value,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection('users').doc(currentUser.uid).update(updatedData).then(() => {
+        alert('Seu perfil foi atualizado com sucesso!');
+        document.getElementById('profile-modal').classList.add('hidden');
+        loadUserProfileData();
+    }).catch(err => {
+        alert('Erro ao salvar perfil: ' + err.message);
+    });
 }
 
 /* --- SUPORTE À GALERIA DE FOTOS E VÍDEOS --- */
@@ -378,7 +491,6 @@ function listenUserGallery(targetUid) {
               let mediaHTML = '';
 
               if (media.type === 'video') {
-                  // Converte links do YouTube para Embed se necessário
                   let embedUrl = media.url.replace("watch?v=", "embed/");
                   mediaHTML = `
                       <div class="gallery-item glass-card">
@@ -399,7 +511,6 @@ function listenUserGallery(targetUid) {
       });
 }
 
-// Botão de Publicar Foto / Vídeo na Galeria
 document.getElementById('btn-publish-media')?.addEventListener('click', () => {
     if (!currentUser) return alert('Você precisa estar logado.');
 
@@ -421,6 +532,91 @@ document.getElementById('btn-publish-media')?.addEventListener('click', () => {
     }).catch(err => alert('Erro ao publicar: ' + err.message));
 });
 
+/* --- CONQUISTAS DO USUÁRIO --- */
+function listenUserAchievements(targetUid) {
+    const grid = document.getElementById('user-achievements-grid');
+    if (!grid) return;
+
+    db.collection('users').doc(targetUid).collection('achievements')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+          grid.innerHTML = '';
+          if (snapshot.empty) {
+              grid.innerHTML = '<p class="text-muted">Nenhuma conquista cadastrada.</p>';
+              return;
+          }
+          snapshot.forEach(doc => {
+              const ach = doc.data();
+              grid.innerHTML += `
+                  <div class="trophy-card">
+                      <i class="fa-solid ${ach.icon || 'fa-trophy'} highlight trophy-icon"></i>
+                      <h4>${ach.title}</h4>
+                      <p>${ach.desc}</p>
+                  </div>
+              `;
+          });
+      });
+}
+
+function handleAddAchievement(e) {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const title = document.getElementById('ach-title').value;
+    const desc = document.getElementById('ach-desc').value;
+    const icon = document.getElementById('ach-icon').value || 'fa-trophy';
+
+    db.collection('users').doc(currentUser.uid).collection('achievements').add({
+        title: title,
+        desc: desc,
+        icon: icon,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert('Conquista adicionada!');
+        document.getElementById('achievement-modal').classList.add('hidden');
+        document.getElementById('achievement-form').reset();
+    });
+}
+
+/* --- FEED DO PERFIL DO JOGADOR --- */
+function listenUserFeed(targetUid) {
+    const list = document.getElementById('user-posts-list');
+    if (!list) return;
+
+    db.collection('users').doc(targetUid).collection('posts')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+          list.innerHTML = '';
+          if (snapshot.empty) {
+              list.innerHTML = '<p class="text-muted">Nenhum recado publicado.</p>';
+              return;
+          }
+          snapshot.forEach(doc => {
+              const p = doc.data();
+              const dateStr = p.createdAt ? new Date(p.createdAt.toDate()).toLocaleDateString() : 'Hoje';
+              list.innerHTML += `
+                  <div class="post-card">
+                      <p class="post-content">${p.content}</p>
+                      <small class="text-muted">${dateStr}</small>
+                  </div>
+              `;
+          });
+      });
+}
+
+function handleNewUserPost() {
+    if (!currentUser) return alert('Você precisa estar logado.');
+    const text = document.getElementById('user-post-input').value.trim();
+    if (!text) return;
+
+    db.collection('users').doc(currentUser.uid).collection('posts').add({
+        content: text,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        document.getElementById('user-post-input').value = '';
+    });
+}
+
 /* ==========================================================================
    Autenticação & Feed Global
    ========================================================================== */
@@ -435,12 +631,7 @@ function handleAuthSubmit(e) {
         auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-                return db.collection('users').doc(user.uid).set({
-                    email: user.email,
-                    role: 'player',
-                    banned: false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                ensureUserProfileExists(user);
             })
             .then(() => {
                 alert('Conta criada com sucesso!');
@@ -468,6 +659,8 @@ function listenAuthState() {
             if (profileSection) profileSection.classList.remove('hidden');
             if (navProfileLink) navProfileLink.classList.remove('hidden');
 
+            ensureUserProfileExists(user);
+
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
@@ -486,6 +679,7 @@ function listenAuthState() {
             if (authBtnText) authBtnText.innerText = 'Entrar';
             if (profileSection) profileSection.classList.add('hidden');
             if (navProfileLink) navProfileLink.classList.add('hidden');
+            loadUserProfileData();
         }
     });
 }
@@ -527,7 +721,9 @@ function listenGlobalFeed() {
                 postsContainer.innerHTML += `
                     <div class="post-card">
                         <div class="post-header">
-                            <span class="post-author">@${data.author}</span>
+                            <a href="perfil.html?uid=${data.userId}" style="text-decoration:none;">
+                                <span class="post-author">@${data.author}</span>
+                            </a>
                             <span class="post-date">${timeStr}</span>
                         </div>
                         <p class="post-content">${data.content}</p>
@@ -629,7 +825,7 @@ function loadAdminUsersList() {
             const row = `
                 <tr>
                     <td><strong>${u.email}</strong></td>
-                    <td>${u.nickname || 'Não configurado'}</td>
+                    <td><a href="perfil.html?uid=${userId}" style="color:var(--text-primary);">${u.nickname || 'Não configurado'}</a></td>
                     <td>
                         <span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">
                             ${isBanned ? 'BANIDO' : 'ATIVO'}
@@ -691,6 +887,29 @@ function adminDeleteUser(userId) {
             alert('Conta de usuário excluída com sucesso!');
         }).catch(err => alert('Erro ao excluir: ' + err.message));
     }
+}
+
+// Atualiza Estatísticas do Jogador EXCLUSIVAMENTE pelo ADM
+function updatePlayerStatsByAdmin(playerUid, statsData) {
+    if (!db || !isAdmin) {
+        alert("Acesso negado: Apenas administradores podem alterar estatísticas de jogadores.");
+        return;
+    }
+
+    db.collection('users').doc(playerUid).update({
+        kdRatio: statsData.kdRatio,
+        totalKills: statsData.totalKills,
+        winRate: statsData.winRate,
+        mvpCount: statsData.mvpCount,
+        currentRank: statsData.currentRank,
+        rankHistory: statsData.rankHistory || [],
+        updatedByAdminAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert('Estatísticas do jogador atualizadas pelo ADM com sucesso!');
+        loadUserProfileData();
+    }).catch(err => {
+        alert('Erro ao atualizar estatísticas: ' + err.message);
+    });
 }
 
 function loadAdminPostsList() {
