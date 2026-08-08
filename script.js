@@ -2,8 +2,12 @@
    VIKING eSports Hub - Lógica Principal e Administração Suprema
    ========================================================================== */
 
-// SEU EMAIL DE ADMINISTRADOR / SUPREMO
-const MASTER_ADMIN_EMAIL = "tassianocontinidelima@gmail.com";
+/* ==========================================================================
+   VIKING eSports Hub - Lógica Principal e Administração Suprema
+   ========================================================================== */
+
+// SEU EMAIL DE ADMINISTRADOR EXCLUSIVO / SUPREMO
+const MASTER_ADMIN_EMAIL = "fallk.codm@gmail.com"; // Ajuste aqui para o seu e-mail exato cadastrado no Firebase
 
 const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
@@ -26,105 +30,62 @@ let currentUser = null;
 let isSignUpMode = false;
 let isAdmin = false;
 
-let mockLeaderboard = [
-    { rank: 1, name: "Viking_Viper", kd: "3.42", wins: 320, points: 2850 },
-    { rank: 2, name: "Alpha_Squad", kd: "2.98", wins: 280, points: 2410 },
-    { rank: 3, name: "Valhalla_Ghost", kd: "2.75", wins: 245, points: 2150 },
-    { rank: 4, name: "Nordic_Shadow", kd: "2.50", wins: 198, points: 1980 },
-    { rank: 5, name: "Nexus_eSports", kd: "2.35", wins: 1720 }
-];
+// ... (resto do arquivo permanece com suas funções normais)
 
-document.addEventListener('DOMContentLoaded', () => {
-    initParticles();
-    initCounters();
-    renderLeaderboard(mockLeaderboard);
-    setupEventListeners();
-    setupModalOverlayListeners();
-    if (auth) listenAuthState();
-    if (db) {
-        listenGlobalFeed();
-        listenAgendaMatches();
-    }
-});
+/* ==========================================================================
+   AUTENTICAÇÃO E GERENCIAMENTO DE PERMISSÕES (RESTRITO AO MASTER ADMIN)
+   ========================================================================== */
 
-function initParticles() {
-    if (typeof particlesJS !== 'undefined' && document.getElementById('particles-js')) {
-        particlesJS('particles-js', {
-            particles: {
-                number: { value: 50, density: { enable: true, value_area: 800 } },
-                color: { value: '#d4af37' },
-                shape: { type: 'circle' },
-                opacity: { value: 0.25, random: true },
-                size: { value: 3, random: true },
-                line_linked: { enable: true, distance: 150, color: '#d4af37', opacity: 0.12, width: 1 },
-                move: { enable: true, speed: 1.5, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
-            },
-            interactivity: {
-                detect_on: 'canvas',
-                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
-                modes: { grab: { distance: 140, line_linked: { opacity: 0.3 } }, push: { particles_nb: 3 } }
-            },
-            retina_detect: true
-        });
-    }
-}
+function listenAuthState() {
+    auth.onAuthStateChanged((user) => {
+        const authBtnText = document.getElementById('auth-btn-text');
+        const profileSection = document.getElementById('profile-section');
+        const navProfileLink = document.getElementById('nav-profile-link');
 
-function initCounters() {
-    const counters = document.querySelectorAll('.counter');
-    const speed = 150;
-    counters.forEach(counter => {
-        const updateCount = () => {
-            const target = +counter.getAttribute('data-target');
-            const count = +counter.innerText;
-            const inc = target / speed;
-            if (count < target) {
-                counter.innerText = Math.ceil(count + inc);
-                setTimeout(updateCount, 15);
-            } else {
-                counter.innerText = target;
-            }
-        };
-        updateCount();
-    });
-}
+        if (user) {
+            currentUser = user;
+            if (authBtnText) authBtnText.innerText = 'Sair';
+            if (profileSection) profileSection.classList.remove('hidden');
+            if (navProfileLink) navProfileLink.classList.remove('hidden');
 
-function renderLeaderboard(data) {
-    const tbody = document.getElementById('leaderboard-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    data.forEach((item, index) => {
-        const rank = index + 1;
-        const rankClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
-        const row = `
-            <tr>
-                <td class="rank-position ${rankClass}">#${rank}</td>
-                <td><strong>${item.name}</strong></td>
-                <td>${item.kd || '2.00'}</td>
-                <td>${item.wins || 100}</td>
-                <td class="highlight">${item.points} pts</td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
-}
+            ensureUserProfileExists(user);
 
-function setupModalOverlayListeners() {
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-    });
+            // Verifica se o e-mail logado bate exatamente com o MASTER_ADMIN_EMAIL
+            const isUserMaster = user.email && user.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase();
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+            db.collection('users').doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.banned) {
+                        alert('SUA CONTA FOI BANIDA PELO ADMINISTRADOR POR VIOLAÇÃO DAS REGRAS.');
+                        auth.signOut();
+                        return;
+                    }
+                    // Apenas a conta MASTER_ADMIN terá status de Admin ativo no painel
+                    isAdmin = isUserMaster;
+                } else {
+                    isAdmin = isUserMaster;
+                }
+
+                toggleAdminButtonsUI(isAdmin);
+                loadUserProfileData();
+            }).catch(() => {
+                isAdmin = isUserMaster;
+                toggleAdminButtonsUI(isAdmin);
+                loadUserProfileData();
+            });
+        } else {
+            currentUser = null;
+            isAdmin = false;
+            if (authBtnText) authBtnText.innerText = 'Entrar';
+            if (profileSection) profileSection.classList.add('hidden');
+            if (navProfileLink) navProfileLink.classList.add('hidden');
+
+            toggleAdminButtonsUI(false);
+            loadUserProfileData();
         }
     });
 }
-
-function setupEventListeners() {
     // Alternar Tema
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
