@@ -978,3 +978,58 @@ function godToggleMaintenance() {
     const isMaint = document.body.classList.contains('maintenance-mode');
     alert(`[PODER DE DEUS]: Modo de Manutenção de Emergência ${isMaint ? 'ATIVADO' : 'DESATIVADO'}!`);
 }
+// ==========================================
+// CONFIGURAÇÃO DO PARTICLES.JS
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('particles-js')) {
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": { "enable": true, "value_area": 800 }
+                },
+                "color": { "value": "#ff3b3b" }, // Cor das partículas (combine com o tema)
+                "shape": { "type": "circle" },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false
+                },
+                "size": {
+                    "value": 3,
+                    "random": true
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ff3b3b",
+                    "opacity": 0.3,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2.5,
+                    "direction": "none",
+                    "out_mode": "out"
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab" // Cria teias com o ponteiro do mouse
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push" // Adiciona partículas ao clicar
+                    }
+                },
+                "modes": {
+                    "grab": { "distance": 180, "line_linked": { "opacity": 0.7 } }
+                }
+            },
+            "retina_detect": true
+        });
+    }
+});
