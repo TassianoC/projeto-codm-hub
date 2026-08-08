@@ -2,6 +2,9 @@
    VIKING eSports Hub - Lógica Principal e Administração Suprema
    ========================================================================== */
 
+// SEU EMAIL DE ADMINISTRADOR / SUPREMO (Ajuste se for diferente)
+const MASTER_ADMIN_EMAIL = "tassianocontinidelima@gmail.com";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
   authDomain: "projeto-codm-hub.firebaseapp.com",
@@ -211,9 +214,11 @@ function setupEventListeners() {
     if (closeMatch) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
 
-    // ACESSO DIRETO SEM SENHA AO PAINEL DE ADMINISTRAÇÃO
+    // --- ACESSO DIRETO SEM SENHA AO PAINEL DE ADMINISTRAÇÃO E GOD MODE ---
     const navAdminLink = document.getElementById('nav-admin-link');
     const adminBtn = document.getElementById('btn-admin');
+    const godBtn = document.getElementById('btn-god-panel');
+    const godAdminBtn = document.getElementById('godAdminBtn');
 
     function directAdminAccess(e) {
         if (e) e.preventDefault();
@@ -239,6 +244,9 @@ function setupEventListeners() {
 
     if (navAdminLink) navAdminLink.addEventListener('click', directAdminAccess);
     if (adminBtn) adminBtn.addEventListener('click', directAdminAccess);
+
+    if (godBtn) godBtn.addEventListener('click', toggleGodPanel);
+    if (godAdminBtn) godAdminBtn.addEventListener('click', toggleGodPanel);
 
     // Modal Admin e Abas
     const adminModal = document.getElementById('admin-modal');
@@ -272,11 +280,6 @@ function listenAuthState() {
         const authBtnText = document.getElementById('auth-btn-text');
         const profileSection = document.getElementById('profile-section');
         const navProfileLink = document.getElementById('nav-profile-link');
-        
-        // Elementos exclusivos de Admin
-        const navAdminLink = document.getElementById('nav-admin-link');
-        const adminBtn = document.getElementById('btn-admin');
-        const godBtn = document.getElementById('btn-god-panel');
 
         if (user) {
             currentUser = user;
@@ -286,7 +289,9 @@ function listenAuthState() {
 
             ensureUserProfileExists(user);
 
-            // Verifica o documento do usuário no Firestore
+            // VERIFICAÇÃO SE É O EMAIL DA SUA CONTA OU ROLE NO BANCO
+            const isUserMaster = user.email && user.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase();
+
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
@@ -296,13 +301,15 @@ function listenAuthState() {
                         return;
                     }
                     
-                    // LIBERAÇÃO AUTOMÁTICA DE ADM/GOD PARA A SUA CONTA
-                    isAdmin = (data.role === 'admin' || data.role === 'GOD_ADM' || data.role === 'god');
+                    isAdmin = isUserMaster || (data.role === 'admin' || data.role === 'GOD_ADM' || data.role === 'god');
                 } else {
-                    isAdmin = false;
+                    isAdmin = isUserMaster;
                 }
 
-                // Oculta/Exibe os botões de administração apenas se for Admin/GOD
+                toggleAdminButtonsUI(isAdmin);
+                loadUserProfileData();
+            }).catch(() => {
+                isAdmin = isUserMaster;
                 toggleAdminButtonsUI(isAdmin);
                 loadUserProfileData();
             });
@@ -319,7 +326,7 @@ function listenAuthState() {
     });
 }
 
-// Oculta todos os controles de Admin para quem não tem permissão
+// Oculta/Exibe todos os controles de Admin no Header / Menu
 function toggleAdminButtonsUI(show) {
     const elementsToToggle = [
         document.getElementById('nav-admin-link'),
@@ -332,7 +339,7 @@ function toggleAdminButtonsUI(show) {
         if (el) {
             if (show) {
                 el.classList.remove('hidden');
-                el.style.display = '';
+                el.style.display = 'inline-block';
             } else {
                 el.classList.add('hidden');
                 el.style.display = 'none';
@@ -429,7 +436,7 @@ function ensureUserProfileExists(user) {
                 gameRole: 'Flex',
                 avatarUrl: user.photoURL || '/img/studio (3).png',
                 bio: 'Novo jogador na comunidade VIKING eSports.',
-                role: 'GOD_ADM', // Defina seu papel padrão de Administrador
+                role: 'GOD_ADM',
                 banned: false,
                 
                 kdRatio: '0.00',
@@ -986,7 +993,8 @@ function handleAdminStatUpdate(e) {
    PAINEL DE CONTROLE GOD MODE
    ========================================================================== */
 
-function toggleGodPanel() {
+function toggleGodPanel(e) {
+    if (e) e.preventDefault();
     if (!isAdmin) {
         alert("Acesso Negado: Apenas a conta GOD_ADM possui permissão para acessar este painel.");
         return;
