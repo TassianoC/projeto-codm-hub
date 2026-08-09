@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "matches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath":"winnerUid","order":"ASCENDING"},
+        {"fieldPath":"resultAt","order":"DESCENDING"}
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
