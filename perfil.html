@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIKING eSports Hub | Perfil do Jogador</title>
+    <title>CODM HUB | Perfil do Jogador</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <header class="navbar">
         <div class="logo">
             <i class="fa-solid fa-shield-halved highlight"></i>
-            <span>VIKING <span class="highlight">HUB</span></span>
+            <span>CODM <span class="highlight">HUB</span></span>
         </div>
         <nav class="nav-links">
             <a href="index.html">Início</a>
@@ -100,6 +100,7 @@
                     <button class="insta-tab-btn" onclick="switchProfileTab('tab-stats')">
                         <i class="fa-solid fa-chart-line"></i> Estatísticas
                     </button>
+                    <button class="insta-tab-btn" onclick="switchProfileTab('tab-coach')"><i class="fa-solid fa-brain"></i> Coach</button>
                     <button class="insta-tab-btn" onclick="switchProfileTab('tab-feed')">
                         <i class="fa-solid fa-comments"></i> Mural
                     </button>
@@ -173,6 +174,14 @@
                 </div>
             </div>
 
+            <div id="tab-coach" class="insta-tab-content">
+                <div class="coach-profile-grid">
+                    <div class="glass-card coach-score-card"><span class="micro">HUB INTELLIGENCE</span><div class="coach-big-score" id="coach-score">—</div><h3>Coach Score</h3><p>Calculado a partir das partidas reais registradas no HUB.</p></div>
+                    <div class="glass-card"><span class="micro">LEITURA RÁPIDA</span><div class="coach-kpis"><div><b id="coach-kd">—</b><small>K/D</small></div><div><b id="coach-matches">0</b><small>Partidas</small></div><div><b id="coach-mvp">0%</b><small>MVP rate</small></div></div><div class="ai-result"><strong>Insight do Coach</strong><p id="coach-insight">Registre partidas com print para começar sua análise.</p></div></div>
+                    <div class="glass-card full"><span class="micro">PLANO DE TREINO</span><h3>Próximos 3 jogos</h3><p id="coach-plan">O Coach monta seu plano automaticamente quando houver dados reais.</p></div>
+                </div>
+            </div>
+
             <div id="tab-feed" class="insta-tab-content">
                 <div class="glass-card">
                     <h3><i class="fa-solid fa-message highlight"></i> Recados do Perfil</h3>
@@ -186,6 +195,56 @@
                 </div>
             </div>
 
+
+            <div class="hub-section" style="padding:45px 0 15px;max-width:none;">
+                <div class="hub-heading">
+                    <div><div class="hub-eyebrow">IDENTIDADE COMPETITIVA</div><h2>Seu perfil, <span class="highlight">sua carreira.</span></h2></div>
+                    <p>Uma leitura rápida do que torna este jogador diferente dentro do CODM HUB.</p>
+                </div>
+                <div class="hub-grid">
+                    <article class="hub-card large">
+                        <div class="dna-layout">
+                            <div>
+                                <div class="hub-icon"><i class="fa-solid fa-dna"></i></div>
+                                <div class="micro">DNA gerado pelo desempenho</div>
+                                <h3>AGGRESSIVE FRAGGER</h3>
+                                <p>Perfil focado em entrada, pressão e criação de vantagem para o time.</p>
+                            </div>
+                            <div><div class="dna-core"><div><strong>92</strong><small>DNA SCORE</small></div></div></div>
+                            <div class="dna-bars">
+                                <div class="dna-row"><span>Mira</span><div class="dna-track"><i class="dna-fill" style="--value:91%"></i></div><b>91</b></div>
+                                <div class="dna-row"><span>Reação</span><div class="dna-track"><i class="dna-fill" style="--value:87%"></i></div><b>87</b></div>
+                                <div class="dna-row"><span>Estratégia</span><div class="dna-track"><i class="dna-fill" style="--value:73%"></i></div><b>73</b></div>
+                                <div class="dna-row"><span>Objetivo</span><div class="dna-track"><i class="dna-fill" style="--value:68%"></i></div><b>68</b></div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="hub-card">
+                        <div class="hub-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="micro">Progressão</div>
+                        <h3>Nível 47 • Elite</h3>
+                        <div class="hub-score">8.742 <span>score</span></div>
+                        <div class="hub-mini-grid">
+                            <div class="hub-mini"><b>17</b><small>Torneios</small></div>
+                            <div class="hub-mini"><b>143</b><small>Partidas</small></div>
+                            <div class="hub-mini"><b>12</b><small>Streak</small></div>
+                            <div class="hub-mini"><b>4.9</b><small>Reputação</small></div>
+                        </div>
+                    </article>
+                    <article class="hub-card full">
+                        <div class="hub-icon"><i class="fa-solid fa-road"></i></div>
+                        <div class="micro">Histórico de carreira</div>
+                        <h3>Do primeiro confronto à Lenda</h3>
+                        <div class="career-line">
+                            <div class="career-step done"><div class="career-dot"><i class="fa-solid fa-person-rifle"></i></div><label>Recruta</label></div>
+                            <div class="career-step done"><div class="career-dot"><i class="fa-solid fa-shield"></i></div><label>Soldado</label></div>
+                            <div class="career-step done"><div class="career-dot"><i class="fa-solid fa-medal"></i></div><label>Veterano</label></div>
+                            <div class="career-step active"><div class="career-dot"><i class="fa-solid fa-fire"></i></div><label>Elite</label></div>
+                            <div class="career-step"><div class="career-dot"><i class="fa-solid fa-crown"></i></div><label>Lenda</label></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -315,7 +374,7 @@
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <button class="close-modal-btn">&times;</button>
-            <h2 id="modal-title">Acessar Viking Hub</h2>
+            <h2 id="modal-title">Acessar CODM HUB</h2>
             <form id="auth-form">
                 <div class="input-group">
                     <label>E-mail</label>
