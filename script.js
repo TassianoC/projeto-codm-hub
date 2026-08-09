@@ -14,16 +14,13 @@ const firebaseConfig = {
   appId: "1:1038952355133:web:18f011328d2e111316a154"
 };
 
-const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
-const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
-const storage = typeof firebase !== 'undefined' ? firebase.storage() : null; // Add esta linha
-
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
 const auth = typeof firebase !== 'undefined' ? firebase.auth() : null;
 const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+const storage = typeof firebase !== 'undefined' ? firebase.storage() : null;
 
 let currentUser = null;
 let isSignUpMode = false;
@@ -40,11 +37,13 @@ let mockLeaderboard = [
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initEventListeners();
+    initHubExperience();
     if (auth) listenAuthState();
     if (db) {
         listenGlobalFeed();
         listenAgendaMatches();
         listenLeaderboard();
+        listenCoachData();
     }
 });
 
@@ -75,6 +74,7 @@ function initEventListeners() {
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
+            localStorage.setItem('codmhub-theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
             const icon = themeBtn.querySelector('i');
             if (icon) {
                 icon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
@@ -158,6 +158,11 @@ function initEventListeners() {
 
     if (closeMatch && matchModal) closeMatch.addEventListener('click', () => matchModal.classList.add('hidden'));
     if (matchForm) matchForm.addEventListener('submit', handleMatchSubscription);
+
+    const resultForm = document.getElementById('result-form');
+    const closeResult = document.querySelector('.close-result-modal');
+    if (resultForm) resultForm.addEventListener('submit', handleResultSubmit);
+    if (closeResult) closeResult.addEventListener('click', () => document.getElementById('result-modal')?.classList.add('hidden'));
 
     const navAdminLink = document.getElementById('nav-admin-link');
     const adminBtn = document.getElementById('btn-admin');
@@ -370,6 +375,10 @@ function ensureUserProfileExists(user) {
                 totalKills: '0',
                 winRate: '0%',
                 mvpCount: '0',
+                totalMatches: 0,
+                totalWins: 0,
+                totalDeaths: 0,
+                rankingPoints: 0,
                 currentRank: 'Não Rankeado',
                 rankHistory: [],
                 favoriteWeapons: [],
@@ -426,6 +435,8 @@ function loadUserProfileData() {
             setElementText('display-total-kills', data.totalKills || '0');
             setElementText('display-winrate', data.winRate || '0%');
             setElementText('display-mvp-count', data.mvpCount || '0');
+            setElementText('display-ranking-points', data.rankingPoints || '0');
+            setElementText('display-total-matches', data.totalMatches || '0');
 
             renderList('display-favorite-weapons', data.favoriteWeapons, 'fa-crosshairs');
             renderList('display-favorite-maps', data.favoriteMaps, 'fa-map');
@@ -697,23 +708,30 @@ function handleMatchSubscription(e) {
     e.preventDefault();
     if (!currentUser || !db) return;
 
-    const mode = document.getElementById('match-mode-selected').value;
-    const teamName = document.getElementById('match-team-name') ? document.getElementById('match-team-name').value : '';
-    const whatsapp = document.getElementById('match-whatsapp') ? document.getElementById('match-whatsapp').value : '';
+    const mode = document.getElementById('match-mode-selected')?.value || 'Confronto';
+    const teamName = document.getElementById('match-team-name')?.value.trim() || '';
+    const whatsapp = document.getElementById('match-whatsapp')?.value.trim() || '';
+    const scheduledDate = document.getElementById('match-date')?.value || '';
+    const scheduledTime = document.getElementById('match-time')?.value || '';
+    const format = document.getElementById('match-format')?.value || 'equipe';
+    if (!scheduledDate || !scheduledTime) return alert('Informe o dia e o horário do confronto.');
 
     db.collection('matches').add({
+        createdBy: currentUser.uid,
         userId: currentUser.uid,
         userEmail: currentUser.email,
-        mode: mode,
-        teamName: teamName,
-        whatsapp: whatsapp,
+        mode,
+        format,
+        teamName,
+        whatsapp,
+        scheduledAt: firebase.firestore.Timestamp.fromDate(new Date(`${scheduledDate}T${scheduledTime}:00`)),
+        status: 'scheduled',
+        resultStatus: 'pending',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        alert(`Inscrição confirmada para ${mode}! O seu confronto foi agendado com sucesso.`);
-        const modal = document.getElementById('match-modal');
-        if (modal) modal.classList.add('hidden');
-        const form = document.getElementById('match-form');
-        if (form) form.reset();
+        alert('Confronto agendado! Ele aparecerá na Agenda com dia, horário e formato.');
+        document.getElementById('match-modal')?.classList.add('hidden');
+        document.getElementById('match-form')?.reset();
     }).catch(err => alert('Erro na inscrição: ' + err.message));
 }
 
@@ -721,34 +739,153 @@ function listenAgendaMatches() {
     const agendaBody = document.getElementById('agenda-body');
     if (!agendaBody || !db) return;
 
-    db.collection('matches').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+    db.collection('matches').orderBy('scheduledAt', 'asc').onSnapshot((snapshot) => {
         agendaBody.innerHTML = '';
         if (snapshot.empty) {
-            agendaBody.innerHTML = '<tr><td colspan="4" class="text-muted">Nenhuma scrim agendada até o momento.</td></tr>';
+            agendaBody.innerHTML = '<tr><td colspan="7" class="text-muted">Nenhuma partida agendada.</td></tr>';
             return;
         }
-
         snapshot.forEach((doc) => {
             const m = doc.data();
-            const dateStr = m.createdAt ? new Date(m.createdAt.toDate()).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Recente';
-            const row = `
-                <tr>
-                    <td><span class="highlight">${m.mode}</span></td>
-                    <td><strong>${m.teamName}</strong></td>
-                    <td>${m.whatsapp}</td>
-                    <td>${dateStr}</td>
-                </tr>
-            `;
-            agendaBody.innerHTML += row;
+            const date = m.scheduledAt?.toDate ? m.scheduledAt.toDate() : (m.createdAt?.toDate ? m.createdAt.toDate() : null);
+            const dateStr = date ? date.toLocaleDateString('pt-BR') : '—';
+            const timeStr = date ? date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '—';
+            const winner = m.winnerName || (m.resultStatus === 'confirmed' ? 'Resultado registrado' : 'A definir');
+            const screenshot = m.proofUrl ? `<a class="agenda-proof" href="${m.proofUrl}" target="_blank" rel="noopener"><img src="${m.proofUrl}" alt="Print da vitória"><span>Ver prova</span></a>` : '<span class="text-muted">—</span>';
+            const action = m.resultStatus === 'confirmed' ? '<span class="result-badge win"><i class="fa-solid fa-check"></i> Confirmado</span>' : `<button class="btn-outline btn-sm" onclick="openResultModal('${doc.id}')"><i class="fa-solid fa-flag-checkered"></i> Resultado</button>`;
+            agendaBody.innerHTML += `<tr>
+                <td><span class="highlight">${escapeHtml(m.mode || 'Confronto')}</span></td>
+                <td><span class="format-pill">${formatLabel(m.format)}</span></td>
+                <td><strong>${escapeHtml(m.teamName || '—')}</strong></td>
+                <td>${dateStr}<br><strong>${timeStr}</strong></td>
+                <td>${winner}</td>
+                <td>${screenshot}</td>
+                <td>${action}</td>
+            </tr>`;
         });
+    }, err => {
+        agendaBody.innerHTML = `<tr><td colspan="7" class="text-muted">Não foi possível carregar a agenda. Verifique o índice do Firestore para scheduledAt.</td></tr>`;
+        console.error(err);
     });
+}
+
+function formatLabel(format) {
+    return ({'equipe':'👥 Equipe','duo':'👥 Duo','x1':'⚔️ X1'})[format] || format || 'Equipe';
+}
+
+function escapeHtml(value='') {
+    return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+function openResultModal(matchId) {
+    const modal = document.getElementById('result-modal');
+    const input = document.getElementById('result-match-id');
+    if (!modal || !input) return;
+    input.value = matchId;
+    modal.classList.remove('hidden');
+}
+
+async function handleResultSubmit(e) {
+    e.preventDefault();
+    if (!currentUser || !db) return alert('Faça login para registrar o resultado.');
+    const matchId = document.getElementById('result-match-id')?.value;
+    const winnerName = document.getElementById('result-winner-name')?.value.trim();
+    const kills = Number(document.getElementById('result-kills')?.value || 0);
+    const deaths = Number(document.getElementById('result-deaths')?.value || 0);
+    const mvp = document.getElementById('result-mvp')?.checked || false;
+    const map = document.getElementById('result-map')?.value.trim() || '';
+    const weapon = document.getElementById('result-weapon')?.value.trim() || '';
+    const file = document.getElementById('result-proof')?.files?.[0];
+    if (!matchId || !winnerName || !file) return alert('Informe o vencedor e envie o print da tela de vitória.');
+    if (!storage) return alert('Firebase Storage não está disponível nesta página.');
+
+    try {
+        const matchRef = db.collection('matches').doc(matchId);
+        const matchSnap = await matchRef.get();
+        if (!matchSnap.exists) throw new Error('Partida não encontrada.');
+        const match = matchSnap.data();
+        if (match.resultStatus === 'confirmed') return alert('Essa partida já possui resultado.');
+
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        const path = `match-proofs/${matchId}/${Date.now()}_${safeName}`;
+        const upload = await storage.ref(path).put(file);
+        const proofUrl = await upload.ref.getDownloadURL();
+
+        const matchData = {
+            status: 'completed', resultStatus: 'confirmed', winnerUid: currentUser.uid,
+            winnerName, proofUrl, kills, deaths, mvp, map, weapon,
+            resultBy: currentUser.uid, resultAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        await matchRef.update(matchData);
+
+        const userRef = db.collection('users').doc(currentUser.uid);
+        await db.runTransaction(async tx => {
+            const snap = await tx.get(userRef);
+            const d = snap.exists ? snap.data() : {};
+            const oldMatches = Number(d.totalMatches || 0);
+            const oldWins = Number(d.totalWins || 0);
+            const oldKills = Number(d.totalKills || 0);
+            const oldDeaths = Number(d.totalDeaths || 0);
+            const newMatches = oldMatches + 1;
+            const newWins = oldWins + 1;
+            const newKills = oldKills + kills;
+            const newDeaths = oldDeaths + deaths;
+            const kd = newDeaths ? (newKills / newDeaths).toFixed(2) : newKills.toFixed(2);
+            const winRate = `${Math.round((newWins / newMatches) * 100)}%`;
+            const points = Number(d.rankingPoints || 0) + 100;
+            const mvpCount = Number(d.mvpCount || 0) + (mvp ? 1 : 0);
+            tx.set(userRef, { totalMatches:newMatches,totalWins:newWins,totalKills:String(newKills),totalDeaths:newDeaths,kdRatio:kd,winRate,mvpCount:String(mvpCount),rankingPoints:points,updatedAt:firebase.firestore.FieldValue.serverTimestamp() }, {merge:true});
+        });
+
+        document.getElementById('result-modal')?.classList.add('hidden');
+        document.getElementById('result-form')?.reset();
+        alert('Resultado confirmado! A vitória, o print e as estatísticas foram registrados no perfil e no ranking.');
+    } catch (err) {
+        console.error(err);
+        alert('Não foi possível registrar o resultado: ' + err.message);
+    }
+}
+
+function listenCoachData() {
+    if (!db || !document.getElementById('coach-score')) return;
+    if (!currentUser) return;
+    db.collection('matches').where('winnerUid','==',currentUser.uid).orderBy('resultAt','desc').limit(20).onSnapshot(snapshot => {
+        const matches = snapshot.docs.map(d => ({id:d.id,...d.data()}));
+        renderCoachAnalysis(matches);
+    }, err => {
+        console.warn('Coach query:', err.message);
+        db.collection('matches').where('winnerUid','==',currentUser.uid).limit(20).get().then(s => renderCoachAnalysis(s.docs.map(d=>d.data())));
+    });
+}
+
+function renderCoachAnalysis(matches) {
+    if (!matches.length) return;
+    const kills = matches.reduce((a,m)=>a+Number(m.kills||0),0);
+    const deaths = matches.reduce((a,m)=>a+Number(m.deaths||0),0);
+    const avgKD = deaths ? kills/deaths : kills;
+    const mvpRate = matches.filter(m=>m.mvp).length / matches.length;
+    const score = Math.min(99, Math.round(60 + avgKD*12 + mvpRate*15));
+    setElementText('coach-score', score);
+    setElementText('coach-kd', avgKD.toFixed(2));
+    setElementText('coach-matches', matches.length);
+    setElementText('coach-mvp', `${Math.round(mvpRate*100)}%`);
+    const insight = avgKD < 1.2 ? 'Seu maior ponto de atenção é sobreviver mais aos primeiros duelos.' : avgKD < 1.8 ? 'Você está consistente. Trabalhe decisões de entrada e troca de abates.' : 'Seu desempenho mecânico está forte. O próximo salto é melhorar leitura e disciplina.';
+    setElementText('coach-insight', insight);
+    setElementText('coach-plan', avgKD < 1.2 ? 'Treino: 3 partidas focando posicionamento, cobertura e não repetir o mesmo ângulo.' : 'Treino: 3 partidas focando troca de abates, rotações e controle do ritmo.');
 }
 
 function listenLeaderboard() {
     const body = document.getElementById('leaderboard-body');
     if (!body) return;
-
-    renderLeaderboard(mockLeaderboard);
+    if (!db) return renderLeaderboard(mockLeaderboard);
+    db.collection('users').orderBy('rankingPoints','desc').limit(50).onSnapshot(snapshot => {
+        const rows = [];
+        snapshot.forEach((doc, index) => {
+            const d = doc.data();
+            rows.push({rank:index+1,name:d.nickname || d.email?.split('@')[0] || 'Jogador',kd:d.kdRatio || '0.00',wins:Number(d.totalWins||0),points:Number(d.rankingPoints||0)});
+        });
+        renderLeaderboard(rows.length ? rows : mockLeaderboard);
+    }, err => { console.warn('Ranking:', err.message); renderLeaderboard(mockLeaderboard); });
 }
 
 function renderLeaderboard(data) {
@@ -1077,4 +1214,58 @@ async function deleteGalleryItem(targetUid, docId, storagePath) {
             alert("Erro ao excluir mídia: " + error.message);
         }
     }
+}
+/* ==========================================================================
+   CODM HUB 2.0 — Interactive Experience
+   ========================================================================== */
+function initHubExperience() {
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('codmhub-theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        const icon = themeBtn?.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-sun';
+    }
+
+    document.querySelectorAll('.hub-action').forEach(button => {
+        button.addEventListener('click', () => showHubToast(button.dataset.toast || 'Funcionalidade do CODM HUB acionada.'));
+    });
+
+    document.querySelectorAll('.counter').forEach(counter => {
+        const target = Number(counter.dataset.target || counter.textContent.replace(/\D/g, ''));
+        if (!target || counter.dataset.animated) return;
+        counter.dataset.animated = 'true';
+        const duration = 900;
+        const start = performance.now();
+        const tick = (now) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            counter.textContent = Math.floor(target * eased).toLocaleString('pt-BR');
+            if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    });
+
+    // Highlight the current page automatically.
+    const current = location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.nav-links a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === current && !link.classList.contains('highlight-link')) link.classList.add('active');
+    });
+}
+
+function showHubToast(message) {
+    let toast = document.getElementById('hub-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'hub-toast';
+        toast.className = 'hub-toast';
+        toast.innerHTML = '<b>CODM HUB</b><span></span>';
+        document.body.appendChild(toast);
+    }
+    const span = toast.querySelector('span');
+    if (span) span.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(window.__hubToastTimer);
+    window.__hubToastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
 }
