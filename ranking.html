@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIKING eSports Hub | Ranking</title>
+    <title>CODM HUB | Ranking</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
     <header class="navbar">
         <div class="logo">
             <i class="fa-solid fa-shield-halved highlight"></i>
-            <span>VIKING <span class="highlight">HUB</span></span>
+            <span>CODM <span class="highlight">HUB</span></span>
         </div>
         <nav class="nav-links">
             <a href="index.html">Início</a>
@@ -52,13 +52,36 @@
                 </table>
             </div>
         </section>
+
+        <section class="hub-section">
+            <div class="hub-heading">
+                <div><div class="hub-eyebrow">HALL OF FAME</div><h2>Os nomes que <span class="highlight">fizeram história.</span></h2></div>
+                <p>Títulos, rivalidades e marcas que permanecem no histórico do CODM HUB.</p>
+            </div>
+            <div class="hub-grid">
+                <article class="hub-card"><div class="hub-icon"><i class="fa-solid fa-crown"></i></div><div class="micro">Rei do X1</div><h3>VK_Valkyrie</h3><div class="hub-score">142 <span>vitórias</span></div></article>
+                <article class="hub-card"><div class="hub-icon"><i class="fa-solid fa-crosshairs"></i></div><div class="micro">Melhor Sniper</div><h3>Odin_Sniper</h3><div class="hub-score">2.64 <span>K/D</span></div></article>
+                <article class="hub-card"><div class="hub-icon"><i class="fa-solid fa-fire"></i></div><div class="micro">Maior Streak</div><h3>Ragnar_L</h3><div class="hub-score">18 <span>vitórias</span></div></article>
+                <article class="hub-card full">
+                    <div class="hub-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <div class="micro">Free Agents</div>
+                    <h3>Talentos procurando seu próximo time</h3>
+                    <table class="hub-table">
+                        <tr><th>Jogador</th><th>Função</th><th>Rank</th><th>Score</th><th>Status</th></tr>
+                        <tr><td><strong>FALLK_OP</strong></td><td>SMG / Entry</td><td>Legendary</td><td>8.742</td><td><span class="rank-pill gold">DISPONÍVEL</span></td></tr>
+                        <tr><td><strong>Loki_Entry</strong></td><td>Flex</td><td>Legendary</td><td>8.110</td><td><span class="rank-pill gold">DISPONÍVEL</span></td></tr>
+                        <tr><td><strong>Thor_CODM</strong></td><td>AR / Support</td><td>Master</td><td>7.840</td><td><span class="rank-pill">SCRIM</span></td></tr>
+                    </table>
+                </article>
+            </div>
+        </section>
     </main>
 
     <!-- Modal de Login/Cadastro -->
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <button class="close-modal-btn">&times;</button>
-            <h2 id="modal-title">Acessar Viking Hub</h2>
+            <h2 id="modal-title">Acessar CODM HUB</h2>
             <form id="auth-form">
                 <div class="input-group">
                     <label>E-mail</label>
@@ -80,6 +103,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
