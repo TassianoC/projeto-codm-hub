@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIKING eSports Hub | Agenda</title>
+    <title>CODM HUB | Agenda</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
     <header class="navbar">
         <div class="logo">
             <i class="fa-solid fa-shield-halved highlight"></i>
-            <span>VIKING <span class="highlight">HUB</span></span>
+            <span>CODM <span class="highlight">HUB</span></span>
         </div>
         <nav class="nav-links">
             <a href="index.html">Início</a>
@@ -24,6 +24,7 @@
             <a href="agenda.html" class="highlight-link">Agenda</a>
             <a href="ranking.html">Ranking</a>
             <a href="comunidade.html">Comunidade</a>
+            <a href="coach.html">Coach</a>
             <a href="perfil.html" id="nav-profile-link" class="highlight-link hidden"><i class="fa-solid fa-user"></i> Meu Perfil</a>
             <a href="#" id="nav-admin-link" class="highlight-link hidden" style="color: var(--gold-primary) !important;"><i class="fa-solid fa-lock"></i> ADM</a>
         </nav>
@@ -37,29 +38,46 @@
     <main style="padding-top: 100px;">
         <section id="agenda" class="container-section">
             <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> Agenda de <span class="highlight">Scrims</span></h2>
-            <div class="glass-card table-container">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Modo</th>
-                            <th>Time / Clan</th>
-                            <th>Contato</th>
-                            <th>Data/Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody id="agenda-body">
-                        <tr><td colspan="4" class="text-muted">Carregando confrontos salvos...</td></tr>
-                    </tbody>
+            <div class="agenda-hero glass-card">
+                <div><span class="micro">MATCH CENTER</span><h1>Agenda de <span class="highlight">Confrontos</span></h1><p>Dia, horário, formato, vencedor e prova visual. Cada resultado confirmado alimenta automaticamente o ranking.</p></div>
+                <button class="btn-primary" onclick="document.getElementById('agenda-result-help')?.classList.toggle('hidden')"><i class="fa-solid fa-circle-info"></i> Como funciona</button>
+            </div>
+            <div id="agenda-result-help" class="glass-card hidden agenda-help"><b>Fluxo:</b> agende a partida → jogue → abra <b>Resultado</b> → informe vencedor e estatísticas → envie o print da tela de vitória → o HUB registra os pontos.</div>
+            <div class="glass-card table-container margin-top">
+                <table class="leaderboard-table agenda-table">
+                    <thead><tr><th>Confronto</th><th>Formato</th><th>Time / Jogador</th><th>Dia / Hora</th><th>Vencedor</th><th>Prova</th><th>Ação</th></tr></thead>
+                    <tbody id="agenda-body"><tr><td colspan="7" class="text-muted">Carregando confrontos...</td></tr></tbody>
                 </table>
             </div>
         </section>
     </main>
 
+    <div id="result-modal" class="modal hidden">
+        <div class="modal-content glass-card large-modal">
+            <button class="close-result-modal close-modal-btn">&times;</button>
+            <span class="micro">RESULTADO OFICIAL</span><h2>Registrar vitória</h2>
+            <p class="text-muted">O print é obrigatório para validar visualmente o resultado.</p>
+            <form id="result-form" class="margin-top">
+                <input type="hidden" id="result-match-id">
+                <div class="form-grid">
+                    <div class="input-group"><label>Quem venceu?</label><input id="result-winner-name" required placeholder="Nickname ou nome do time"></div>
+                    <div class="input-group"><label>Mapa</label><input id="result-map" placeholder="Ex: Raid"></div>
+                    <div class="input-group"><label>Abates</label><input id="result-kills" type="number" min="0" value="0"></div>
+                    <div class="input-group"><label>Mortes</label><input id="result-deaths" type="number" min="0" value="0"></div>
+                    <div class="input-group"><label>Arma principal</label><input id="result-weapon" placeholder="Ex: QQ9"></div>
+                    <div class="input-group"><label>Print da vitória</label><input id="result-proof" type="file" accept="image/*" required></div>
+                </div>
+                <label class="check-row margin-top"><input id="result-mvp" type="checkbox"> Fui MVP da partida</label>
+                <button class="btn-primary btn-full margin-top" type="submit"><i class="fa-solid fa-cloud-arrow-up"></i> Confirmar e contabilizar</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal de Login/Cadastro -->
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content glass-card">
             <button class="close-modal-btn">&times;</button>
-            <h2 id="modal-title">Acessar Viking Hub</h2>
+            <h2 id="modal-title">Acessar CODM HUB</h2>
             <form id="auth-form">
                 <div class="input-group">
                     <label>E-mail</label>
@@ -81,6 +99,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
