@@ -43,3 +43,27 @@ Para transformar o protótipo em uma rede real, conecte as ações a um backend 
 - `styles.css` — identidade visual, responsividade e temas.
 - `app.js` — navegação, interações, persistência local, Coach, desafios, feed e ranking.
 
+
+
+## Atualizações desta versão
+
+### Perfil — feed visual estilo Instagram
+- O perfil agora possui um feed em grade de 3 colunas.
+- É possível publicar fotos e vídeos diretamente pelo botão `+ Nova Mídia`.
+- As mídias ficam persistidas no perfil via Firestore quando o Firebase está disponível e no `localStorage` como fallback.
+- Clique em uma publicação para abrir o visualizador com imagem/vídeo, legenda e metadados.
+- O código preserva dados antigos de `feedMedia`/`instaFeed` quando existirem.
+
+### Coach — análise obrigatória de 4 prints
+- O Coach exige exatamente quatro prints antes de iniciar a análise.
+- Cada slot possui uma finalidade: resultado/placar, K/D/A e dano, objetivos, e armas/perks/utilitários.
+- Os prints são redimensionados no navegador e enviados à Cloud Function.
+- A IA recebe somente as quatro imagens como fonte de métricas da partida. Modo e mapa são apenas contexto.
+- O modelo é instruído a não inventar números que não estejam visíveis ou legíveis.
+- O relatório mostra veredito, nota, métricas, evidências identificadas e avisos.
+- Sem a Cloud Function/Gemini configurados, o sistema informa a configuração necessária em vez de fabricar uma análise.
+
+### Firebase
+O `index.html` agora carrega o `firebase-client.js`, corrigindo a integração que o `app.js` já esperava.
+
+Para ativar o Coach IA, veja `functions/README.md`.
