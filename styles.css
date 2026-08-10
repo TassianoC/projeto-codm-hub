@@ -138,3 +138,36 @@
 @media(max-width:570px){
   .insta-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
 }
+
+/* ======================================================
+   EXTENSÕES: FEED DO PERFIL + COACH MULTIMODAL REAL
+   ====================================================== */
+.insta-empty{
+  grid-column:1/-1;
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:30px;
+  border:1px dashed var(--line);
+  border-radius:10px;
+  background:var(--surface-2);
+  text-align:center;
+}
+.insta-empty strong{font:700 20px var(--display);color:var(--text)}
+.insta-empty span{max-width:520px;color:var(--muted);font-size:11px;line-height:1.5}
+.insta-item:focus{outline:2px solid var(--gold);outline-offset:2px}
+.insta-modal-meta{display:grid;gap:6px;text-align:left;padding:4px 2px}
+.insta-modal-meta span{font-size:10px;color:var(--muted)}
+.coach-print-rule{margin:0 0 8px!important;font-size:10px!important;color:var(--muted)!important;line-height:1.4!important}
+.print-preview .print-number{position:absolute;right:5px;bottom:5px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.72);color:var(--gold);font-weight:800}
+.coach-source-badge{display:inline-flex;width:max-content;margin:0 0 14px;padding:5px 8px;border:1px solid rgba(98,214,155,.3);border-radius:999px;color:var(--green);font-size:9px;font-weight:800;letter-spacing:.5px}
+.coach-evidence,.coach-warnings{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.025)}
+.coach-evidence p,.coach-warnings ul{margin:7px 0 0;color:var(--muted);font-size:11px;line-height:1.55}
+.coach-warnings{border-color:rgba(255,99,121,.28)}
+.coach-warnings b{color:var(--pink)}
+.coach-warnings li{margin:4px 0}
+.coach-loading span{animation:pulse 1.2s infinite}
+.button:disabled{opacity:.6;cursor:wait;transform:none!important}
