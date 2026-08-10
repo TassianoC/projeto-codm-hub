@@ -1,48 +1,45 @@
-# CODM HUB 2.0
+# CODM HUB 3.0 — Carreira competitiva
 
-Plataforma web para comunidade e competitivo de Call of Duty: Mobile.
-
-## O que foi melhorado
-
-- Redesign premium preto/grafite + dourado.
-- Hero inicial com identidade competitiva.
-- Player DNA: leitura visual do estilo de jogo.
-- Rivalidades e histórico Head-to-Head.
-- Player Score e reputação.
-- Progressão de carreira: Recruta → Soldado → Veterano → Elite → Lenda.
-- Desafios semanais.
-- Mercado de Free Agents.
-- Coach digital com insights demonstrativos.
-- Mapa de domínio por mapa.
-- CODM HUB League e Hall da Fama.
-- Perfil do jogador ampliado com carreira e DNA.
-- Ranking ampliado com Hall da Fama e talentos.
-- Tema claro/escuro persistente.
-- Animação dos números do início.
-- Correção da inicialização duplicada do Firebase no `script.js`.
-- Remoção de `node_modules` e `.git` do pacote final para deixar o ZIP mais leve.
+Uma experiência única para transformar a comunidade de COD Mobile em uma plataforma de identidade e evolução competitiva.
 
 ## Como abrir
 
-### Versão simples
-Abra `index.html` diretamente no navegador.
+Abra `index.html` diretamente no navegador. Para uma experiência melhor durante alterações, rode o projeto com qualquer servidor local (por exemplo, a extensão Live Server do VS Code).
 
-### Com servidor local
-Se usar VS Code, rode com Live Server.
+Não há instalação nem dependências obrigatórias: esta versão funciona somente com HTML, CSS e JavaScript.
 
-### Firebase
-O projeto continua preparado para Firebase Auth, Firestore e Storage. Para os recursos online funcionarem, mantenha a configuração do Firebase e as regras do projeto.
+## O que foi incluído
 
-## Estrutura principal
+- Perfil competitivo completo, com Player Score, DNA de jogo, rank, histórico, armas, mapas, conquistas e currículo para times.
+- Card de jogador compartilhável: o botão de compartilhar copia o link direto do perfil.
+- Sistema de Player Score explicado por critérios: vitórias, objetivos, eficiência, adversários, torneios, sequência e reputação.
+- Arena para desafios 1v1, 2v2 e 5v5, com modal de criação e valor de pontos.
+- Ranking global com busca de jogador e categorias preparadas para Global, X1 e Clãs.
+- Desafio semanal funcional: o progresso é atualizado e persiste no navegador.
+- Coach digital funcional: recebe dados da partida e gera um diagnóstico com mira, decisão, agressividade, posicionamento e recomendação.
+- Feed da comunidade com publicação local, curtidas e área de mercado de talentos.
+- Visual responsivo para desktop e celular, tema claro/escuro e navegação inferior no celular.
 
-- `index.html` — página inicial e nova experiência CODM HUB 2.0
-- `perfil.html` — perfil e carreira do jogador
-- `ranking.html` — ranking + Hall da Fama + Free Agents
-- `modos.html` — inscrições 1v1, 2v2 e 5v5
-- `agenda.html` — agenda de scrims
-- `comunidade.html` — feed da comunidade
-- `regras.html` — regras
-- `style.css` — sistema visual completo
-- `script.js` — Firebase + interações
+## Dados e persistência
 
-> Os dados de DNA, rivalidade, desafios e algumas áreas de inteligência são demonstrativos nesta versão visual. A próxima etapa pode conectar cada métrica ao Firestore para que tudo seja calculado automaticamente.
+Esta é uma versão demonstrativa pronta para apresentação e validação de produto. Alterações feitas no desafio, perfil, disponibilidade e feed são salvas no `localStorage` do navegador, sem depender de login ou banco de dados.
+
+## Próxima etapa para colocar online
+
+Para transformar o protótipo em uma rede real, conecte as ações a um backend (Firebase, Supabase ou outro):
+
+1. Autenticação e perfis em `players`.
+2. Partidas e confirmação dupla em `matches`.
+3. Desafios em `challenges` e progresso em `challengeProgress`.
+4. Posts, comentários e curtidas em `posts`.
+5. Ranking calculado no servidor a partir das partidas validadas.
+6. Upload de prints/clipes em Storage, com moderação antes de contabilizar pontos.
+
+> Importante: nunca calcule nem conceda Player Score apenas no navegador em produção. A validação de resultado e o cálculo do ranking devem acontecer no servidor para evitar fraude.
+
+## Estrutura
+
+- `index.html` — interface e seções do HUB.
+- `styles.css` — identidade visual, responsividade e temas.
+- `app.js` — navegação, interações, persistência local, Coach, desafios, feed e ranking.
+
