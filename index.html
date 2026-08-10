@@ -13,48 +13,52 @@
   <div class="noise"></div>
   <div class="app-shell">
 
-    <!-- TOPBAR -->
+    <!-- BARRA SUPERIOR -->
     <header class="topbar">
       <a href="#inicio" class="brand" data-page="inicio">
-        <div class="brand-mark"><i></i><i></i><i></i></div>
-        CODM <b>HUB</b>
+        <span class="brand-mark"><i></i><i></i><i></i></span>
+        <span>CODM<b>HUB</b></span>
       </a>
-      
+
       <nav class="desktop-nav">
         <button class="nav-link active" data-page="inicio">Início</button>
-        <button class="nav-link auth-required-nav" data-page="perfil">Perfil</button>
-        <button class="nav-link" data-page="arena">Arena 1v1 / Scrims</button>
-        <button class="nav-link" data-page="ranking">Ranking Global</button>
+        <button class="nav-link auth-required-nav hidden" data-page="perfil">Perfil</button>
+        <button class="nav-link" data-page="arena">Arena 1v1</button>
+        <button class="nav-link" data-page="ranking">Ranking</button>
         <button class="nav-link" data-page="desafios">Desafios</button>
-        <button class="nav-link" data-page="coach">Coach Digital</button>
+        <button class="nav-link" data-page="coach">Coach IA</button>
         <button class="nav-link" data-page="comunidade">Comunidade</button>
       </nav>
 
       <div class="topbar-actions">
-        <button id="themeToggle" class="icon-button" title="Alternar Tema">☼</button>
-        <button id="notificationButton" class="icon-button" title="Notificações">
+        <button class="icon-button" id="themeToggle" title="Alternar Tema">☼</button>
+        <button class="icon-button" id="notificationButton" title="Notificações">
           🔔 <b id="notificationBadge">2</b>
         </button>
 
-        <button id="authButton" class="button primary small">Entrar / Cadastrar</button>
+        <button class="button primary small" id="authButton">Entrar</button>
 
-        <button id="profileMini" class="profile-mini hidden" data-page="perfil">
+        <button class="profile-mini hidden" id="profileMini" data-page="perfil">
           <span class="avatar small" id="headerAvatar">FO</span>
           <span id="headerNickname">FALLK_OP</span>
         </button>
 
-        <button id="logoutButton" class="button ghost small hidden">Sair</button>
-        <button id="menuButton" class="menu-button" aria-label="Menu"><span></span><span></span><span></span></button>
+        <button class="button ghost small hidden" id="logoutButton">Sair</button>
       </div>
+
+      <button class="menu-button" id="menuButton" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </header>
 
-    <!-- TRILHO LATERAL (DESKTOP) -->
+    <!-- TRILHO LATERAL -->
     <aside class="side-rail">
       <button class="rail-link active" data-page="inicio"><span>🏠</span><small>Início</small></button>
-      <button class="rail-link auth-required-nav" data-page="perfil"><span>👤</span><small>Perfil</small></button>
+      <button class="rail-link auth-required-nav hidden" data-page="perfil"><span>👤</span><small>Perfil</small></button>
       <button class="rail-link" data-page="arena"><span>⚔️</span><small>Arena</small></button>
       <button class="rail-link" data-page="ranking"><span>🏆</span><small>Ranking</small></button>
-      <button class="rail-link" data-page="coach"><span>✦</span><small>Coach</small></button>
+      <button class="rail-link" data-page="desafios"><span>🎯</span><small>Desafios</small></button>
+      <button class="rail-link" data-page="coach"><span>🧠</span><small>Coach</small></button>
       <button class="rail-link" data-page="comunidade"><span>💬</span><small>Social</small></button>
     </aside>
 
@@ -62,38 +66,40 @@
     <main class="main-content">
 
       <!-- PÁGINA INÍCIO -->
-      <section id="inicio" class="page active">
+      <section class="page active" id="inicio">
         <div class="hero-grid">
-          <div class="hero-copy">
+          <div class="hero-copy reveal">
             <span class="eyebrow live"><span></span> TEMPORADA COMPETITIVA ATIVA</span>
-            <h1>SUA CARREIRA NO <em>COD MOBILE</em> COMEÇA AQUI.</h1>
-            <p>Construa sua identidade competitiva, encontre desafios validados, analise suas partidas com IA e suba no Ranking Global.</p>
+            <h1>DOMINE O <em>LOBBY</em> COM SEU DNA</h1>
+            <p>Construa sua reputação, acompanhe seu Player Score, desafie os melhores e receba análises táticas da nossa inteligência artificial baseada nos seus prints de jogo.</p>
+            
             <div class="hero-actions">
-              <button class="button primary" id="quickProfileBtn">Ver Meu Perfil</button>
-              <button class="button ghost" data-page="arena">Encontrar Desafio</button>
+              <button class="button primary" data-page="arena">Desafiar na Arena</button>
+              <button class="button ghost" id="heroCareerBtn">Ver Meu Perfil</button>
             </div>
+
             <div class="hero-proof">
               <div class="player-stack">
-                <span class="avatar stack a1">FO</span>
+                <span class="avatar stack a1">RX</span>
                 <span class="avatar stack a2">VK</span>
-                <span class="avatar stack a3">LB</span>
+                <span class="avatar stack a3">TU</span>
               </div>
-              <p>Mais de <strong>1.400+ jogadores</strong> ativos participando de scrims e desafios.</p>
+              <p>Mais de <strong>1.400 jogadas</strong> validadas esta semana.</p>
             </div>
           </div>
 
-          <div class="hero-visual">
+          <div class="hero-visual reveal delay-1">
+            <div class="scan-lines"></div>
             <div class="orb orb-one"></div>
             <div class="orb orb-two"></div>
-            <div class="scan-lines"></div>
 
-            <article class="featured-card">
+            <div class="featured-card">
               <div class="featured-top">
-                <div class="rank-emblem">E3</div>
+                <span class="rank-emblem">E3</span>
                 <span class="signal">● ONLINE</span>
               </div>
               <div class="featured-name">
-                <span class="avatar xxl" id="cardAvatar">FO</span>
+                <span class="avatar xl" id="cardAvatar">FO</span>
                 <div>
                   <small id="cardClanRole">LO BARK · ENTRY FRAGGER</small>
                   <h2 id="cardNickname">FALLK_OP</h2>
@@ -107,101 +113,95 @@
                 </div>
                 <div class="score-trend">
                   ▲ +442
-                  <small>esta semana</small>
+                  <small>este mês</small>
                 </div>
               </div>
-              <div class="featured-stats">
-                <div><small>K/D RATIO</small><b>2.84</b></div>
-                <div><small>WIN RATE</small><b>68%</b></div>
-                <div><small>MODO</small><b>Hardpoint</b></div>
-              </div>
-              <div class="card-footer">
-                <span>CODM HUB VERIFIED PLAYER</span>
-                <span>#BR-0447</span>
-              </div>
-            </article>
+            </div>
 
             <div class="floating-stat one">
-              <small>SEQUÊNCIA</small>
-              <b>5V</b>
-              <span>Seguidas</span>
+              <small>TAXA DE VITÓRIA</small>
+              <b>68%</b>
+              <span>ranked</span>
             </div>
             <div class="floating-stat two">
-              <small>TOP ARMA</small>
+              <small>ARMA PRINCIPAL</small>
               <b>AK117</b>
-              <span>Especialista</span>
+              <span>master</span>
             </div>
           </div>
         </div>
 
-        <div class="section-heading">
-          <h2>RESUMO DA <em>CARREIRA</em></h2>
-          <button class="text-button" id="activityProfileBtn">Ver perfil completo →</button>
+        <div class="section-heading compact">
+          <div>
+            <span class="eyebrow">RESUMO DE CARREIRA</span>
+            <h2>MÉTRICAS <em>RÁPIDAS</em></h2>
+          </div>
         </div>
 
         <div class="quick-grid">
           <div class="metric-card card">
-            <div class="metric-icon gold">🏆</div>
+            <span class="metric-icon gold">🏆</span>
             <div>
               <small>PLAYER SCORE</small>
               <strong id="homeScore">8.742</strong>
-              <p class="positive">▲ Top 3% da região</p>
+              <p class="positive">▲ Top 3% do servidor</p>
             </div>
-            <div class="mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <button class="circle-action" data-score-info title="Entenda o Score">?</button>
           </div>
 
           <div class="metric-card card">
-            <div class="metric-icon pink">⚔️</div>
+            <span class="metric-icon pink">🎯</span>
             <div>
-              <small>DESAFIO SEMANAL</small>
-              <strong id="challengePercent">63%</strong>
-              <p><b id="challengeCount">19</b> / 30 Eliminações AK117</p>
+              <small>DESAFIO DA SEMANA</small>
+              <strong><span id="challengeProgress">19</span>/30</strong>
+              <p>Eliminações com AK117</p>
             </div>
-            <button class="circle-action" data-page="desafios">→</button>
+            <div class="progress-ring" id="challengePercent">63%</div>
           </div>
 
           <div class="metric-card card">
-            <div class="metric-icon blue">✦</div>
+            <span class="metric-icon blue">⚡</span>
             <div>
-              <small>DIAGNOSTICO COACH</small>
-              <strong>88/100</strong>
-              <p>Mira e Posicionamento em destaque</p>
+              <small>DISPONIBILIDADE</small>
+              <strong id="availabilityStatus">DISPONÍVEL</strong>
+              <p>Pronto para 1v1 / Scrims</p>
             </div>
-            <button class="circle-action" data-page="coach">→</button>
           </div>
         </div>
 
         <div class="dashboard-grid">
           <div class="activity-card card">
             <div class="card-title">
-              <h3>ÚLTIMAS ATIVIDADES</h3>
+              <h3>Histórico de Atividades</h3>
+              <button class="text-button" id="activityProfileBtn">Ver Perfil Completo →</button>
             </div>
             <div class="timeline" id="homeTimeline"></div>
           </div>
 
           <div class="challenge-card card">
             <div class="challenge-card-top">
-              <h3>DESAFIO DA SEMANA</h3>
-              <span class="xp-badge">+250 PTS</span>
+              <span class="eyebrow">MISSÃO SEMANAL</span>
+              <span class="xp-badge">+350 PTS</span>
             </div>
-            <p>Conclua 30 eliminações no modo Mutiplayer Ranqueado utilizando qualquer fuzil de assalto.</p>
+            <h3>AK117 Dominance</h3>
+            <p>Conclua 30 eliminações em partidas ranqueadas usando a AK117 para subir no ranking global.</p>
             <div class="challenge-bar"><i id="challengeBar"></i></div>
             <div class="challenge-bottom">
-              <span>Progresso atual</span>
-              <b id="challengeProgress">19/30</b>
+              <span id="challengeCount">19</span> / 30 Concluídos
+              <span>Expira em 3 dias</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- PÁGINA PERFIL (ESTILO INSTAGRAM + FEED DE MÍDIAS) -->
-      <section id="perfil" class="page">
+      <!-- PÁGINA PERFIL (COM INSTAGRAM FEED E CARREIRA) -->
+      <section class="page" id="perfil">
         <div class="profile-banner">
           <div class="profile-gradient"></div>
           <div class="banner-dots"></div>
 
           <div class="profile-main">
-            <span class="avatar xxl" id="profileAvatar" title="Clique para trocar foto">FO</span>
+            <span class="avatar xxl" id="profileAvatar">FO</span>
             <div>
               <span class="verified">✓ JOGADOR VERIFICADO</span>
               <h2 id="profileName">FALLK_OP</h2>
@@ -210,237 +210,175 @@
                 <span id="profileClan">LO BARK</span>
                 <span id="profileStyle">AGGRESSIVE</span>
                 <span id="profileWeapon">AK117</span>
-                <span id="profileId">#BR-0447</span>
               </div>
             </div>
           </div>
 
           <div class="profile-rank">
-            <span>SUA PATENTE</span>
+            <span>RANK ATUAL</span>
             <b id="profileRank">ELITE III</b>
-            <small>TOP 3% DA REGIÃO</small>
+            <small id="profileId">#BR-0447</small>
           </div>
-        </div>
-
-        <div class="heading-actions" style="margin-top: 15px;">
-          <button class="button primary small" id="editProfile">⚙ Editar Perfil</button>
-          <button class="button ghost small" id="addMediaBtn">📸 Publicar Imagem / Vídeo</button>
         </div>
 
         <div class="profile-summary-grid">
           <div class="score-panel card">
             <div class="card-title">
-              <h3>PLAYER SCORE</h3>
+              <span class="eyebrow">PLAYER SCORE</span>
               <button class="info-button" data-score-info>?</button>
             </div>
-            <div class="big-score">
-              <strong id="profileScore">8.742</strong>
-              <span>PTS</span>
-            </div>
-            <p class="positive">▲ +442 PTS nesta temporada</p>
+            <div class="big-score"><strong id="profileScore">8.742</strong><span>PTS</span></div>
+            <p class="positive">▲ +442 nesta temporada</p>
             <div class="score-progress"><i></i></div>
-            <div class="next-level">
-              <span>PRÓXIMO RANK</span>
-              <b>MESTRE I (9.000 PTS)</b>
-            </div>
+            <div class="next-level"><span>Próximo nível: Master I</span><b>9.000 PTS</b></div>
           </div>
 
           <div class="dna-panel card">
             <div class="card-title">
-              <h3>DNA DE JOGO</h3>
-              <span class="dna-tag">ENTRY FRAGGER</span>
+              <span class="eyebrow">DNA DE JOGO</span>
+              <span class="dna-tag">ESTILO AGRESSIVO</span>
             </div>
             <div class="dna-content">
-              <div class="dna-core">
-                <b>2.84</b>
-                <span>K/D MEDIO</span>
-              </div>
+              <div class="dna-core"><b>ENTRY</b><span>FRAGGER</span></div>
               <div class="skills" id="skillBars"></div>
             </div>
           </div>
 
           <div class="streak-panel card">
-            <span class="eyebrow">SEQUÊNCIA ATIVA</span>
-            <h3>5 VITÓRIAS</h3>
-            <div class="flame-row">🔥🔥🔥🔥🔥</div>
-            <p>Mantenha a sequência para ganhar multiplicadores de Player Score nas arenas.</p>
+            <span class="eyebrow">SEQUÊNCIA DE VITÓRIAS</span>
+            <h3>5 SEGUIDAS</h3>
+            <div class="flame-row">🔥 🔥 🔥 🔥 🔥</div>
+            <p>Sua eficiência em trocações está 14% acima da média dos jogadores Elite.</p>
+            <button class="button primary small full" id="editProfile">Editar Perfil</button>
           </div>
         </div>
 
-        <!-- TABS DO PERFIL -->
+        <!-- ABAS DO PERFIL -->
         <div class="profile-tabs">
-          <button class="profile-tab active" data-profile-tab="instaFeed">📱 Feed (Instagram)</button>
-          <button class="profile-tab" data-profile-tab="career">📜 Histórico & Carreira</button>
-          <button class="profile-tab" data-profile-tab="stats">📊 Estatísticas Detalhadas</button>
-          <button class="profile-tab" data-profile-tab="achievements">🏅 Conquistas</button>
-          <button class="profile-tab" data-profile-tab="resume">📄 Currículo / Card</button>
+          <button class="profile-tab active" data-tab="careerTab">Carreira & Conquistas</button>
+          <button class="profile-tab" data-tab="instaTab">📸 Feed Mídia (Estilo Instagram)</button>
+          <button class="profile-tab" data-tab="statsTab">Estatísticas de Armas</button>
+          <button class="profile-tab" data-tab="resumeTab">Currículo para Times</button>
         </div>
 
-        <!-- ABA 1: FEED ESTILO INSTAGRAM (IMAGENS E VÍDEOS) -->
-        <div id="tab-instaFeed" class="profile-tab-content active">
-          <div class="insta-header-bar card" style="padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <b style="font-size:16px;">Galeria de Mídias e Destaques</b>
-              <p style="margin:0; font-size:10px; color:var(--muted);">Postagens visuais do seu perfil. Fotos de vitórias, setups, clipes de jogadas e momentos no CODM.</p>
-            </div>
-            <button class="button primary small" id="uploadInstaMediaBtn">+ Nova Mídia</button>
-          </div>
-
-          <!-- GRID ESTILO INSTAGRAM (3 COLUNAS) -->
-          <div class="insta-grid" id="instaGrid"></div>
-        </div>
-
-        <!-- ABA 2: HISTÓRICO & CARREIRA -->
-        <div id="tab-career" class="profile-tab-content">
+        <!-- CONTEÚDO DA ABA CARREIRA -->
+        <div class="profile-tab-content active" id="careerTab">
           <div class="career-layout">
             <div class="card">
-              <h3>LINHA DO TEMPO COMPETITIVA</h3>
+              <span class="eyebrow">HISTÓRICO COMPETITIVO</span>
               <div class="career-timeline" id="careerTimeline"></div>
             </div>
+
             <div class="card">
-              <h3>DOMÍNIO DE MAPAS</h3>
+              <span class="eyebrow">DESEMPENHO EM MAPAS</span>
               <div class="map-list">
-                <div><span><i style="width: 88%;"></i></span><b>Standoff</b><strong>88% WR</strong></div>
-                <div><span><i style="width: 79%;"></i></span><b>Firing Range</b><strong>79% WR</strong></div>
-                <div><span><i style="width: 71%;"></i></span><b>Raid</b><strong>71% WR</strong></div>
-                <div><span><i style="width: 65%;"></i></span><b>Takeoff</b><strong>65% WR</strong></div>
+                <div><b>Nuketown</b><span><i style="width: 78%;"></i></span><strong>78% WR</strong></div>
+                <div><b>Raid</b><span><i style="width: 72%;"></i></span><strong>72% WR</strong></div>
+                <div><b>Standoff</b><span><i style="width: 65%;"></i></span><strong>65% WR</strong></div>
+                <div><b>Firing Range</b><span><i style="width: 61%;"></i></span><strong>61% WR</strong></div>
               </div>
               <div class="coach-tip">
-                <b>✦ Dica do Coach:</b> Seu desempenho em mapas de controle de rotação é alto. Priorize combates na meia distância.
+                <b>DICA DO COACH:</b> Seu controle de mapa em Raid é alto, aproveite para ser o Entry principal nas rodadas decisivas.
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ABA 3: ESTATÍSTICAS -->
-        <div id="tab-stats" class="profile-tab-content">
+        <!-- CONTEÚDO DA ABA FEED INSTAGRAM -->
+        <div class="profile-tab-content" id="instaTab">
+          <div class="insta-feed-header">
+            <div>
+              <h3>Feed do Jogador</h3>
+              <p>Fotos, prints de vitórias e clipes de jogadas compartilhadas no seu perfil.</p>
+            </div>
+            <button class="button primary" id="uploadInstaMediaBtn">+ Publicar Foto ou Vídeo</button>
+          </div>
+
+          <div class="insta-feed-grid" id="instaFeedGrid">
+            <!-- Grid estilo Instagram renderizado via JS -->
+          </div>
+        </div>
+
+        <!-- CONTEÚDO DA ABA ESTATÍSTICAS DE ARMAS -->
+        <div class="profile-tab-content" id="statsTab">
           <div class="stats-table card">
             <div class="stat-tiles">
-              <div><b>1.482</b><span>PARTIDAS JOGADAS</span><small>+24 esta semana</small></div>
-              <div><b>2.84</b><span>K/D RATIO</span><small class="positive">▲ +0.12</small></div>
-              <div><b>68.4%</b><span>TAXA DE VITÓRIA</span><small>234 W / 108 L</small></div>
-              <div><b>42.1%</b><span>PRECISÃO MIRA</span><small>Headshot Rate 28%</small></div>
+              <div><b>3.420</b><span>ELIMINAÇÕES</span><small>+180 esta semana</small></div>
+              <div><b>2.15</b><span>K/D RATIO</span><small>Ranqueado</small></div>
+              <div><b>48%</b><span>PRECISÃO MIRA</span><small>Aumento de 3%</small></div>
+              <div><b>142</b><span>HEADSHOTS</span><small>Neste mês</small></div>
             </div>
-            <h3>ARMAS MAIS UTILIZADAS</h3>
+
+            <h3>Aproveitamento de Armamento</h3>
             <div class="weapon-list">
-              <div><span class="weapon-icon">AK</span><b>AK117</b><i><em style="width: 85%;"></em></i><small>4.120 Abates · 2.9 K/D</small></div>
-              <div><span class="weapon-icon">DL</span><b>DL Q33</b><i><em style="width: 62%;"></em></i><small>2.310 Abates · 3.1 K/D</small></div>
-              <div><span class="weapon-icon">K9</span><b>KRM-262</b><i><em style="width: 44%;"></em></i><small>1.200 Abates · 2.4 K/D</small></div>
+              <div><span class="weapon-icon">AR</span><b>AK117</b><span><em style="width: 88%;"></i></span><small>88% Uso</small></div>
+              <div><span class="weapon-icon">SMG</span><b>CBR4</b><span><em style="width: 62%;"></i></span><small>62% Uso</small></div>
+              <div><span class="weapon-icon">AR</span><b>KILO 141</b><span><em style="width: 45%;"></i></span><small>45% Uso</small></div>
+              <div><span class="weapon-icon">SNP</span><b>DL Q33</b><span><em style="width: 30%;"></i></span><small>30% Uso</small></div>
             </div>
           </div>
         </div>
 
-        <!-- ABA 4: CONQUISTAS -->
-        <div id="tab-achievements" class="profile-tab-content">
-          <div class="achievements-grid">
-            <article class="achievement card">
-              <span>👑</span><b>Lenda Urbana</b><p>Alcançou o top 100 ranqueado em 2 temporadas seguidas.</p>
-            </article>
-            <article class="achievement card">
-              <span>🔥</span><b>Imparável</b><p>Conquistou 10 vitórias consecutivas em desafios 1v1 da Arena.</p>
-            </article>
-            <article class="achievement card">
-              <span>🎯</span><b>Sniper Elite</b><p>Taxa de precisão superior a 70% com rifles de precisão em 50 partidas.</p>
-            </article>
-            <article class="achievement card locked">
-              <span>🔒</span><b>Dominador Global</b><p>Alcance o Top 1 do Ranking Global para desbloquear este selo.</p>
-            </article>
-          </div>
-        </div>
-
-        <!-- ABA 5: CURRÍCULO -->
-        <div id="tab-resume" class="profile-tab-content">
+        <!-- CONTEÚDO DA ABA CURRÍCULO -->
+        <div class="profile-tab-content" id="resumeTab">
           <div class="resume-card card">
             <div>
-              <span class="eyebrow">CARTÃO DE JOGADOR</span>
-              <h3 id="cardTitle">FALLK_OP — LO BARK</h3>
+              <span class="eyebrow">PASSAPORTE COMPETITIVO</span>
+              <h3>Disponível para Line-ups 5v5 & Torneios</h3>
               <p id="profileBio">“Entre no meu lobby se quiser jogar para vencer.”</p>
-              <div class="resume-details">
-                <div><span>DISPONIBILIDADE</span><b>Treinos noturnos / Finais de semana</b></div>
-                <div><span>FUNÇÃO PRINCIPAL</span><b>Entry Fragger / Fragger de Linha</b></div>
-                <div id="resumeContact"><span>CONTATO</span><b>@FALLK_OP</b></div>
-              </div>
             </div>
-            <button class="button primary" id="shareCardBtn">↗ Compartilhar Perfil</button>
+            <div class="resume-details">
+              <div><span>FUNÇÃO PRINCIPAL</span><b>Entry Fragger</b></div>
+              <div><span>DISPONIBILIDADE</span><b>Noite / Finais de semana</b></div>
+            </div>
+            <button class="button primary" id="resumeContact">CONTATO @FALLK_OP</button>
           </div>
         </div>
       </section>
 
-      <!-- PÁGINA ARENA 1V1 / SCRIMS -->
-      <section id="arena" class="page">
+      <!-- PÁGINA ARENA -->
+      <section class="page" id="arena">
         <div class="arena-hero card">
           <div class="arena-copy">
-            <span class="eyebrow">ARENA DE DESAFIOS</span>
-            <h2>DESAFIE OS MELHORES <i>VS</i> SUBA O RANKING</h2>
-            <p>Crie ou aceite desafios validados pela comunidade para somar Player Score diretamente na sua conta.</p>
+            <span class="eyebrow live"><span></span> ARENA DE DESAFIOS ATIVA</span>
+            <h2>DESAFIE JOGADORES <i>VS</i> PROVE SEU VALOR</h2>
+            <p>Encontre oponentes para partidas 1v1 Sniper, 2v2 Rush ou Scrims de Clãs valendo Player Score.</p>
             <div class="duel-meta">
-              <span>✓ Validação de Resultado por Prints</span>
-              <span>✓ Anti-Cheat Integrado</span>
-              <span>✓ Pontuação Ranqueada</span>
+              <span>● 24 SALAS ABERTAS AGORA</span>
+              <span>● VALIDAÇÃO DUPLA POR PRINT</span>
             </div>
-            <button class="button primary" id="createMatchBtn">+ Criar Novo Desafio</button>
+            <button class="button primary" data-open-duel>+ Criar Desafio</button>
           </div>
-          <div class="versus-art">
-            <span>VS</span>
-          </div>
+          <div class="versus-art"><span>VS</span></div>
         </div>
 
         <div class="section-heading">
-          <h2>DESAFIOS <em>DISPONÍVEIS</em></h2>
-          <div class="filter-group">
-            <button class="filter active" data-filter="all">Todos</button>
-            <button class="filter" data-filter="1v1">1v1</button>
-            <button class="filter" data-filter="2v2">2v2</button>
-            <button class="filter" data-filter="5v5">5v5 Scrims</button>
+          <h2>PARTIDAS <em>DISPONÍVEIS</em></h2>
+          <div class="filter-group" id="matchFilters">
+            <button class="filter active" data-filter="all">Todas</button>
+            <button class="filter" data-filter="1v1">1v1 Sniper</button>
+            <button class="filter" data-filter="2v2">2v2 Duo</button>
+            <button class="filter" data-filter="5v5">5v5 Scrim</button>
           </div>
         </div>
 
         <div class="match-grid" id="matchGrid"></div>
       </section>
 
-      <!-- PÁGINA RANKING GLOBAL -->
-      <section id="ranking" class="page">
-        <div class="leaderboard-layout">
-          <div class="podium card">
-            <span class="eyebrow">TOP 3 DA REGIONAL</span>
-            <div class="podium-players">
-              <div class="podium-player second">
-                <span class="avatar">VK</span>
-                <b>VK_VALKYRIE</b>
-                <small>9.142 PTS</small>
-                <i>2</i>
-              </div>
-              <div class="podium-player first">
-                <span class="crown">👑</span>
-                <span class="avatar">RX</span>
-                <b>R4GNA_RX</b>
-                <small>9.486 PTS</small>
-                <i>1</i>
-              </div>
-              <div class="podium-player third">
-                <span class="avatar">TU</span>
-                <b>TUCAFPS</b>
-                <small>8.991 PTS</small>
-                <i>3</i>
-              </div>
-            </div>
-          </div>
-
-          <div class="rank-insight card">
-            <span class="eyebrow">SUA POSIÇÃO</span>
-            <h3>#06 <small>TOP 3%</small></h3>
-            <p>Você está a apenas <b>249 PTS</b> de entrar no Top 5 Global. Dispute partidas de Arena para subir posições.</p>
-            <div class="rank-ladder">
-              <span>Sua pontuação: 8.742</span>
-              <i></i>
-              <span>Top 5: 8.991</span>
-            </div>
+      <!-- PÁGINA RANKING -->
+      <section class="page" id="ranking">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">TEMPORADA 4 · BRASIL</span>
+            <h1>RANKING <em>GLOBAL</em></h1>
+            <p>Os melhores jogadores e clãs calculados com base no Player Score.</p>
           </div>
         </div>
 
         <div class="ranking-controls">
           <div class="search-box">
-            🔍 <input type="text" id="rankingSearch" placeholder="Buscar por nick do jogador...">
+            <span>🔍</span>
+            <input type="text" id="rankingSearch" placeholder="Buscar por nick ou clã...">
           </div>
         </div>
 
@@ -451,295 +389,304 @@
             <span>FUNÇÃO</span>
             <span>WIN RATE</span>
             <span>SCORE</span>
-            <span></span>
+            <span>VER</span>
           </div>
           <div id="rankingRows"></div>
         </div>
       </section>
 
       <!-- PÁGINA DESAFIOS -->
-      <section id="desafios" class="page">
+      <section class="page" id="desafios">
         <div class="featured-challenge card">
           <div class="challenge-medal">🏅</div>
           <div class="featured-challenge-copy">
-            <span class="eyebrow">DESAFIO DA SEMANA</span>
-            <h2>MESTRE DO FUZIL DE ASSALTO</h2>
-            <p>Realize 30 eliminações em partidas ranqueadas Multiplayer usando a arma AK117 ou qualquer outro fuzil de assalto para garantir Bônus de Player Score.</p>
-            <div class="large-progress">
-              <i id="largeChallengeBar"></i>
-            </div>
+            <span class="eyebrow">DESAFIO ESPECIAL DA SEMANA</span>
+            <h2>AK117 MASTER CLASS</h2>
+            <p>Acumule 30 eliminações em partidas ranqueadas usando a AK117 para resgatar o selo exclusivo de Mestre de Fusil.</p>
+            <div class="large-progress"><i id="largeChallengeBar"></i></div>
             <div id="largeChallengeText">19 de 30 eliminações validadas</div>
           </div>
           <div class="challenge-rewards">
             <span>RECOMPENSA</span>
-            <b>+250 PTS</b>
-            <p>Selo exclusivo "Especialista AK117" no perfil.</p>
-          </div>
-        </div>
-
-        <div class="section-heading">
-          <h2>MISSÕES <em>DIÁRIAS</em></h2>
-        </div>
-
-        <div class="missions-grid">
-          <div class="mission card">
-            <div class="mission-icon pink">⚔️</div>
-            <div>
-              <small>MISSÃO 01</small>
-              <h3>Vitória no Hardpoint</h3>
-              <p>Vença 2 partidas no modo Hardpoint.</p>
-            </div>
-            <b>+50 PTS</b>
-          </div>
-
-          <div class="mission card">
-            <div class="mission-icon blue">🎯</div>
-            <div>
-              <small>MISSÃO 02</small>
-              <h3>Precisão Mortal</h3>
-              <p>Acerte 10 tiros na cabeça em qualquer modo.</p>
-            </div>
-            <b>+75 PTS</b>
-          </div>
-
-          <div class="mission card">
-            <div class="mission-icon green">🤝</div>
-            <div>
-              <small>MISSÃO 03</small>
-              <h3>Trabalho em Equipe</h3>
-              <p>Conclua 15 assistências em partidas de clã.</p>
-            </div>
-            <b>+60 PTS</b>
+            <b>+350 PTS</b>
+            <p>Incréscimo direto no seu Player Score Global.</p>
           </div>
         </div>
       </section>
 
-      <!-- PÁGINA COACH DIGITAL COM UPLOAD E ANÁLISE DE 4 PRINTS -->
-      <section id="coach" class="page">
+      <!-- PÁGINA COACH IA (ANÁLISE POR 4 PRINTS) -->
+      <section class="page" id="coach">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">TECNOLOGIA DE ANÁLISE IA</span>
+            <h1>COACH <em>DIGITAL</em> DE DESEMPENHO</h1>
+            <p>Envie exatamente os 4 prints da sua partida para que a IA analise seu desempenho e dê o veredito completo.</p>
+          </div>
+        </div>
+
         <div class="coach-layout">
           <div class="coach-form-card card">
-            <span class="eyebrow">ANÁLISE POR IA MULTIMODAL</span>
-            <h2>COACH DIGITAL CODM</h2>
-            <p>Envie os <strong>4 prints da tela de fim de partida</strong> para que a IA analise a estatística completa (Pontuação, K/D, Objetivos e Utilitários) e emita o veredito tático exato.</p>
+            <h2>Enviar Prints da Partida</h2>
+            <p>Para obter a análise mais precisa, selecione ou tire foto das 4 telas finais da sua partida do CODM:</p>
+
+            <div class="screenshot-upload-box">
+              <span class="eyebrow">ANEXAR OS 4 PRINTS OBRIGATÓRIOS</span>
+              <div class="screenshot-grid">
+                <div class="screenshot-slot" data-slot="1">
+                  <span class="slot-icon">📷</span>
+                  <small>1. Placar Final</small>
+                  <input type="file" accept="image/*" class="slot-file-input" hidden>
+                  <div class="slot-preview hidden"></div>
+                </div>
+                <div class="screenshot-slot" data-slot="2">
+                  <span class="slot-icon">📷</span>
+                  <small>2. K/D/A e Pontos</small>
+                  <input type="file" accept="image/*" class="slot-file-input" hidden>
+                  <div class="slot-preview hidden"></div>
+                </div>
+                <div class="screenshot-slot" data-slot="3">
+                  <span class="slot-icon">📷</span>
+                  <small>3. Dano e Destaque</small>
+                  <input type="file" accept="image/*" class="slot-file-input" hidden>
+                  <div class="slot-preview hidden"></div>
+                </div>
+                <div class="screenshot-slot" data-slot="4">
+                  <span class="slot-icon">📷</span>
+                  <small>4. Armas / Detalhes</small>
+                  <input type="file" accept="image/*" class="slot-file-input" hidden>
+                  <div class="slot-preview hidden"></div>
+                </div>
+              </div>
+            </div>
 
             <form id="coachForm">
               <div class="form-row">
                 <label>MODO DE JOGO
-                  <select name="mode" id="coachModeSelect">
-                    <option value="Hardpoint">Hardpoint (Zona Localizada)</option>
-                    <option value="Search & Destroy">Localizar e Destruir (S&D)</option>
+                  <select name="mode" id="coachMode">
+                    <option value="Hardpoint">Hardpoint (Zona de Conflito)</option>
+                    <option value="S&D">Search & Destroy (Localizar e Destruir)</option>
                     <option value="Domination">Dominação</option>
-                    <option value="Control">Controle</option>
+                    <option value="1v1 Sniper">1v1 Sniper</option>
                   </select>
                 </label>
-                <label>MAPA DA PARTIDA
-                  <select name="map" id="coachMapSelect">
-                    <option value="Standoff">Standoff</option>
+                <label>MAPA
+                  <select name="map" id="coachMap">
+                    <option value="Nuketown">Nuketown</option>
                     <option value="Raid">Raid</option>
+                    <option value="Standoff">Standoff</option>
                     <option value="Firing Range">Firing Range</option>
-                    <option value="Takeoff">Takeoff</option>
                     <option value="Summit">Summit</option>
                   </select>
                 </label>
               </div>
 
-              <!-- PAINEL DE 4 PRINTS OBRIGATÓRIOS PARA AVALIAÇÃO DA IA -->
-              <div class="coach-prints-container">
-                <label style="margin-bottom:6px; display:block; font-weight:700; color:var(--gold);">
-                  📸 ANEXAR OS 4 PRINTS DA PARTIDA (PARA ANÁLISE COMPLETA):
-                </label>
-                
-                <div class="coach-prints-grid">
-                  <!-- Print 1 -->
-                  <div class="print-slot" id="printSlot1" data-slot="0">
-                    <div class="print-preview" id="printPrev0"><span>1</span><small>Placar Geral & Vitórias</small></div>
-                    <button type="button" class="button small ghost btn-upload-print" data-slot="0">Anexar Print 1</button>
-                  </div>
-
-                  <!-- Print 2 -->
-                  <div class="print-slot" id="printSlot2" data-slot="1">
-                    <div class="print-preview" id="printPrev1"><span>2</span><small>Dano & K/D/A</small></div>
-                    <button type="button" class="button small ghost btn-upload-print" data-slot="1">Anexar Print 2</button>
-                  </div>
-
-                  <!-- Print 3 -->
-                  <div class="print-slot" id="printSlot3" data-slot="2">
-                    <div class="print-preview" id="printPrev2"><span>3</span><small>Tempo de Objetivo / Capturas</small></div>
-                    <button type="button" class="button small ghost btn-upload-print" data-slot="2">Anexar Print 3</button>
-                  </div>
-
-                  <!-- Print 4 -->
-                  <div class="print-slot" id="printSlot4" data-slot="3">
-                    <div class="print-preview" id="printPrev3"><span>4</span><small>Detalhes de Armas & Util.</small></div>
-                    <button type="button" class="button small ghost btn-upload-print" data-slot="3">Anexar Print 4</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <label>RESULTADO
-                  <select name="win">
-                    <option value="yes">Vitória na Partida</option>
-                    <option value="no">Derrota na Partida</option>
-                  </select>
-                </label>
-                <label>COMPORTAMENTO
-                  <select name="behavior">
-                    <option value="balanced">Equilibrado / Rotação</option>
-                    <option value="solo">Combates Isolados / Entry</option>
-                    <option value="objective">Focado 100% na Zona</option>
-                    <option value="passive">Ancoragem / Suporte Recuado</option>
-                  </select>
-                </label>
-              </div>
-
-              <button type="submit" class="button primary full" style="margin-top:10px;">✦ Gerar Veredito da IA baseada nos Prints</button>
+              <button type="submit" class="button primary full" id="analyzeBtn">🧠 Analisar 4 Prints & Gerar Veredito IA</button>
             </form>
           </div>
 
-          <!-- RELATÓRIO DO COACH -->
           <div class="coach-report card" id="coachReport">
             <div class="report-empty">
-              <span>✦</span>
-              <h2>Aguardando Dados e Prints</h2>
-              <p>Anexe os 4 prints da partida acima e clique em "Gerar Veredito" para a IA processar suas métricas visuais de jogo.</p>
+              <span>🧠</span>
+              <h2>Aguardando Envio de Prints</h2>
+              <p>Anexe as 4 imagens da sua partida ao lado e clique em "Analisar 4 Prints" para gerar seu diagnóstico completo de tática, mira e rotação.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- PÁGINA COMUNIDADE & SOCIAL -->
-      <section id="comunidade" class="page">
+      <!-- PÁGINA COMUNIDADE -->
+      <section class="page" id="comunidade">
         <div class="community-layout">
           <div>
             <div class="create-post card">
               <div>
                 <span class="avatar" id="feedUserAvatar">FO</span>
-                <textarea id="postInput" placeholder="O que você está treinando hoje? Compartilhe seus resultados ou busque parceiros para scrims..." maxlength="300"></textarea>
+                <textarea id="postInput" placeholder="O que está acontecendo no seu lobby? Compartilhe resultados, vídeos ou busque time..." maxlength="280"></textarea>
               </div>
               <div class="post-actions">
-                <button type="button" class="button small ghost" id="attachPostPhotoBtn">🖼 Anexar Foto/Mídia</button>
-                <span id="charCount">0/300</span>
-                <button class="button primary small" id="publishPost">Publicar</button>
+                <button type="button" class="button ghost small" id="attachPostPhotoBtn">📷 Anexar Foto</button>
+                <span id="charCount">0/280</span>
+                <button type="button" class="button primary small" id="publishPostBtn">Publicar</button>
               </div>
             </div>
 
             <div class="post-list" id="postList"></div>
           </div>
 
-          <aside class="community-aside">
+          <div class="community-aside">
             <div class="trending card">
-              <h3>POSTS EM DESTAQUE</h3>
-              <p>Confira o que a comunidade competitiva do CODM HUB está comentando no momento.</p>
+              <h3>Destaques do Dia</h3>
+              <p>#X1NightCup · #Lineup5v5 · #AK117Master</p>
             </div>
-            <div class="spotlight-grid" id="spotlightPosts" style="display:grid; gap:10px; margin-top:10px;"></div>
-          </aside>
+          </div>
         </div>
       </section>
 
     </main>
 
-    <!-- NAVEGAÇÃO MOBILE (RODAPÉ) -->
+    <!-- NAVEGAÇÃO MOBILE -->
     <nav class="mobile-nav">
-      <button class="active" data-page="inicio">🏠<small>Início</small></button>
-      <button class="auth-required-nav" data-page="perfil">👤<small>Perfil</small></button>
-      <button class="mobile-center" data-page="arena">⚔️<small>Arena</small></button>
-      <button data-page="ranking">🏆<small>Rank</small></button>
-      <button data-page="coach">✦<small>Coach</small></button>
+      <button data-page="inicio" class="active"><span>🏠</span><small>Início</small></button>
+      <button data-page="arena"><span>⚔️</span><small>Arena</small></button>
+      <button data-page="perfil" class="mobile-center auth-required-nav hidden"><span>👤</span><small>Perfil</small></button>
+      <button data-page="ranking"><span>🏆</span><small>Ranking</small></button>
+      <button data-page="coach"><span>🧠</span><small>Coach</small></button>
     </nav>
-  </div>
 
-  <!-- MODAIS E POPUPS -->
-  <div class="modal-backdrop" id="modalBackdrop"></div>
+    <!-- BACKDROP E MODAIS -->
+    <div class="modal-backdrop" id="modalBackdrop"></div>
 
-  <!-- MODAL AUTH -->
-  <div class="modal" id="authModal">
-    <button class="modal-close" data-close-modal>&times;</button>
-    <h2 id="authModalTitle">Entre na sua carreira</h2>
-    <p id="authModalDesc">Acesse com sua conta para gerenciar seu perfil e interagir com a comunidade.</p>
-    
-    <button class="button google-button full" id="googleLogin">Continuar com Google</button>
-    
-    <div class="auth-divider"><span>OU</span></div>
-
-    <form id="authForm">
-      <label>E-MAIL
-        <input type="email" name="email" required placeholder="seu@email.com">
-      </label>
-      <label>SENHA
-        <input type="password" name="password" required placeholder="••••••••">
-      </label>
-      <button type="submit" class="button primary full" id="emailAuthSubmit">Entrar na conta</button>
-    </form>
-    
-    <div class="auth-mode">
-      <button class="text-button" id="toggleAuthMode">Ainda não tem conta? Criar nova conta</button>
-    </div>
-  </div>
-
-  <!-- MODAL EDITAR PERFIL -->
-  <div class="modal" id="editModal">
-    <button class="modal-close" data-close-modal>&times;</button>
-    <h2 id="editModalTitle">Editar Perfil Competitivo</h2>
-    <p>Atualize seus dados visíveis para recrutadores de clãs e outros jogadores.</p>
-
-    <div style="margin-bottom:15px; text-align:center;">
-      <button type="button" class="button ghost small" id="changeAvatarBtn">📷 Trocar Foto de Perfil</button>
+    <!-- MODAL AUTH -->
+    <div class="modal" id="authModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2 id="authModalTitle">Entre na sua carreira</h2>
+      <p id="authModalDesc">Acesse com sua conta para gerenciar seu perfil e interagir com a comunidade.</p>
+      
+      <form id="authForm">
+        <label>E-MAIL<input type="email" name="email" required placeholder="seu@email.com"></label>
+        <label>SENHA<input type="password" name="password" required placeholder="••••••••"></label>
+        <button type="submit" class="button primary full" id="emailAuthSubmit">Entrar na conta</button>
+      </form>
+      
+      <div class="auth-divider">OU</div>
+      <button class="button google-button full" id="googleLogin">Entrar com Google</button>
+      <button class="text-button auth-mode" id="toggleAuthMode">Ainda não tem conta? Criar nova conta</button>
     </div>
 
-    <form id="profileForm">
-      <div class="form-row">
-        <label>NICKNAME
-          <input type="text" name="nickname" required>
-        </label>
-        <label>CLÃ / TIME
-          <input type="text" name="clan">
-        </label>
+    <!-- MODAL EDITAR PERFIL -->
+    <div class="modal" id="editModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2 id="editModalTitle">Editar Perfil Competitivo</h2>
+      <p>Mantenha seus dados atualizados para ser encontrado por outros clãs.</p>
+
+      <div style="margin-bottom:15px; text-align:center;">
+        <button type="button" class="button ghost small" id="changeAvatarBtn">📷 Trocar Foto de Perfil</button>
       </div>
-      <label>BIOGRAFIA / FRASE DE IMPACTO
-        <textarea name="bio" rows="2"></textarea>
-      </label>
-      <div class="form-row">
-        <label>FUNÇÃO
-          <select name="role">
-            <option value="Entry Fragger">Entry Fragger</option>
-            <option value="Sniper">Sniper</option>
-            <option value="IGL / Capitão">IGL / Capitão</option>
-            <option value="Support">Support</option>
-            <option value="Flex">Flex</option>
+
+      <form id="profileForm">
+        <div class="form-row">
+          <label>NICKNAME<input type="text" name="nickname" required></label>
+          <label>CLÃ<input type="text" name="clan"></label>
+        </div>
+        <div class="form-row">
+          <label>FUNÇÃO EM JOGO
+            <select name="role">
+              <option value="Entry Fragger">Entry Fragger</option>
+              <option value="Sniper">Sniper</option>
+              <option value="Flex">Flex</option>
+              <option value="IGL / Capitão">IGL / Capitão</option>
+              <option value="Suporte">Suporte</option>
+            </select>
+          </label>
+          <label>ESTILO DE JOGO
+            <select name="style">
+              <option value="Aggressive">Aggressive</option>
+              <option value="Tactical">Tactical</option>
+              <option value="Passive">Passive</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>ARMA FAVORITA<input type="text" name="weapon"></label>
+          <label>MAPA FAVORITO<input type="text" name="favoriteMap"></label>
+        </div>
+        <label>BIO DA CARREIRA<textarea name="bio" rows="2"></textarea></label>
+        <label>DISPONIBILIDADE
+          <select name="availability">
+            <option value="true">Disponível para partidas</option>
+            <option value="false">Ocupado no momento</option>
           </select>
         </label>
-        <label>ESTILO DE JOGO
-          <select name="style">
-            <option value="Aggressive">Aggressive</option>
-            <option value="Tactical">Tactical</option>
-            <option value="Anchor">Anchor</option>
-            <option value="Slayer">Slayer</option>
+        <button type="submit" class="button primary full">Salvar Alterações</button>
+      </form>
+    </div>
+
+    <!-- MODAL PUBLICAR NO FEED DO PERFIL (INSTAGRAM) -->
+    <div class="modal" id="instaUploadModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2>Nova Publicação no Feed</h2>
+      <p>Envie uma foto ou clipe de vídeo para exibir no seu perfil estilo Instagram.</p>
+
+      <form id="instaUploadForm">
+        <label>SELECIONAR MÍDIA (FOTO OU VÍDEO)
+          <input type="file" id="instaMediaInput" accept="image/*,video/*" required>
+        </label>
+        <label>LEGENDA DA PUBLICAÇÃO
+          <textarea id="instaCaptionInput" rows="3" placeholder="Escreva uma legenda..."></textarea>
+        </label>
+        <button type="submit" class="button primary full">Publicar no Perfil</button>
+      </form>
+    </div>
+
+    <!-- MODAL VISUALIZAR MÍDIA FEED INSTAGRAM -->
+    <div class="modal" id="instaViewerModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <div id="instaViewerContent"></div>
+    </div>
+
+    <!-- MODAL CRIAR DESAFIO DUELO -->
+    <div class="modal" id="duelModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2>Criar Desafio na Arena</h2>
+      <p>Escolha a modalidade e os pontos valendo no Player Score.</p>
+      <form id="duelForm">
+        <label>MODO DE JOGO
+          <select name="duelMode">
+            <option value="1v1 Sniper">1v1 Sniper (BO3)</option>
+            <option value="2v2 Duo Rush">2v2 Duo Rush</option>
+            <option value="5v5 Scrim">5v5 Scrim Ranqueada</option>
           </select>
         </label>
-      </div>
-      <div class="form-row">
-        <label>ARMA FAVORITA
-          <input type="text" name="weapon" placeholder="Ex: AK117, DL Q33">
+        <label>MAPA<input type="text" name="duelMap" placeholder="Ex: Nuketown / BO3" required></label>
+        <label>PONTOS EM JOGO
+          <select name="duelPoints">
+            <option value="80">80 PTS</option>
+            <option value="120" selected>120 PTS</option>
+            <option value="200">200 PTS</option>
+          </select>
         </label>
-        <label>MAPA FAVORITO
-          <input type="text" name="favoriteMap" placeholder="Ex: Standoff">
-        </label>
+        <button type="submit" class="button primary full">Criar Sala de Desafio</button>
+      </form>
+    </div>
+
+    <!-- MODAL NOTIFICAÇÕES -->
+    <div class="modal" id="notificationsModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2>Notificações</h2>
+      <div class="notification-list">
+        <div class="notification-item card">
+          <b>🎯 Novo Desafio Aceito</b>
+          <p>NyxGhost aceitou seu desafio 1v1 Sniper em Shipment.</p>
+          <time>Há 10 min</time>
+        </div>
+        <div class="notification-item card">
+          <b>🏆 Recompensa Concluída</b>
+          <p>Você recebeu +350 PTS no desafio semanal com AK117.</p>
+          <time>Há 2 horas</time>
+        </div>
       </div>
-      <button type="submit" class="button primary full">Salvar Alterações</button>
-    </form>
-  </div>
+    </div>
 
-  <!-- MODAL VER MÍDIA INSTAGRAM (LIGHTBOX) -->
-  <div class="modal" id="instaMediaModal">
-    <button class="modal-close" data-close-modal>&times;</button>
-    <div id="instaModalContent" style="display:grid; gap:12px; text-align:center;"></div>
-  </div>
+    <!-- MODAL SCORE ENTENDIMENTO -->
+    <div class="modal" id="scoreModal">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2>Como funciona o Player Score?</h2>
+      <p>O Player Score é o cálculo do seu desempenho geral baseado em 5 critérios principais:</p>
+      <ul class="score-list">
+        <li><b>Vitórias Ranqueadas:</b> +25 a +50 PTS por vitória em salas validadas.</li>
+        <li><b>Eficiência K/D:</b> Bônus proporcional a eliminação sem mortes acumuladas.</li>
+        <li><b>Objetivo do Mapa:</b> Pontuação de domínio de zonas e plantas de bomba.</li>
+        <li><b>Desafios da Comunidade:</b> Missões semanais concluídas no HUB.</li>
+        <li><b>Análise do Coach IA:</b> Bônus de consistência nos relatórios dos prints.</li>
+      </ul>
+    </div>
 
-  <!-- TOAST NOTIFICATION -->
-  <div class="toast" id="toast">
-    <span>✓</span>
-    <p>Ação concluída com sucesso!</p>
+    <!-- TOAST DE NOTIFICAÇÕES FLUTUANTES -->
+    <div class="toast" id="toast">
+      <span>✓</span>
+      <p id="toastMessage">Ação realizada com sucesso!</p>
+    </div>
+
   </div>
 
   <script src="app.js"></script>
