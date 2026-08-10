@@ -6,7 +6,7 @@ import { firebaseConfig } from './firebase-config.js';
  */
 async function bootFirebase() {
   try {
-    const version = '12.17.1';
+    const version = '10.12.0';
     const [appSdk, authSdk, firestoreSdk, storageSdk, functionsSdk] = await Promise.all([
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
