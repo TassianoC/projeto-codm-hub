@@ -16,6 +16,7 @@
     globalScore: 8742,
     avatarUrl: '',
     playerId: '#BR-0447',
+    instaFeed: [],
     career: [
       { date: 'AGO 2026', title: 'Elite III alcançado', description: '+442 Player Score na temporada.', tone: 'gold' },
       { date: 'JUL 2026', title: 'Campeão · X1 Night Cup', description: 'Venceu 5 séries sem perder.', tone: 'pink' },
@@ -44,7 +45,19 @@
   const load = () => {
     try { 
       const data = JSON.parse(localStorage.getItem(storageKey));
-      return { ...defaults, ...data, profile: { ...defaults.profile, ...(data?.profile || {}) } }; 
+      return {
+        ...defaults,
+        ...data,
+        profile: {
+          ...defaults.profile,
+          ...(data?.profile || {}),
+          instaFeed: Array.isArray(data?.profile?.instaFeed)
+            ? data.profile.instaFeed
+            : Array.isArray(data?.profile?.feedMedia)
+              ? data.profile.feedMedia
+              : defaults.profile.instaFeed
+        }
+      }; 
     } catch { 
       return structuredClone(defaults); 
     }
@@ -61,6 +74,9 @@
   let currentUser = null;
   let authMode = 'login'; // 'login' ou 'register'
   let pendingPostPhotoUrl = '';
+  // Mídias do feed do perfil, no formato Instagram.
+  let coachPrints = [null, null, null, null];
+
 
   /**
    * Utilitário para exibir mensagens Toast na tela
@@ -123,6 +139,377 @@
       input.click();
     });
   }
+
+  /**
+   * Seletor universal para fotos/vídeos. Mantém fallback local quando o Firebase
+   * Storage não estiver disponível.
+   */
+  async function selectAndUploadMedia(accept = 'image/*,video/*', folder = 'uploads') {
+    return new Promise((resolve, reject) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+
+      input.onchange = async event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return resolve(null);
+
+        const type = file.type.startsWith('video/') ? 'video' : 'image';
+
+        try {
+          toast('Processando mídia...');
+          if (firebase && firebase.available && firebase.storage && firebase.sdk.ref && firebase.sdk.uploadBytes) {
+            const userId = currentUser ? currentUser.uid : 'guest_' + Date.now();
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const fileName = `${folder}/${userId}_${Date.now()}_${safeName}`;
+            const storageRef = firebase.sdk.ref(firebase.storage, fileName);
+            const snapshot = await firebase.sdk.uploadBytes(storageRef, file, { contentType: file.type });
+            const downloadUrl = await firebase.sdk.getDownloadURL(snapshot.ref);
+            toast('Mídia enviada com sucesso!');
+            return resolve({ url: downloadUrl, type, file });
+          }
+
+          const reader = new FileReader();
+          reader.onload = e => resolve({ url: e.target.result, type, file });
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        } catch (err) {
+          console.warn('Erro ao subir mídia para o Firebase. Usando modo local...', err);
+          const reader = new FileReader();
+          reader.onload = e => resolve({ url: e.target.result, type, file });
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        }
+      };
+
+      input.click();
+    });
+  }
+
+  /**
+   * Redimensiona um print antes de enviá-lo ao Coach.
+   * Isso evita payloads gigantes e preserva a leitura dos números da tela.
+   */
+  async function fileToAnalysisDataUrl(file, maxDimension = 1800, quality = 0.86) {
+    if (!file || !file.type.startsWith('image/')) return null;
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = event => {
+        const image = new Image();
+        image.onload = () => {
+          const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        image.onerror = reject;
+        image.src = event.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function selectCoachPrint(slotIdx) {
+    return new Promise((resolve, reject) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/png,image/jpeg,image/webp';
+      input.onchange = async event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return resolve(null);
+
+        try {
+          toast(`Processando Print ${slotIdx + 1}...`);
+          const dataUrl = await fileToAnalysisDataUrl(file);
+
+          let storedUrl = dataUrl;
+          if (firebase && firebase.available && firebase.storage && firebase.sdk.ref && firebase.sdk.uploadBytes) {
+            try {
+              const userId = currentUser ? currentUser.uid : 'guest_' + Date.now();
+              const blob = await (await fetch(dataUrl)).blob();
+              const fileName = `coach_prints/${userId}_${Date.now()}_print_${slotIdx + 1}.jpg`;
+              const storageRef = firebase.sdk.ref(firebase.storage, fileName);
+              const snapshot = await firebase.sdk.uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
+              storedUrl = await firebase.sdk.getDownloadURL(snapshot.ref);
+            } catch (storageError) {
+              console.warn('Não foi possível salvar o print no Storage; a análise continuará com a cópia local.', storageError);
+            }
+          }
+
+          resolve({ url: storedUrl, dataUrl, type: 'image', file });
+        } catch (error) {
+          reject(error);
+        }
+      };
+      input.click();
+    });
+  }
+
+  function renderProfileInstagramFeed() {
+    const grid = $('#instaGrid');
+    if (!grid) return;
+
+    const items = Array.isArray(state.profile.instaFeed) ? state.profile.instaFeed : [];
+    if (!items.length) {
+      grid.innerHTML = `
+        <div class="insta-empty">
+          <strong>Seu feed está vazio.</strong>
+          <span>Publique fotos ou vídeos de partidas, setups e melhores jogadas.</span>
+          <button type="button" class="button primary small" data-empty-insta-upload>+ Nova mídia</button>
+        </div>`;
+      const emptyButton = $('[data-empty-insta-upload]', grid);
+      if (emptyButton) emptyButton.addEventListener('click', handleAddInstagramMedia);
+      return;
+    }
+
+    grid.innerHTML = items.map(item => {
+      const safeUrl = escapeHtml(item.url || '');
+      const caption = escapeHtml(item.caption || '');
+      const media = item.type === 'video'
+        ? `<video src="${safeUrl}" muted playsinline preload="metadata"></video>`
+        : `<img src="${safeUrl}" alt="${caption || 'Publicação do perfil'}" loading="lazy">`;
+
+      return `
+        <article class="insta-item" data-insta-id="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="Abrir publicação">
+          ${media}
+          <span class="insta-type-badge">${item.type === 'video' ? '🎥 VÍDEO' : '📷 FOTO'}</span>
+          <div class="insta-item-overlay">
+            <span>♡ ${Number(item.likes || 0)}</span>
+            <span>💬 ${Number(item.comments || 0)}</span>
+          </div>
+        </article>`;
+    }).join('');
+
+    $$('.insta-item', grid).forEach(itemEl => {
+      const open = () => {
+        const item = items.find(post => String(post.id) === String(itemEl.dataset.instaId));
+        if (item) openInstaMediaModal(item);
+      };
+      itemEl.addEventListener('click', open);
+      itemEl.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          open();
+        }
+      });
+    });
+  }
+
+  function openInstaMediaModal(item) {
+    const content = $('#instaModalContent');
+    if (!content) return;
+
+    const safeUrl = escapeHtml(item.url || '');
+    const safeCaption = escapeHtml(item.caption || '');
+    const media = item.type === 'video'
+      ? `<video src="${safeUrl}" controls autoplay playsinline style="width:min(100%,720px);max-height:70vh;border-radius:10px;background:#000;"></video>`
+      : `<img src="${safeUrl}" alt="${safeCaption || 'Publicação'}" style="width:min(100%,720px);max-height:70vh;border-radius:10px;object-fit:contain;background:#000;">`;
+
+    content.innerHTML = `
+      ${media}
+      <div class="insta-modal-meta">
+        <strong>${safeCaption || 'Publicação do CODM HUB'}</strong>
+        <span>♡ ${Number(item.likes || 0)} curtidas · 💬 ${Number(item.comments || 0)} comentários · ${escapeHtml(item.date || 'Agora')}</span>
+      </div>`;
+    showModal('#instaMediaModal');
+  }
+
+  async function handleAddInstagramMedia() {
+    try {
+      const media = await selectAndUploadMedia('image/*,video/*', 'profile_feed');
+      if (!media) return;
+
+      const caption = window.prompt('Digite uma legenda para a publicação (opcional):') || '';
+      const newPost = {
+        id: `profile_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        type: media.type,
+        url: media.url,
+        caption,
+        likes: 0,
+        comments: 0,
+        date: 'Agora'
+      };
+
+      if (!Array.isArray(state.profile.instaFeed)) state.profile.instaFeed = [];
+      state.profile.instaFeed.unshift(newPost);
+      state.profile.instaFeed = state.profile.instaFeed.slice(0, 30);
+
+      await saveUserProfile();
+      renderProfileInstagramFeed();
+      toast('Publicação adicionada ao seu perfil!');
+    } catch (error) {
+      console.error('Erro ao adicionar mídia ao perfil:', error);
+      toast('Não foi possível adicionar essa mídia.');
+    }
+  }
+
+  function setupCoachPrintsUpload() {
+    $$('.btn-upload-print').forEach(button => {
+      button.addEventListener('click', async () => {
+        const slotIdx = Number(button.dataset.slot);
+        try {
+          const result = await selectCoachPrint(slotIdx);
+          if (!result) return;
+
+          coachPrints[slotIdx] = result;
+
+          const preview = $(`#printPrev${slotIdx}`);
+          if (preview) {
+            preview.classList.add('has-file');
+            preview.innerHTML = `
+              <img src="${escapeHtml(result.dataUrl)}" alt="Print ${slotIdx + 1} carregado">
+              <span class="print-number">${slotIdx + 1}</span>`;
+          }
+
+          button.textContent = '✓ Print anexado';
+          button.style.color = 'var(--green)';
+          toast(`Print ${slotIdx + 1} anexado.`);
+        } catch (error) {
+          console.error(`Erro no Print ${slotIdx + 1}:`, error);
+          toast(`Não foi possível carregar o Print ${slotIdx + 1}.`);
+        }
+      });
+    });
+  }
+
+  function resetCoachPrints() {
+    coachPrints = [null, null, null, null];
+    for (let i = 0; i < 4; i += 1) {
+      const preview = $(`#printPrev${i}`);
+      const button = $(`.btn-upload-print[data-slot="${i}"]`);
+      if (preview) {
+        preview.classList.remove('has-file');
+        preview.innerHTML = `<span>${i + 1}</span><small>${['Placar Geral & Resultado','K/D/A, dano e pontuação','Objetivos, tempo e capturas','Armas, perks e utilitários'][i]}</small>`;
+      }
+      if (button) {
+        button.textContent = `Anexar Print ${i + 1}`;
+        button.style.color = '';
+      }
+    }
+  }
+
+  async function requestCoachAI(data) {
+    if (!firebase || !firebase.available || !firebase.functions || !firebase.sdk.httpsCallable) {
+      throw new Error('COACH_AI_NOT_CONFIGURED');
+    }
+
+    const callable = firebase.sdk.httpsCallable(firebase.functions, 'analyzeCoachScreenshots');
+    const screenshots = coachPrints.map(print => print.dataUrl);
+
+    const result = await callable({
+      mode: data.mode,
+      map: data.map,
+      screenshots
+    });
+
+    return result.data;
+  }
+
+  function renderCoachReport(report, data) {
+    const grade = Math.max(0, Math.min(100, Number(report.grade || 0)));
+    const metrics = report.metrics || {};
+    const insight = escapeHtml(report.verdict || 'A análise foi concluída sem um veredito textual.');
+    const recommendation = escapeHtml(report.recommendation || 'Repita a análise com quatro prints legíveis se algum dado estiver incompleto.');
+
+    if ($('#coachReport')) {
+      $('#coachReport').innerHTML = `
+        <div class="report-title">
+          <div>
+            <span class="eyebrow">VEREDITO DA IA · ${escapeHtml(data.mode)} / ${escapeHtml(data.map)}</span>
+            <h2>${escapeHtml(report.title || 'Análise competitiva')}</h2>
+          </div>
+          <span class="coach-grade">${grade}</span>
+        </div>
+        <div class="coach-source-badge">✓ Baseado exclusivamente nos 4 prints enviados</div>
+        <div class="coach-kpis">
+          <div><b>${Number(metrics.aim || 0)}</b><span>MIRA / DANO</span></div>
+          <div><b>${Number(metrics.decision || 0)}</b><span>DECISÃO</span></div>
+          <div><b>${Number(metrics.aggression || 0)}</b><span>AGRESSÃO</span></div>
+          <div><b>${Number(metrics.positioning || 0)}</b><span>POSICIONAMENTO</span></div>
+        </div>
+        <div class="coach-insight"><b>✦ VEREDITO</b><p>${insight}</p></div>
+        <div class="coach-insight"><b>PRÓXIMO TREINO</b><p>${recommendation}</p></div>
+        ${report.evidence ? `<div class="coach-evidence"><b>DADOS IDENTIFICADOS NOS PRINTS</b><p>${escapeHtml(report.evidence)}</p></div>` : ''}
+        ${Array.isArray(report.warnings) && report.warnings.length ? `<div class="coach-warnings"><b>ATENÇÃO</b><ul>${report.warnings.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>` : ''}
+      `;
+    }
+
+    state.activities.unshift({
+      icon: '✦',
+      title: 'Análise do Coach concluída',
+      subtitle: `Veredito ${grade}/100 em ${data.mode}`,
+      time: 'agora'
+    });
+    state.activities = state.activities.slice(0, 5);
+    persist();
+    renderActivities();
+  }
+
+  async function runCoachAnalysis(data) {
+    const missing = coachPrints.findIndex(item => !item);
+    if (missing !== -1) {
+      toast(`Envie os 4 prints. Falta o Print ${missing + 1}.`);
+      const preview = $(`#printPrev${missing}`);
+      if (preview) preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const submitButton = $('#coachForm button[type="submit"]');
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = '✦ IA analisando os 4 prints...';
+    }
+
+    if ($('#coachReport')) {
+      $('#coachReport').innerHTML = `
+        <div class="report-empty coach-loading">
+          <span>✦</span>
+          <h2>Analisando os 4 prints...</h2>
+          <p>A IA está cruzando somente as informações visíveis nas imagens. Não use dados digitados como métricas da partida.</p>
+        </div>`;
+    }
+
+    try {
+      const report = await requestCoachAI(data);
+      renderCoachReport(report, data);
+      toast('Veredito da IA gerado com os 4 prints.');
+    } catch (error) {
+      console.error('Falha na análise do Coach:', error);
+      if (error.message === 'COACH_AI_NOT_CONFIGURED') {
+        if ($('#coachReport')) {
+          $('#coachReport').innerHTML = `
+            <div class="report-empty">
+              <span>⚠</span>
+              <h2>IA ainda não conectada</h2>
+              <p>Os 4 prints foram carregados corretamente, mas a função de IA do Firebase ainda não está publicada/configurada. Veja <strong>functions/README.md</strong> para conectar o Gemini com segurança.</p>
+            </div>`;
+        }
+        toast('Configure a função analyzeCoachScreenshots no Firebase.');
+      } else {
+        if ($('#coachReport')) {
+          $('#coachReport').innerHTML = `
+            <div class="report-empty">
+              <span>⚠</span>
+              <h2>Não foi possível concluir a análise</h2>
+              <p>Confira se os 4 prints estão legíveis e tente novamente.</p>
+            </div>`;
+        }
+        toast('A análise da IA falhou. Tente novamente.');
+      }
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = '✦ Gerar Veredito da IA baseada nos Prints';
+      }
+    }
+  }
+
 
   // --- GERENCIAMENTO DE INTERFACE E AUTENTICAÇÃO ---
 
@@ -189,6 +576,7 @@
     }
     
     renderProfileData();
+    renderProfileInstagramFeed();
     persist();
     updateAuthUI();
   }
@@ -454,40 +842,7 @@
     return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
   }
 
-  function createCoachReport(data) {
-    const kills = Number(data.kills);
-    const deaths = Math.max(1, Number(data.deaths));
-    const kd = (kills / deaths).toFixed(2);
-    const win = data.win === 'yes';
-    const behavior = data.behavior;
-    
-    const aim = Math.min(98, Math.round(66 + kd * 11 + (win ? 4 : 0)));
-    const decision = Math.min(96, Math.max(42, 72 + (win ? 9 : -6) + (behavior === 'solo' ? -10 : 0) + (behavior === 'objective' ? 7 : 0)));
-    const aggression = Math.min(96, Math.round(57 + kills * 1.1 + (behavior === 'solo' ? 7 : 0)));
-    const positioning = Math.min(94, Math.max(40, 67 + (behavior === 'balanced' ? 11 : 0) + (behavior === 'solo' ? -14 : 0)));
-    
-    let insight = 'Você jogou de forma equilibrada. Preserve as trocas com seu squad e use essa consistência para acelerar o ritmo no meio da partida.';
-    let title = 'Base sólida para evoluir';
-    
-    if (behavior === 'solo') { title = 'Evite as entradas isoladas'; insight = 'Seu dano aparece, mas você está entrando sozinho em situações de desvantagem. Espere o trade do time antes do próximo push.'; }
-    if (behavior === 'objective') { title = 'Ótima leitura de objetivo'; insight = 'Você gerou valor ao priorizar o objetivo. Agora comunique o timing de rotação para que o time chegue junto.'; }
-    if (behavior === 'passive') { title = 'Você pode pressionar mais'; insight = 'Seu posicionamento se manteve seguro, mas o impacto caiu. Escolha um timing por rotação para disputar espaço.'; }
-    
-    const grade = Math.round((aim + decision + aggression + positioning) / 4);
-    
-    if ($('#coachReport')) {
-      $('#coachReport').innerHTML = `
-        <div class="report-title"><div><span class="eyebrow">RELATÓRIO · ${escapeHtml(data.mode)} / ${escapeHtml(data.map)}</span><h2>${title}</h2></div><span class="coach-grade">${grade}</span></div>
-        <div class="coach-kpis"><div><b>${aim}</b><span>MIRA</span></div><div><b>${decision}</b><span>DECISÃO</span></div><div><b>${aggression}</b><span>AGRESSIVIDADE</span></div><div><b>${positioning}</b><span>POSICIONAMENTO</span></div></div>
-        <div class="coach-insight"><b>✦ PRINCIPAL INSIGHT (K/D ${kd})</b><p>${insight}</p></div>
-        <div class="coach-insight"><b>PRÓXIMO TREINO</b><p>Antes da próxima partida, jogue duas rotações com foco em callouts curtos: posição, número de inimigos e direção do push.</p></div>`;
-    }
-    
-    state.activities.unshift({ icon: '✦', title: 'Análise do Coach concluída', subtitle: `Relatório ${grade}/100 em ${data.mode}`, time: 'agora' });
-    state.activities = state.activities.slice(0, 5);
-    persist(); 
-    renderActivities();
-  }
+  
 
   // --- INICIALIZAÇÃO E EVENTOS DE BOTAO DA APLICAÇÃO ---
 
@@ -500,6 +855,8 @@
     renderRanking(); 
     renderSkills(); 
     renderProfileData();
+    renderProfileInstagramFeed();
+    setupCoachPrintsUpload();
 
     const initialPage = location.hash.slice(1);
     if (initialPage && document.getElementById(initialPage)) {
@@ -812,6 +1169,10 @@
       $$('.profile-tab-content').forEach(content => content.classList.toggle('active', content.id === tab.dataset.profileTab));
     }));
 
+    // Feed do perfil estilo Instagram.
+    if ($('#addMediaBtn')) $('#addMediaBtn').addEventListener('click', handleAddInstagramMedia);
+    if ($('#uploadInstaMediaBtn')) $('#uploadInstaMediaBtn').addEventListener('click', handleAddInstagramMedia);
+
     // Botões de Apostas / Pontos da Arena
     $$('.point').forEach(point => point.addEventListener('click', () => $$('.point').forEach(item => item.classList.toggle('active', item === point))));
 
@@ -886,13 +1247,12 @@
       });
     }
 
-    // Form do Coach
+    // Form do Coach: a análise só é liberada com os 4 prints.
     if ($('#coachForm')) {
-      $('#coachForm').addEventListener('submit', event => {
+      $('#coachForm').addEventListener('submit', async event => {
         event.preventDefault();
         const data = Object.fromEntries(new FormData(event.currentTarget));
-        createCoachReport(data); 
-        toast('Sua análise tática do Coach está pronta!');
+        await runCoachAnalysis(data);
       });
     }
 
