@@ -1,8 +1,7 @@
 import { firebaseConfig } from './firebase-config.js';
 
 /**
- * Carrega Firebase sem impedir que a interface demonstrativa abra caso a rede
- * esteja indisponível. O app principal recebe o serviço pelo evento abaixo.
+ * Carrega Firebase sem impedir que a interface abra caso haja instabilidade na rede.
  */
 async function bootFirebase() {
   try {
@@ -27,7 +26,7 @@ async function bootFirebase() {
     window.codmFirebase = service;
     window.dispatchEvent(new CustomEvent('codmFirebaseReady', { detail: service }));
   } catch (error) {
-    console.warn('Firebase indisponível; usando modo demonstrativo local.', error);
+    console.warn('Firebase indisponível; utilizando modo de dados locais.', error);
     const service = { available: false, error };
     window.codmFirebase = service;
     window.dispatchEvent(new CustomEvent('codmFirebaseReady', { detail: service }));
