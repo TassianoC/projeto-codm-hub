@@ -520,7 +520,7 @@
           <div class="coach-form-card card">
             <span class="eyebrow">ANÁLISE POR IA MULTIMODAL</span>
             <h2>COACH DIGITAL CODM</h2>
-            <p>Envie os <strong>4 prints da tela de fim de partida</strong> para que a IA analise a estatística completa (Pontuação, K/D, Objetivos e Utilitários) e emita o veredito tático exato.</p>
+            <p>Envie <strong>exatamente 4 prints legíveis da tela de fim de partida</strong>. A IA usará somente o que estiver visível nessas quatro imagens para identificar métricas, comparar desempenho e emitir o veredito tático. Os campos de modo e mapa servem apenas para contextualizar a análise.</p>
 
             <form id="coachForm">
               <div class="form-row">
@@ -546,31 +546,32 @@
               <!-- PAINEL DE 4 PRINTS OBRIGATÓRIOS PARA AVALIAÇÃO DA IA -->
               <div class="coach-prints-container">
                 <label style="margin-bottom:6px; display:block; font-weight:700; color:var(--gold);">
-                  📸 ANEXAR OS 4 PRINTS DA PARTIDA (PARA ANÁLISE COMPLETA):
+                  📸 ANEXAR EXATAMENTE 4 PRINTS DA PARTIDA:
                 </label>
+                <p class="coach-print-rule">A análise só começa quando os 4 slots estiverem preenchidos. Não inventamos K/D, dano, objetivo ou armas a partir dos campos do formulário.</p>
                 
                 <div class="coach-prints-grid">
                   <!-- Print 1 -->
                   <div class="print-slot" id="printSlot1" data-slot="0">
-                    <div class="print-preview" id="printPrev0"><span>1</span><small>Placar Geral & Vitórias</small></div>
+                    <div class="print-preview" id="printPrev0"><span>1</span><small>Placar Geral & Resultado</small></div>
                     <button type="button" class="button small ghost btn-upload-print" data-slot="0">Anexar Print 1</button>
                   </div>
 
                   <!-- Print 2 -->
                   <div class="print-slot" id="printSlot2" data-slot="1">
-                    <div class="print-preview" id="printPrev1"><span>2</span><small>Dano & K/D/A</small></div>
+                    <div class="print-preview" id="printPrev1"><span>2</span><small>K/D/A, dano e pontuação</small></div>
                     <button type="button" class="button small ghost btn-upload-print" data-slot="1">Anexar Print 2</button>
                   </div>
 
                   <!-- Print 3 -->
                   <div class="print-slot" id="printSlot3" data-slot="2">
-                    <div class="print-preview" id="printPrev2"><span>3</span><small>Tempo de Objetivo / Capturas</small></div>
+                    <div class="print-preview" id="printPrev2"><span>3</span><small>Objetivos, tempo e capturas</small></div>
                     <button type="button" class="button small ghost btn-upload-print" data-slot="2">Anexar Print 3</button>
                   </div>
 
                   <!-- Print 4 -->
                   <div class="print-slot" id="printSlot4" data-slot="3">
-                    <div class="print-preview" id="printPrev3"><span>4</span><small>Detalhes de Armas & Util.</small></div>
+                    <div class="print-preview" id="printPrev3"><span>4</span><small>Armas, perks e utilitários</small></div>
                     <button type="button" class="button small ghost btn-upload-print" data-slot="3">Anexar Print 4</button>
                   </div>
                 </div>
@@ -602,7 +603,7 @@
             <div class="report-empty">
               <span>✦</span>
               <h2>Aguardando Dados e Prints</h2>
-              <p>Anexe os 4 prints da partida acima e clique em "Gerar Veredito" para a IA processar suas métricas visuais de jogo.</p>
+              <p>Anexe os 4 prints da partida acima e clique em "Gerar Veredito" para a IA analisar somente as informações visíveis nas imagens.</p>
             </div>
           </div>
         </div>
@@ -742,6 +743,7 @@
     <p>Ação concluída com sucesso!</p>
   </div>
 
+  <script type="module" src="firebase-client.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
