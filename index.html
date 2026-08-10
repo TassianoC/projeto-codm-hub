@@ -1,343 +1,747 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#08090d">
-  <meta name="description" content="CODM HUB — sua identidade competitiva começa aqui.">
-  <title>CODM HUB — Carreira competitiva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CODM HUB 3.1 — Carreira Competitiva</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="noise" aria-hidden="true"></div>
+  <div class="noise"></div>
   <div class="app-shell">
+
+    <!-- TOPBAR -->
     <header class="topbar">
-      <a class="brand" href="#inicio" data-page="inicio" aria-label="CODM HUB, início">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span>CODM <b>HUB</b></span>
+      <a href="#inicio" class="brand" data-page="inicio">
+        <div class="brand-mark"><i></i><i></i><i></i></div>
+        CODM <b>HUB</b>
       </a>
-      <nav class="desktop-nav" aria-label="Navegação principal">
+      
+      <nav class="desktop-nav">
         <button class="nav-link active" data-page="inicio">Início</button>
-        <button class="nav-link auth-required-nav hidden" data-page="perfil">Perfil</button>
-        <button class="nav-link" data-page="arena">Arena</button>
-        <button class="nav-link" data-page="ranking">Ranking</button>
-        <button class="nav-link" data-page="coach">Coach</button>
+        <button class="nav-link auth-required-nav" data-page="perfil">Perfil</button>
+        <button class="nav-link" data-page="arena">Arena 1v1 / Scrims</button>
+        <button class="nav-link" data-page="ranking">Ranking Global</button>
+        <button class="nav-link" data-page="desafios">Desafios</button>
+        <button class="nav-link" data-page="coach">Coach Digital</button>
         <button class="nav-link" data-page="comunidade">Comunidade</button>
       </nav>
+
       <div class="topbar-actions">
-        <button class="icon-button" id="themeToggle" aria-label="Alternar tema">☼</button>
-        <button class="icon-button" id="notificationButton" aria-label="Notificações">♧<b id="notificationBadge">1</b></button>
-        <button class="button small ghost" id="authButton">Entrar / Cadastrar</button>
-        <button class="profile-mini hidden" id="profileMini" data-page="perfil">
-          <span class="avatar small" id="headerAvatar">FO</span>
-          <span class="hide-small" id="headerNickname">FALLK_OP</span>
+        <button id="themeToggle" class="icon-button" title="Alternar Tema">☼</button>
+        <button id="notificationButton" class="icon-button" title="Notificações">
+          🔔 <b id="notificationBadge">2</b>
         </button>
-        <button class="button small ghost hidden" id="logoutButton">Sair</button>
-        <button class="button small admin-button hidden" id="adminButton" data-page="admin">ADM</button>
-        <button class="menu-button" id="menuButton" aria-expanded="false" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+
+        <button id="authButton" class="button primary small">Entrar / Cadastrar</button>
+
+        <button id="profileMini" class="profile-mini hidden" data-page="perfil">
+          <span class="avatar small" id="headerAvatar">FO</span>
+          <span id="headerNickname">FALLK_OP</span>
+        </button>
+
+        <button id="logoutButton" class="button ghost small hidden">Sair</button>
+        <button id="menuButton" class="menu-button" aria-label="Menu"><span></span><span></span><span></span></button>
       </div>
     </header>
 
+    <!-- TRILHO LATERAL (DESKTOP) -->
     <aside class="side-rail">
-      <button class="rail-link active" data-page="inicio"><span>⌂</span><small>Início</small></button>
-      <button class="rail-link auth-required-nav hidden" data-page="perfil"><span>◉</span><small>Perfil</small></button>
-      <button class="rail-link" data-page="arena"><span>⚔</span><small>Arena</small></button>
-      <button class="rail-link" data-page="ranking"><span>♛</span><small>Ranking</small></button>
-      <button class="rail-link" data-page="desafios"><span>◎</span><small>Desafios</small></button>
+      <button class="rail-link active" data-page="inicio"><span>🏠</span><small>Início</small></button>
+      <button class="rail-link auth-required-nav" data-page="perfil"><span>👤</span><small>Perfil</small></button>
+      <button class="rail-link" data-page="arena"><span>⚔️</span><small>Arena</small></button>
+      <button class="rail-link" data-page="ranking"><span>🏆</span><small>Ranking</small></button>
       <button class="rail-link" data-page="coach"><span>✦</span><small>Coach</small></button>
-      <button class="rail-link" data-page="comunidade"><span>◌</span><small>Feed</small></button>
+      <button class="rail-link" data-page="comunidade"><span>💬</span><small>Social</small></button>
     </aside>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <main class="main-content">
+
       <!-- PÁGINA INÍCIO -->
-      <section class="page active" id="inicio" data-page-section="inicio">
+      <section id="inicio" class="page active">
         <div class="hero-grid">
-          <div class="hero-copy reveal">
-            <div class="eyebrow live"><span></span> TEMPORADA 01 · AO VIVO</div>
-            <h1>SUA CARREIRA NÃO É SÓ <em>ESTATÍSTICA.</em></h1>
-            <p>Construa sua identidade competitiva, desafie rivais e transforme cada partida em reputação dentro da comunidade.</p>
+          <div class="hero-copy">
+            <span class="eyebrow live"><span></span> TEMPORADA COMPETITIVA ATIVA</span>
+            <h1>SUA CARREIRA NO <em>COD MOBILE</em> COMEÇA AQUI.</h1>
+            <p>Construa sua identidade competitiva, encontre desafios validados, analise suas partidas com IA e suba no Ranking Global.</p>
             <div class="hero-actions">
-              <button class="button primary" id="heroCareerBtn">Ver minha carreira <b>→</b></button>
-              <button class="button ghost" data-page="arena">Entrar na arena</button>
+              <button class="button primary" id="quickProfileBtn">Ver Meu Perfil</button>
+              <button class="button ghost" data-page="arena">Encontrar Desafio</button>
             </div>
             <div class="hero-proof">
-              <div class="player-stack"><span class="avatar stack a1">VK</span><span class="avatar stack a2">RX</span><span class="avatar stack a3">LU</span></div>
-              <p><strong>2.481 jogadores</strong> já estão construindo seu legado</p>
+              <div class="player-stack">
+                <span class="avatar stack a1">FO</span>
+                <span class="avatar stack a2">VK</span>
+                <span class="avatar stack a3">LB</span>
+              </div>
+              <p>Mais de <strong>1.400+ jogadores</strong> ativos participando de scrims e desafios.</p>
             </div>
           </div>
-          <div class="hero-visual reveal delay-1" aria-label="Resumo de carreira do jogador">
-            <div class="orb orb-one"></div><div class="orb orb-two"></div><div class="scan-lines"></div>
-            <div class="career-card featured-card">
-              <div class="featured-top"><span class="rank-emblem">47</span><span class="signal">● ONLINE</span></div>
-              <div class="featured-name"><span class="avatar xl" id="cardAvatar">FO</span><div><small id="cardPlayerId">PLAYER ID · #BR-0447</small><h2 id="cardNickname">FALLK_OP</h2><p id="cardClanRole">LO BARK · ENTRY FRAGGER</p></div></div>
-              <div class="featured-score"><div><small>PLAYER SCORE</small><strong id="cardScore">8.742</strong></div><div class="score-trend">↗ 12.4%<small> esta temporada</small></div></div>
-              <div class="featured-stats"><div><b>2.41</b><small>K/D</small></div><div><b>68%</b><small>VITÓRIAS</small></div><div><b>12</b><small>STREAK</small></div></div>
-              <div class="card-footer"><span id="cardRank">ELITE III</span><span>★ 4.9 REPUTAÇÃO</span></div>
+
+          <div class="hero-visual">
+            <div class="orb orb-one"></div>
+            <div class="orb orb-two"></div>
+            <div class="scan-lines"></div>
+
+            <article class="featured-card">
+              <div class="featured-top">
+                <div class="rank-emblem">E3</div>
+                <span class="signal">● ONLINE</span>
+              </div>
+              <div class="featured-name">
+                <span class="avatar xxl" id="cardAvatar">FO</span>
+                <div>
+                  <small id="cardClanRole">LO BARK · ENTRY FRAGGER</small>
+                  <h2 id="cardNickname">FALLK_OP</h2>
+                  <p id="cardRank">ELITE III</p>
+                </div>
+              </div>
+              <div class="featured-score">
+                <div>
+                  <small>PLAYER SCORE</small>
+                  <strong id="cardScore">8.742</strong>
+                </div>
+                <div class="score-trend">
+                  ▲ +442
+                  <small>esta semana</small>
+                </div>
+              </div>
+              <div class="featured-stats">
+                <div><small>K/D RATIO</small><b>2.84</b></div>
+                <div><small>WIN RATE</small><b>68%</b></div>
+                <div><small>MODO</small><b>Hardpoint</b></div>
+              </div>
+              <div class="card-footer">
+                <span>CODM HUB VERIFIED PLAYER</span>
+                <span>#BR-0447</span>
+              </div>
+            </article>
+
+            <div class="floating-stat one">
+              <small>SEQUÊNCIA</small>
+              <b>5V</b>
+              <span>Seguidas</span>
             </div>
-            <div class="floating-stat one"><small>MAIOR FORÇA</small><b>91</b><span>Mira</span></div>
-            <div class="floating-stat two"><small>PRÓXIMA META</small><b>9.000</b><span>Player Score</span></div>
+            <div class="floating-stat two">
+              <small>TOP ARMA</small>
+              <b>AK117</b>
+              <span>Especialista</span>
+            </div>
           </div>
         </div>
 
-        <div class="section-heading compact"><div><span class="eyebrow">SEU HUB HOJE</span><h2>O que move sua <em>carreira</em></h2></div><button class="text-button" id="quickProfileBtn">Abrir perfil completo →</button></div>
+        <div class="section-heading">
+          <h2>RESUMO DA <em>CARREIRA</em></h2>
+          <button class="text-button" id="activityProfileBtn">Ver perfil completo →</button>
+        </div>
+
         <div class="quick-grid">
-          <article class="metric-card card reveal"><div class="metric-icon gold">↗</div><div><small>PLAYER SCORE</small><strong id="homeScore">8.742</strong><p class="positive">+184 esta semana</p></div><div class="mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
-          <article class="metric-card card reveal delay-1"><div class="metric-icon pink">⚔</div><div><small>RIVALIDADE ATIVA</small><strong>10 <span>×</span> 7</strong><p>FALLK_OP <b>vs</b> R1P3R</p></div><button class="circle-action" data-open-duel title="Ver desafio">→</button></article>
-          <article class="metric-card card reveal delay-2"><div class="metric-icon blue">◎</div><div><small>DESAFIO SEMANAL</small><strong><span id="challengeProgress">19</span>/30</strong><p>Eliminações com AK117</p></div><div class="progress-ring"><span id="challengePercent">63%</span></div></article>
+          <div class="metric-card card">
+            <div class="metric-icon gold">🏆</div>
+            <div>
+              <small>PLAYER SCORE</small>
+              <strong id="homeScore">8.742</strong>
+              <p class="positive">▲ Top 3% da região</p>
+            </div>
+            <div class="mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+
+          <div class="metric-card card">
+            <div class="metric-icon pink">⚔️</div>
+            <div>
+              <small>DESAFIO SEMANAL</small>
+              <strong id="challengePercent">63%</strong>
+              <p><b id="challengeCount">19</b> / 30 Eliminações AK117</p>
+            </div>
+            <button class="circle-action" data-page="desafios">→</button>
+          </div>
+
+          <div class="metric-card card">
+            <div class="metric-icon blue">✦</div>
+            <div>
+              <small>DIAGNOSTICO COACH</small>
+              <strong>88/100</strong>
+              <p>Mira e Posicionamento em destaque</p>
+            </div>
+            <button class="circle-action" data-page="coach">→</button>
+          </div>
         </div>
 
         <div class="dashboard-grid">
-          <article class="card activity-card reveal"><div class="card-title"><div><span class="eyebrow">ATIVIDADE RECENTE</span><h3>Seu histórico competitivo</h3></div><button class="text-button" id="activityProfileBtn">Ver tudo →</button></div><div class="timeline" id="homeTimeline"></div></article>
-          <article class="card challenge-card reveal delay-1"><div class="challenge-card-top"><div><span class="eyebrow">DESAFIO DA COMUNIDADE</span><h3>Domínio de AK117</h3></div><span class="xp-badge">+500 XP</span></div><p>Faça 30 eliminações com AK117 no modo multiplayer e envie sua prova.</p><div class="challenge-bar"><i id="challengeBar"></i></div><div class="challenge-bottom"><span><b id="challengeCount">19</b> de 30 eliminações</span><button class="button small primary" data-page="desafios">Continuar</button></div></article>
-        </div>
+          <div class="activity-card card">
+            <div class="card-title">
+              <h3>ÚLTIMAS ATIVIDADES</h3>
+            </div>
+            <div class="timeline" id="homeTimeline"></div>
+          </div>
 
-        <div class="section-heading compact feed-heading"><div><span class="eyebrow">EM DESTAQUE</span><h2>A comunidade está <em>em jogo</em></h2><p class="heading-copy">Missões diárias e mensais agora rendem medalhas específicas — inclusive itens raros para quem mantém a constância.</p></div><button class="text-button" data-page="desafios">Ver todas as missões →</button></div>
-        <div class="home-missions-strip reveal">
-          <article class="home-mission card"><span class="mission-icon gold">☀</span><div><small>MISSÃO DIÁRIA</small><b>3 vitórias em multiplayer</b><p>Medalha: <strong>Rotina de aço</strong></p></div><button class="text-button" data-open-evidence data-evidence-kind="daily">Enviar prova →</button></article>
-          <article class="home-mission card rare"><span class="mission-icon violet">✧</span><div><small>MISSÃO MENSAL · RARA</small><b>50 partidas validadas</b><p>Medalha: <strong>Legado da temporada</strong></p></div><button class="text-button" data-open-evidence data-evidence-kind="monthly">Enviar prova →</button></article>
+          <div class="challenge-card card">
+            <div class="challenge-card-top">
+              <h3>DESAFIO DA SEMANA</h3>
+              <span class="xp-badge">+250 PTS</span>
+            </div>
+            <p>Conclua 30 eliminações no modo Mutiplayer Ranqueado utilizando qualquer fuzil de assalto.</p>
+            <div class="challenge-bar"><i id="challengeBar"></i></div>
+            <div class="challenge-bottom">
+              <span>Progresso atual</span>
+              <b id="challengeProgress">19/30</b>
+            </div>
+          </div>
         </div>
-        <div class="spotlight-grid" id="spotlightPosts"></div>
       </section>
 
-      <!-- PÁGINA PERFIL (Visível apenas após Logar) -->
-      <section class="page" id="perfil" data-page-section="perfil">
-        <div class="page-heading reveal"><div><span class="eyebrow">PLAYER IDENTITY · <span id="profileId">#BR-0447</span></span><h1 id="profileHeading">FALLK_<em>OP</em></h1><p id="profileSubtitle">Entry Fragger · SMG Specialist · LO BARK</p></div><div class="heading-actions"><button class="button ghost" id="shareProfile">↗ Compartilhar card</button><button class="button primary" id="editProfile">Editar perfil</button></div></div>
-        <div class="profile-banner reveal"><div class="profile-gradient"></div><div class="banner-dots"></div><div class="profile-main"><span class="avatar xxl" id="profileAvatar">FO</span><div><span class="verified" id="verifiedBadge">✓ JOGADOR VERIFICADO</span><h2 id="profileName">FALLK_OP</h2><p id="profileBio">“Entre no meu lobby se quiser jogar para vencer.”</p><div class="tags"><span id="profileClan">LO BARK</span><span id="profileStyle">AGGRESSIVE</span><span id="profileWeapon">SMG</span></div></div></div><div class="profile-rank"><span>RANK ATUAL</span><b id="profileRank">ELITE III</b><small>TOP 8% DA REGIÃO</small></div></div>
+      <!-- PÁGINA PERFIL (ESTILO INSTAGRAM + FEED DE MÍDIAS) -->
+      <section id="perfil" class="page">
+        <div class="profile-banner">
+          <div class="profile-gradient"></div>
+          <div class="banner-dots"></div>
+
+          <div class="profile-main">
+            <span class="avatar xxl" id="profileAvatar" title="Clique para trocar foto">FO</span>
+            <div>
+              <span class="verified">✓ JOGADOR VERIFICADO</span>
+              <h2 id="profileName">FALLK_OP</h2>
+              <p id="profileSubtitle">Entry Fragger · AK117 Specialist · LO BARK</p>
+              <div class="tags">
+                <span id="profileClan">LO BARK</span>
+                <span id="profileStyle">AGGRESSIVE</span>
+                <span id="profileWeapon">AK117</span>
+                <span id="profileId">#BR-0447</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-rank">
+            <span>SUA PATENTE</span>
+            <b id="profileRank">ELITE III</b>
+            <small>TOP 3% DA REGIÃO</small>
+          </div>
+        </div>
+
+        <div class="heading-actions" style="margin-top: 15px;">
+          <button class="button primary small" id="editProfile">⚙ Editar Perfil</button>
+          <button class="button ghost small" id="addMediaBtn">📸 Publicar Imagem / Vídeo</button>
+        </div>
+
         <div class="profile-summary-grid">
-          <article class="card score-panel reveal"><div class="card-title"><div><span class="eyebrow">PONTUAÇÃO GLOBAL</span><h3>Player Score</h3></div><button class="info-button" data-score-info>i</button></div><div class="big-score"><strong id="profileScore">8.742</strong><span>/ 10.000</span></div><p class="positive">↗ 184 pontos ganhos nos últimos 7 dias</p><div class="score-progress"><i></i></div><div class="next-level"><span>PRÓXIMO MARCO</span><b>Elite IV · 9.000</b></div></article>
-          <article class="card dna-panel reveal delay-1"><div class="card-title"><div><span class="eyebrow">PLAYER DNA</span><h3>Seu estilo competitivo</h3></div><span class="dna-tag">AGGRO</span></div><div class="dna-content"><div class="dna-core"><b>AGGRO</b><span>DNA</span></div><div class="skills" id="skillBars"></div></div></article>
-          <article class="card streak-panel reveal delay-2"><span class="eyebrow">MOMENTUM</span><h3>12 vitórias <em>seguidas</em></h3><div class="flame-row">♨ ♨ ♨ ♨ ♨ ♨</div><p>Seu melhor streak nesta temporada. Continue assim para alcançar o Top 100.</p><button class="text-button" data-page="arena">Encontrar partida →</button></article>
+          <div class="score-panel card">
+            <div class="card-title">
+              <h3>PLAYER SCORE</h3>
+              <button class="info-button" data-score-info>?</button>
+            </div>
+            <div class="big-score">
+              <strong id="profileScore">8.742</strong>
+              <span>PTS</span>
+            </div>
+            <p class="positive">▲ +442 PTS nesta temporada</p>
+            <div class="score-progress"><i></i></div>
+            <div class="next-level">
+              <span>PRÓXIMO RANK</span>
+              <b>MESTRE I (9.000 PTS)</b>
+            </div>
+          </div>
+
+          <div class="dna-panel card">
+            <div class="card-title">
+              <h3>DNA DE JOGO</h3>
+              <span class="dna-tag">ENTRY FRAGGER</span>
+            </div>
+            <div class="dna-content">
+              <div class="dna-core">
+                <b>2.84</b>
+                <span>K/D MEDIO</span>
+              </div>
+              <div class="skills" id="skillBars"></div>
+            </div>
+          </div>
+
+          <div class="streak-panel card">
+            <span class="eyebrow">SEQUÊNCIA ATIVA</span>
+            <h3>5 VITÓRIAS</h3>
+            <div class="flame-row">🔥🔥🔥🔥🔥</div>
+            <p>Mantenha a sequência para ganhar multiplicadores de Player Score nas arenas.</p>
+          </div>
         </div>
-        <div class="profile-tabs" role="tablist"><button class="profile-tab active" data-profile-tab="carreira">Carreira</button><button class="profile-tab" data-profile-tab="estatisticas">Estatísticas</button><button class="profile-tab" data-profile-tab="conquistas">Conquistas</button><button class="profile-tab" data-profile-tab="curriculo">Currículo</button></div>
-        <div class="profile-tab-content active" id="carreira"><div class="career-layout"><article class="card"><div class="card-title"><div><span class="eyebrow">LINHA DO TEMPO</span><h3>Carreira competitiva</h3></div><button class="text-button" id="addCareerMilestone">+ Adicionar marco</button></div><div class="career-timeline" id="careerTimeline"><div class="career-event"><span class="event-dot gold"></span><time>AGO 2026</time><div><b>Elite III alcançado</b><p>+442 Player Score na temporada.</p></div></div><div class="career-event"><span class="event-dot pink"></span><time>JUL 2026</time><div><b>Campeão · X1 Night Cup</b><p>Venceu 5 séries sem perder.</p></div></div><div class="career-event"><span class="event-dot blue"></span><time>JUN 2026</time><div><b>Entrada no LO BARK</b><p>Assinado como Entry Fragger.</p></div></div></div></article><article class="card map-card"><div class="card-title"><div><span class="eyebrow">MAP POOL</span><h3>Domínio por mapa</h3></div></div><div class="map-list"><div><b>Nuketown</b><span><i style="width:94%"></i></span><strong>94</strong></div><div><b>Raid</b><span><i style="width:84%"></i></span><strong>84</strong></div><div><b>Standoff</b><span><i style="width:76%"></i></span><strong>76</strong></div><div><b>Crossfire</b><span><i style="width:61%"></i></span><strong>61</strong></div></div><p class="coach-tip">✦ <b>Dica do Coach:</b> Crossfire é sua maior oportunidade de evolução.</p></article></div></div>
-        <div class="profile-tab-content" id="estatisticas"><div class="stats-table card"><div class="stat-tiles"><div><b>2.41</b><span>K/D</span><small>+0.12</small></div><div><b>143</b><span>PARTIDAS</span><small>+8</small></div><div><b>97</b><span>VITÓRIAS</span><small>68%</small></div><div><b>27</b><span>MVPs</span><small>19%</small></div></div><h3>Armas mais utilizadas</h3><div class="weapon-list"><div><span class="weapon-icon">AK</span><b>AK117</b><i><em style="width:82%"></em></i><small>82 partidas</small></div><div><span class="weapon-icon">QQ</span><b>QQ9</b><i><em style="width:71%"></em></i><small>71 partidas</small></div><div><span class="weapon-icon">DL</span><b>DL Q33</b><i><em style="width:48%"></em></i><small>48 partidas</small></div></div></div></div>
-        <div class="profile-tab-content" id="conquistas"><div class="achievements-grid"><article class="achievement card"><span>♛</span><b>Rei do X1</b><p>Venceu 10 séries 1v1.</p></article><article class="achievement card"><span>♨</span><b>Em chamas</b><p>10 vitórias consecutivas.</p></article><article class="achievement card"><span>◈</span><b>Primeira taça</b><p>Campeão de torneio oficial.</p></article><article class="achievement card locked"><span>◇</span><b>Lenda da arena</b><p>Alcance 9.500 pontos.</p></article></div></div>
-        <div class="profile-tab-content" id="curriculo"><article class="card resume-card"><div><span class="eyebrow">CURRÍCULO COMPETITIVO</span><h3>Disponível para novos desafios</h3><p>Entry Fragger com foco em respawn. Experiência em campeonatos comunitários, scrims e busca por line-up competitivo.</p></div><div class="resume-details"><span>DISPONIBILIDADE <b>NOITES · BRT</b></span><span>IDIOMA <b>PT-BR</b></span><span id="resumeContact">CONTATO <b>@FALLK_OP</b></span></div><button class="button primary" data-page="comunidade">Mostrar para times</button></article></div>
+
+        <!-- TABS DO PERFIL -->
+        <div class="profile-tabs">
+          <button class="profile-tab active" data-profile-tab="instaFeed">📱 Feed (Instagram)</button>
+          <button class="profile-tab" data-profile-tab="career">📜 Histórico & Carreira</button>
+          <button class="profile-tab" data-profile-tab="stats">📊 Estatísticas Detalhadas</button>
+          <button class="profile-tab" data-profile-tab="achievements">🏅 Conquistas</button>
+          <button class="profile-tab" data-profile-tab="resume">📄 Currículo / Card</button>
+        </div>
+
+        <!-- ABA 1: FEED ESTILO INSTAGRAM (IMAGENS E VÍDEOS) -->
+        <div id="tab-instaFeed" class="profile-tab-content active">
+          <div class="insta-header-bar card" style="padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <b style="font-size:16px;">Galeria de Mídias e Destaques</b>
+              <p style="margin:0; font-size:10px; color:var(--muted);">Postagens visuais do seu perfil. Fotos de vitórias, setups, clipes de jogadas e momentos no CODM.</p>
+            </div>
+            <button class="button primary small" id="uploadInstaMediaBtn">+ Nova Mídia</button>
+          </div>
+
+          <!-- GRID ESTILO INSTAGRAM (3 COLUNAS) -->
+          <div class="insta-grid" id="instaGrid"></div>
+        </div>
+
+        <!-- ABA 2: HISTÓRICO & CARREIRA -->
+        <div id="tab-career" class="profile-tab-content">
+          <div class="career-layout">
+            <div class="card">
+              <h3>LINHA DO TEMPO COMPETITIVA</h3>
+              <div class="career-timeline" id="careerTimeline"></div>
+            </div>
+            <div class="card">
+              <h3>DOMÍNIO DE MAPAS</h3>
+              <div class="map-list">
+                <div><span><i style="width: 88%;"></i></span><b>Standoff</b><strong>88% WR</strong></div>
+                <div><span><i style="width: 79%;"></i></span><b>Firing Range</b><strong>79% WR</strong></div>
+                <div><span><i style="width: 71%;"></i></span><b>Raid</b><strong>71% WR</strong></div>
+                <div><span><i style="width: 65%;"></i></span><b>Takeoff</b><strong>65% WR</strong></div>
+              </div>
+              <div class="coach-tip">
+                <b>✦ Dica do Coach:</b> Seu desempenho em mapas de controle de rotação é alto. Priorize combates na meia distância.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: ESTATÍSTICAS -->
+        <div id="tab-stats" class="profile-tab-content">
+          <div class="stats-table card">
+            <div class="stat-tiles">
+              <div><b>1.482</b><span>PARTIDAS JOGADAS</span><small>+24 esta semana</small></div>
+              <div><b>2.84</b><span>K/D RATIO</span><small class="positive">▲ +0.12</small></div>
+              <div><b>68.4%</b><span>TAXA DE VITÓRIA</span><small>234 W / 108 L</small></div>
+              <div><b>42.1%</b><span>PRECISÃO MIRA</span><small>Headshot Rate 28%</small></div>
+            </div>
+            <h3>ARMAS MAIS UTILIZADAS</h3>
+            <div class="weapon-list">
+              <div><span class="weapon-icon">AK</span><b>AK117</b><i><em style="width: 85%;"></em></i><small>4.120 Abates · 2.9 K/D</small></div>
+              <div><span class="weapon-icon">DL</span><b>DL Q33</b><i><em style="width: 62%;"></em></i><small>2.310 Abates · 3.1 K/D</small></div>
+              <div><span class="weapon-icon">K9</span><b>KRM-262</b><i><em style="width: 44%;"></em></i><small>1.200 Abates · 2.4 K/D</small></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: CONQUISTAS -->
+        <div id="tab-achievements" class="profile-tab-content">
+          <div class="achievements-grid">
+            <article class="achievement card">
+              <span>👑</span><b>Lenda Urbana</b><p>Alcançou o top 100 ranqueado em 2 temporadas seguidas.</p>
+            </article>
+            <article class="achievement card">
+              <span>🔥</span><b>Imparável</b><p>Conquistou 10 vitórias consecutivas em desafios 1v1 da Arena.</p>
+            </article>
+            <article class="achievement card">
+              <span>🎯</span><b>Sniper Elite</b><p>Taxa de precisão superior a 70% com rifles de precisão em 50 partidas.</p>
+            </article>
+            <article class="achievement card locked">
+              <span>🔒</span><b>Dominador Global</b><p>Alcance o Top 1 do Ranking Global para desbloquear este selo.</p>
+            </article>
+          </div>
+        </div>
+
+        <!-- ABA 5: CURRÍCULO -->
+        <div id="tab-resume" class="profile-tab-content">
+          <div class="resume-card card">
+            <div>
+              <span class="eyebrow">CARTÃO DE JOGADOR</span>
+              <h3 id="cardTitle">FALLK_OP — LO BARK</h3>
+              <p id="profileBio">“Entre no meu lobby se quiser jogar para vencer.”</p>
+              <div class="resume-details">
+                <div><span>DISPONIBILIDADE</span><b>Treinos noturnos / Finais de semana</b></div>
+                <div><span>FUNÇÃO PRINCIPAL</span><b>Entry Fragger / Fragger de Linha</b></div>
+                <div id="resumeContact"><span>CONTATO</span><b>@FALLK_OP</b></div>
+              </div>
+            </div>
+            <button class="button primary" id="shareCardBtn">↗ Compartilhar Perfil</button>
+          </div>
+        </div>
       </section>
 
-      <!-- PÁGINA ARENA -->
-      <section class="page" id="arena" data-page-section="arena">
-        <div class="page-heading reveal"><div><span class="eyebrow live"><span></span> MATCHMAKING ABERTO</span><h1>ENTRE NA <em>ARENA</em></h1><p>Desafie jogadores, confirme resultados e suba no ranking da comunidade.</p></div><button class="button primary" data-open-duel>Novo desafio <b>+</b></button></div>
-        <div class="arena-hero card reveal"><div class="arena-copy"><span class="eyebrow">DESAFIO EM DESTAQUE</span><h2>FALLK_OP <i>vs</i> R1P3R</h2><p>Melhor de 3 · Shipment · Snipers Only</p><div class="duel-score"><div><span>FALLK_OP</span><b>10</b></div><i>:</i><div><span>R1P3R</span><b>7</b></div></div><div class="duel-meta"><span>🏆 VALE 100 PONTOS</span><span>⏱ AGUARDANDO CONFIRMAÇÃO</span></div><button class="button primary" data-open-duel>Ver ou confirmar resultado</button></div><div class="versus-art" aria-hidden="true"><span>VS</span></div></div>
-        <article class="global-match-bar card" id="globalMatchBar"><span class="live-dot"></span><div><small>PARTIDAS PÚBLICAS</small><b id="globalMatchStatus">Conecte sua conta para acompanhar desafios em tempo real.</b></div><button class="text-button" data-open-duel>Criar seu desafio →</button></article>
-        <div class="section-heading compact"><div><span class="eyebrow">PARTIDAS DISPONÍVEIS</span><h2>Encontre seu próximo <em>rival</em></h2></div><div class="filter-group"><button class="filter active" data-arena-filter="all">Todas</button><button class="filter" data-arena-filter="1v1">1v1</button><button class="filter" data-arena-filter="2v2">2v2</button><button class="filter" data-arena-filter="5v5">5v5</button></div></div>
+      <!-- PÁGINA ARENA 1V1 / SCRIMS -->
+      <section id="arena" class="page">
+        <div class="arena-hero card">
+          <div class="arena-copy">
+            <span class="eyebrow">ARENA DE DESAFIOS</span>
+            <h2>DESAFIE OS MELHORES <i>VS</i> SUBA O RANKING</h2>
+            <p>Crie ou aceite desafios validados pela comunidade para somar Player Score diretamente na sua conta.</p>
+            <div class="duel-meta">
+              <span>✓ Validação de Resultado por Prints</span>
+              <span>✓ Anti-Cheat Integrado</span>
+              <span>✓ Pontuação Ranqueada</span>
+            </div>
+            <button class="button primary" id="createMatchBtn">+ Criar Novo Desafio</button>
+          </div>
+          <div class="versus-art">
+            <span>VS</span>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <h2>DESAFIOS <em>DISPONÍVEIS</em></h2>
+          <div class="filter-group">
+            <button class="filter active" data-filter="all">Todos</button>
+            <button class="filter" data-filter="1v1">1v1</button>
+            <button class="filter" data-filter="2v2">2v2</button>
+            <button class="filter" data-filter="5v5">5v5 Scrims</button>
+          </div>
+        </div>
+
         <div class="match-grid" id="matchGrid"></div>
       </section>
 
-      <!-- PÁGINA RANKING -->
-      <section class="page" id="ranking" data-page-section="ranking">
-        <div class="page-heading reveal"><div><span class="eyebrow">TEMPORADA 01 · BRASIL</span><h1>RANKING <em>GLOBAL</em></h1><p>A posição reflete desempenho, vitórias, consistência, adversários e torneios.</p></div><button class="button ghost" data-score-info>Como o score funciona</button></div>
-        <div class="leaderboard-layout"><article class="podium card reveal"><span class="eyebrow">TOP 3 DA TEMPORADA</span><div class="podium-players"><div class="podium-player second"><span class="avatar">VK</span><b>VK_VALKYRIE</b><small>9.142</small><i>2</i></div><div class="podium-player first"><span class="crown">♛</span><span class="avatar xl">RX</span><b>R4GNA_RX</b><small>9.486</small><i>1</i></div><div class="podium-player third"><span class="avatar">TU</span><b>TUCAFPS</b><small>8.991</small><i>3</i></div></div></article><article class="rank-insight card reveal delay-1"><span class="eyebrow">SUA POSIÇÃO</span><h3>#128 <small>↗ 14 posições</small></h3><p>Você está no <b>Top 8%</b> dos jogadores ativos. Faltam 258 pontos para o Top 100.</p><div class="rank-ladder"><span>TOP 1%</span><i><b></b></i><span>TOP 10%</span></div><button class="button small primary" data-page="arena">Ganhar pontos</button></article></div>
-        <div class="ranking-controls"><div class="filter-group"><button class="filter active" data-ranking-filter="global">Global</button><button class="filter" data-ranking-filter="x1">X1</button><button class="filter" data-ranking-filter="clans">Clãs</button></div><label class="search-box">⌕ <input id="rankSearch" type="search" placeholder="Buscar jogador"></label></div>
-        <article class="card rank-table-card"><div class="rank-table-head"><span>#</span><span>JOGADOR</span><span>FUNÇÃO</span><span>W/R</span><span>PLAYER SCORE</span><span></span></div><div id="rankingRows"></div></article>
+      <!-- PÁGINA RANKING GLOBAL -->
+      <section id="ranking" class="page">
+        <div class="leaderboard-layout">
+          <div class="podium card">
+            <span class="eyebrow">TOP 3 DA REGIONAL</span>
+            <div class="podium-players">
+              <div class="podium-player second">
+                <span class="avatar">VK</span>
+                <b>VK_VALKYRIE</b>
+                <small>9.142 PTS</small>
+                <i>2</i>
+              </div>
+              <div class="podium-player first">
+                <span class="crown">👑</span>
+                <span class="avatar">RX</span>
+                <b>R4GNA_RX</b>
+                <small>9.486 PTS</small>
+                <i>1</i>
+              </div>
+              <div class="podium-player third">
+                <span class="avatar">TU</span>
+                <b>TUCAFPS</b>
+                <small>8.991 PTS</small>
+                <i>3</i>
+              </div>
+            </div>
+          </div>
+
+          <div class="rank-insight card">
+            <span class="eyebrow">SUA POSIÇÃO</span>
+            <h3>#06 <small>TOP 3%</small></h3>
+            <p>Você está a apenas <b>249 PTS</b> de entrar no Top 5 Global. Dispute partidas de Arena para subir posições.</p>
+            <div class="rank-ladder">
+              <span>Sua pontuação: 8.742</span>
+              <i></i>
+              <span>Top 5: 8.991</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ranking-controls">
+          <div class="search-box">
+            🔍 <input type="text" id="rankingSearch" placeholder="Buscar por nick do jogador...">
+          </div>
+        </div>
+
+        <div class="rank-table-card card">
+          <div class="rank-table-head">
+            <span>#</span>
+            <span>JOGADOR</span>
+            <span>FUNÇÃO</span>
+            <span>WIN RATE</span>
+            <span>SCORE</span>
+            <span></span>
+          </div>
+          <div id="rankingRows"></div>
+        </div>
       </section>
 
       <!-- PÁGINA DESAFIOS -->
-      <section class="page" id="desafios" data-page-section="desafios">
-        <div class="page-heading reveal"><div><span class="eyebrow">RENOVA EM 2D 14H</span><h1>DESAFIOS DA <em>COMUNIDADE</em></h1><p>Jogue, envie a prova e conquiste XP, medalhas e posições no ranking semanal.</p></div></div>
-        <div class="featured-challenge card reveal"><div class="challenge-medal">◎</div><div class="featured-challenge-copy"><span class="eyebrow">DESAFIO DA SEMANA · PROVA OBRIGATÓRIA</span><h2>Domínio de AK117</h2><p>Consiga 30 eliminações com AK117 em partidas multiplayer. Envie um print ou vídeo para validar seu progresso.</p><div class="large-progress"><i id="largeChallengeBar"></i></div><div><b id="largeChallengeText">19 de 30 eliminações validadas</b><span> · 63% concluído</span></div></div><div class="challenge-rewards"><span>RECOMPENSAS</span><b>500 XP</b><p>Medalha “Precisão de aço”</p><button class="button primary" id="addChallengeProgress">Enviar print ou vídeo</button></div></div>
-        <div class="section-heading compact"><div><span class="eyebrow">MAIS MISSÕES</span><h2>Suba de nível <em>jogando</em></h2></div></div><div class="missions-grid"><article class="mission card"><span class="mission-icon pink">⚔</span><div><small>ARENA</small><h3>Racha de vitórias</h3><p>Vença 3 desafios X1 com prova validada.</p><button class="text-button" data-open-evidence data-evidence-kind="match_result">Enviar resultado →</button></div><b>300 XP</b></article><article class="mission card"><span class="mission-icon blue">◈</span><div><small>TIME · DIÁRIA</small><h3>Parceiro de squad</h3><p>Participe de 5 partidas 5v5.</p><button class="text-button" data-open-evidence data-evidence-kind="daily">Enviar prova →</button></div><b>250 XP</b></article><article class="mission card"><span class="mission-icon green">✦</span><div><small>COACH · MENSAL</small><h3>Revisão tática</h3><p>Complete uma análise com vídeo.</p><button class="text-button" data-open-evidence data-evidence-kind="coach">Enviar mídia →</button></div><b>150 XP</b></article></div>
+      <section id="desafios" class="page">
+        <div class="featured-challenge card">
+          <div class="challenge-medal">🏅</div>
+          <div class="featured-challenge-copy">
+            <span class="eyebrow">DESAFIO DA SEMANA</span>
+            <h2>MESTRE DO FUZIL DE ASSALTO</h2>
+            <p>Realize 30 eliminações em partidas ranqueadas Multiplayer usando a arma AK117 ou qualquer outro fuzil de assalto para garantir Bônus de Player Score.</p>
+            <div class="large-progress">
+              <i id="largeChallengeBar"></i>
+            </div>
+            <div id="largeChallengeText">19 de 30 eliminações validadas</div>
+          </div>
+          <div class="challenge-rewards">
+            <span>RECOMPENSA</span>
+            <b>+250 PTS</b>
+            <p>Selo exclusivo "Especialista AK117" no perfil.</p>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <h2>MISSÕES <em>DIÁRIAS</em></h2>
+        </div>
+
+        <div class="missions-grid">
+          <div class="mission card">
+            <div class="mission-icon pink">⚔️</div>
+            <div>
+              <small>MISSÃO 01</small>
+              <h3>Vitória no Hardpoint</h3>
+              <p>Vença 2 partidas no modo Hardpoint.</p>
+            </div>
+            <b>+50 PTS</b>
+          </div>
+
+          <div class="mission card">
+            <div class="mission-icon blue">🎯</div>
+            <div>
+              <small>MISSÃO 02</small>
+              <h3>Precisão Mortal</h3>
+              <p>Acerte 10 tiros na cabeça em qualquer modo.</p>
+            </div>
+            <b>+75 PTS</b>
+          </div>
+
+          <div class="mission card">
+            <div class="mission-icon green">🤝</div>
+            <div>
+              <small>MISSÃO 03</small>
+              <h3>Trabalho em Equipe</h3>
+              <p>Conclua 15 assistências em partidas de clã.</p>
+            </div>
+            <b>+60 PTS</b>
+          </div>
+        </div>
       </section>
 
-      <!-- PÁGINA COACH -->
-      <section class="page" id="coach" data-page-section="coach">
-        <div class="page-heading reveal"><div><span class="eyebrow">HUB INTELLIGENCE · BETA</span><h1>SEU <em>COACH</em> DIGITAL</h1><p>Transforme seus dados de partida em uma leitura prática para o próximo jogo.</p></div></div>
-        <div class="coach-layout"><article class="card coach-form-card reveal"><span class="eyebrow">NOVA ANÁLISE</span><h2>Conte como foi a partida</h2><p>Use números reais e uma prova em print ou vídeo. O Coach gera a leitura tática após a validação.</p><form id="coachForm"><div class="form-row"><label>Modo<select name="mode"><option>Hardpoint</option><option>Search & Destroy</option><option>Domination</option><option>Team Deathmatch</option></select></label><label>Mapa<select name="map"><option>Raid</option><option>Shipment</option><option>Nuketown</option><option>Standoff</option></select></label></div><div class="form-row three"><label>Abates<input name="kills" type="number" min="0" value="24" required></label><label>Mortes<input name="deaths" type="number" min="0" value="12" required></label><label>Vitória?<select name="win"><option value="yes">Sim</option><option value="no">Não</option></select></label></div><label>Print ou vídeo da partida<input name="proof" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"></label><label>O que mais aconteceu?<select name="behavior"><option value="balanced">Joguei equilibrado com o time</option><option value="solo">Entrei sozinho em muitos confrontos</option><option value="objective">Foquei muito no objetivo</option><option value="passive">Fiquei muito recuado</option></select></label><button class="button primary full" type="submit">Enviar para análise com IA <b>✦</b></button></form></article><article class="coach-report card reveal delay-1" id="coachReport"><div class="report-empty"><span>✦</span><h2>Sua leitura tática aparece aqui</h2><p>Envie os dados da partida para receber um diagnóstico completo.</p></div></article></div>
+      <!-- PÁGINA COACH DIGITAL COM UPLOAD E ANÁLISE DE 4 PRINTS -->
+      <section id="coach" class="page">
+        <div class="coach-layout">
+          <div class="coach-form-card card">
+            <span class="eyebrow">ANÁLISE POR IA MULTIMODAL</span>
+            <h2>COACH DIGITAL CODM</h2>
+            <p>Envie os <strong>4 prints da tela de fim de partida</strong> para que a IA analise a estatística completa (Pontuação, K/D, Objetivos e Utilitários) e emita o veredito tático exato.</p>
+
+            <form id="coachForm">
+              <div class="form-row">
+                <label>MODO DE JOGO
+                  <select name="mode" id="coachModeSelect">
+                    <option value="Hardpoint">Hardpoint (Zona Localizada)</option>
+                    <option value="Search & Destroy">Localizar e Destruir (S&D)</option>
+                    <option value="Domination">Dominação</option>
+                    <option value="Control">Controle</option>
+                  </select>
+                </label>
+                <label>MAPA DA PARTIDA
+                  <select name="map" id="coachMapSelect">
+                    <option value="Standoff">Standoff</option>
+                    <option value="Raid">Raid</option>
+                    <option value="Firing Range">Firing Range</option>
+                    <option value="Takeoff">Takeoff</option>
+                    <option value="Summit">Summit</option>
+                  </select>
+                </label>
+              </div>
+
+              <!-- PAINEL DE 4 PRINTS OBRIGATÓRIOS PARA AVALIAÇÃO DA IA -->
+              <div class="coach-prints-container">
+                <label style="margin-bottom:6px; display:block; font-weight:700; color:var(--gold);">
+                  📸 ANEXAR OS 4 PRINTS DA PARTIDA (PARA ANÁLISE COMPLETA):
+                </label>
+                
+                <div class="coach-prints-grid">
+                  <!-- Print 1 -->
+                  <div class="print-slot" id="printSlot1" data-slot="0">
+                    <div class="print-preview" id="printPrev0"><span>1</span><small>Placar Geral & Vitórias</small></div>
+                    <button type="button" class="button small ghost btn-upload-print" data-slot="0">Anexar Print 1</button>
+                  </div>
+
+                  <!-- Print 2 -->
+                  <div class="print-slot" id="printSlot2" data-slot="1">
+                    <div class="print-preview" id="printPrev1"><span>2</span><small>Dano & K/D/A</small></div>
+                    <button type="button" class="button small ghost btn-upload-print" data-slot="1">Anexar Print 2</button>
+                  </div>
+
+                  <!-- Print 3 -->
+                  <div class="print-slot" id="printSlot3" data-slot="2">
+                    <div class="print-preview" id="printPrev2"><span>3</span><small>Tempo de Objetivo / Capturas</small></div>
+                    <button type="button" class="button small ghost btn-upload-print" data-slot="2">Anexar Print 3</button>
+                  </div>
+
+                  <!-- Print 4 -->
+                  <div class="print-slot" id="printSlot4" data-slot="3">
+                    <div class="print-preview" id="printPrev3"><span>4</span><small>Detalhes de Armas & Util.</small></div>
+                    <button type="button" class="button small ghost btn-upload-print" data-slot="3">Anexar Print 4</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <label>RESULTADO
+                  <select name="win">
+                    <option value="yes">Vitória na Partida</option>
+                    <option value="no">Derrota na Partida</option>
+                  </select>
+                </label>
+                <label>COMPORTAMENTO
+                  <select name="behavior">
+                    <option value="balanced">Equilibrado / Rotação</option>
+                    <option value="solo">Combates Isolados / Entry</option>
+                    <option value="objective">Focado 100% na Zona</option>
+                    <option value="passive">Ancoragem / Suporte Recuado</option>
+                  </select>
+                </label>
+              </div>
+
+              <button type="submit" class="button primary full" style="margin-top:10px;">✦ Gerar Veredito da IA baseada nos Prints</button>
+            </form>
+          </div>
+
+          <!-- RELATÓRIO DO COACH -->
+          <div class="coach-report card" id="coachReport">
+            <div class="report-empty">
+              <span>✦</span>
+              <h2>Aguardando Dados e Prints</h2>
+              <p>Anexe os 4 prints da partida acima e clique em "Gerar Veredito" para a IA processar suas métricas visuais de jogo.</p>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <!-- PÁGINA COMUNIDADE -->
-      <section class="page" id="comunidade" data-page-section="comunidade">
-        <div class="page-heading reveal"><div><span class="eyebrow">REDE SOCIAL COMPETITIVA</span><h1>O LOBBY DA <em>COMUNIDADE</em></h1><p>Clipes, resultados, recrutamento e a conversa que move o competitivo.</p></div></div>
-        <div class="community-layout"><div><article class="card create-post reveal"><div><span class="avatar" id="feedUserAvatar">FO</span><textarea id="postInput" maxlength="300" placeholder="Compartilhe um clip, resultado ou chame o squad..."></textarea></div><div class="post-actions"><span><button type="button" class="text-button" id="attachPostPhotoBtn" style="color:var(--gold)">📷 Foto do Aparelho</button></span><span id="charCount">0/300</span><button class="button small primary" id="publishPost">Publicar</button></div></article><div class="post-list" id="postList"></div></div><aside class="community-aside"><article class="card trending"><span class="eyebrow">EM ALTA</span><h3>🔥 #AK117Challenge</h3><p>184 jogadores participando esta semana.</p><h3>⚔ #X1NightCup</h3><p>Inscrições abertas até sexta.</p><h3>◈ #ProcuraSeSquad</h3><p>56 jogadores disponíveis.</p></article><article class="card free-agent"><span class="eyebrow">MERCADO DE TALENTOS</span><h3>Você está disponível?</h3><p>Deixe seu perfil visível para clãs e line-ups.</p><button class="button small ghost" id="toggleAvailable">Marcar como disponível</button></article></aside></div>
+      <!-- PÁGINA COMUNIDADE & SOCIAL -->
+      <section id="comunidade" class="page">
+        <div class="community-layout">
+          <div>
+            <div class="create-post card">
+              <div>
+                <span class="avatar" id="feedUserAvatar">FO</span>
+                <textarea id="postInput" placeholder="O que você está treinando hoje? Compartilhe seus resultados ou busque parceiros para scrims..." maxlength="300"></textarea>
+              </div>
+              <div class="post-actions">
+                <button type="button" class="button small ghost" id="attachPostPhotoBtn">🖼 Anexar Foto/Mídia</button>
+                <span id="charCount">0/300</span>
+                <button class="button primary small" id="publishPost">Publicar</button>
+              </div>
+            </div>
+
+            <div class="post-list" id="postList"></div>
+          </div>
+
+          <aside class="community-aside">
+            <div class="trending card">
+              <h3>POSTS EM DESTAQUE</h3>
+              <p>Confira o que a comunidade competitiva do CODM HUB está comentando no momento.</p>
+            </div>
+            <div class="spotlight-grid" id="spotlightPosts" style="display:grid; gap:10px; margin-top:10px;"></div>
+          </aside>
+        </div>
       </section>
 
-      <!-- PÁGINA ADM -->
-      <section class="page" id="admin" data-page-section="admin">
-        <div class="page-heading reveal"><div><span class="eyebrow">CONTROLE E MODERAÇÃO</span><h1>PAINEL <em>ADM</em></h1><p>Revisão de evidências, suspeitas, pontuações e integridade da comunidade.</p></div><span class="admin-seal">ACESSO ADMINISTRADOR</span></div>
-        <div class="admin-stats"><article class="card"><span>EM ANÁLISE</span><b id="adminPendingCount">0</b><small>provas aguardando revisão</small></article><article class="card"><span>SUSPEITAS</span><b id="adminFlagCount">0</b><small>casos marcados para auditoria</small></article><article class="card"><span>RESULTADOS HOJE</span><b id="adminApprovedCount">0</b><small>validações aprovadas</small></article></div>
-        <div class="admin-layout"><article class="card admin-queue"><div class="card-title"><div><span class="eyebrow">FILA DE REVISÃO</span><h3>Provas e análises pendentes</h3></div><button class="text-button" id="refreshAdmin">Atualizar</button></div><div id="adminEvidenceQueue" class="admin-list"><p class="empty-state">Nenhuma prova pendente no momento.</p></div></article><aside class="card admin-policy"><span class="eyebrow">POLÍTICA DE VALIDAÇÃO</span><h3>Antes de aprovar</h3><ul><li>Confirme o nickname, modo e placar visíveis.</li><li>Rejeite mídia cortada ou sem contexto.</li><li>Marque suspeitas para impedir crédito automático.</li></ul><button class="button small ghost" id="openAdminGuide">Guia de auditoria</button></aside></div>
-      </section>
     </main>
+
+    <!-- NAVEGAÇÃO MOBILE (RODAPÉ) -->
+    <nav class="mobile-nav">
+      <button class="active" data-page="inicio">🏠<small>Início</small></button>
+      <button class="auth-required-nav" data-page="perfil">👤<small>Perfil</small></button>
+      <button class="mobile-center" data-page="arena">⚔️<small>Arena</small></button>
+      <button data-page="ranking">🏆<small>Rank</small></button>
+      <button data-page="coach">✦<small>Coach</small></button>
+    </nav>
   </div>
 
-  <!-- NAVEGAÇÃO MOBILE -->
-  <nav class="mobile-nav" aria-label="Navegação móvel">
-    <button class="active" data-page="inicio">⌂<small>Início</small></button>
-    <button data-page="arena">⚔<small>Arena</small></button>
-    <button data-page="desafios" class="mobile-center">◎<small>Missões</small></button>
-    <button data-page="ranking">♛<small>Ranking</small></button>
-    <button data-page="perfil" class="auth-required-nav hidden">◉<small>Perfil</small></button>
-  </nav>
+  <!-- MODAIS E POPUPS -->
+  <div class="modal-backdrop" id="modalBackdrop"></div>
 
-  <!-- MODAIS DO SISTEMA -->
-  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
-
-  <!-- MODAL DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
-  <section class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow" id="authModalSub">CONTA CODM HUB</span>
+  <!-- MODAL AUTH -->
+  <div class="modal" id="authModal">
+    <button class="modal-close" data-close-modal>&times;</button>
     <h2 id="authModalTitle">Entre na sua carreira</h2>
     <p id="authModalDesc">Acesse com sua conta para gerenciar seu perfil e interagir com a comunidade.</p>
+    
+    <button class="button google-button full" id="googleLogin">Continuar com Google</button>
+    
+    <div class="auth-divider"><span>OU</span></div>
+
     <form id="authForm">
-      <label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="seuemail@exemplo.com"></label>
-      <label>Senha<input name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Sua senha (mínimo 6 caracteres)"></label>
-      <button class="button primary full" id="emailAuthSubmit" type="submit">Entrar na conta</button>
+      <label>E-MAIL
+        <input type="email" name="email" required placeholder="seu@email.com">
+      </label>
+      <label>SENHA
+        <input type="password" name="password" required placeholder="••••••••">
+      </label>
+      <button type="submit" class="button primary full" id="emailAuthSubmit">Entrar na conta</button>
     </form>
-    <div class="auth-divider"><span>ou</span></div>
-    <button class="button google-button full" id="googleLogin" type="button">G <span>Continuar com Google</span></button>
-    <button class="text-button auth-mode" id="toggleAuthMode" type="button" style="margin-top:15px; width:100%; text-align:center;">Ainda não tem conta? Criar nova conta</button>
-  </section>
+    
+    <div class="auth-mode">
+      <button class="text-button" id="toggleAuthMode">Ainda não tem conta? Criar nova conta</button>
+    </div>
+  </div>
 
   <!-- MODAL EDITAR PERFIL -->
-  <section class="modal" id="editModal" role="dialog" aria-modal="true">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow">IDENTIDADE COMPETITIVA</span>
-    <h2 id="editModalTitle">Seu perfil do CODM HUB</h2>
-    <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:15px;">Atualize suas informações de jogador para se destacar na comunidade.</p>
-    <form id="profileForm">
-      <div style="margin-bottom:15px;">
-        <button type="button" id="changeAvatarBtn" class="button ghost full">📷 Selecionar Foto do Perfil (Galeria/Câmera)</button>
-      </div>
-      <div class="form-row">
-        <label>Nickname<input name="nickname" maxlength="20" required placeholder="Ex.: FALLK_OP"></label>
-        <label>Clã atual<input name="clan" maxlength="28" placeholder="Ex.: LO BARK"></label>
-      </div>
-      <label>Bio / Apresentação<input name="bio" maxlength="120" placeholder="Ex.: Entre no meu lobby se quiser jogar para vencer."></label>
-      <div class="form-row">
-        <label>Função principal
-          <select name="role">
-            <option>Entry Fragger</option>
-            <option>Flex</option>
-            <option>Sniper</option>
-            <option>IGL</option>
-            <option>Support</option>
-          </select>
-        </label>
-        <label>Estilo de jogo
-          <select name="style">
-            <option>Aggressive</option>
-            <option>Balanced</option>
-            <option>Strategic</option>
-            <option>Objective</option>
-          </select>
-        </label>
-      </div>
-      <div class="form-row">
-        <label>Arma assinatura<input name="weapon" maxlength="20" placeholder="Ex.: AK117"></label>
-        <label>Mapa favorito<input name="favoriteMap" maxlength="20" placeholder="Ex.: Nuketown"></label>
-      </div>
-      <label>Disponibilidade para times
-        <select name="availability">
-          <option value="false">Indisponível para novos convites</option>
-          <option value="true">Disponível no Mercado de Talentos</option>
-        </select>
-      </label>
-      <button class="button primary full" type="submit">Salvar Alterações no Perfil</button>
-    </form>
-  </section>
+  <div class="modal" id="editModal">
+    <button class="modal-close" data-close-modal>&times;</button>
+    <h2 id="editModalTitle">Editar Perfil Competitivo</h2>
+    <p>Atualize seus dados visíveis para recrutadores de clãs e outros jogadores.</p>
 
-  <!-- MODAL DE DESAFIO / DUELO -->
-  <section class="modal" id="duelModal" role="dialog" aria-modal="true" aria-labelledby="duelModalTitle">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow">CRIAR DESAFIO</span>
-    <h2 id="duelModalTitle">Chame um rival para a arena</h2>
-    <p>O desafio vale pontos após a confirmação das duas partes.</p>
-    <form id="duelForm">
-      <label>Jogador adversário<input name="opponent" required placeholder="Nickname do rival" value="R1P3R"></label>
-      <div class="form-row">
-        <label>Formato<select name="format"><option>1v1 · Melhor de 3</option><option>2v2 · Melhor de 3</option><option>5v5 · Série competitiva</option></select></label>
-        <label>Modo / mapa<select name="map"><option>Shipment · Sniper</option><option>Raid · Hardpoint</option><option>Standoff · S&D</option></select></label>
-      </div>
-      <div class="point-select">
-        <span>VALOR DO DESAFIO</span>
-        <button type="button" class="point active" data-points="100">100</button>
-        <button type="button" class="point" data-points="200">200</button>
-        <button type="button" class="point" data-points="300">300</button>
-      </div>
-      <button type="submit" class="button primary full">Enviar Desafio <b>→</b></button>
-    </form>
-  </section>
-
-  <!-- MODAL DE INFORMAÇÕES DO SCORE -->
-  <section class="modal small-modal" id="scoreModal" role="dialog" aria-modal="true">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow">PLAYER SCORE</span>
-    <h2>Como funciona seu score</h2>
-    <p>Sua pontuação recompensa desempenho real e consistência.</p>
-    <ul class="score-list">
-      <li><span>Vitórias e desempenho</span><b>30%</b></li>
-      <li><span>Objetivo e consistência</span><b>25%</b></li>
-      <li><span>K/D e eficiência</span><b>20%</b></li>
-      <li><span>Adversários e torneios</span><b>15%</b></li>
-      <li><span>Sequências e reputação</span><b>10%</b></li>
-    </ul>
-  </section>
-
-  <!-- MODAL DE EVIDÊNCIAS / PROVAS -->
-  <section class="modal" id="evidenceModal" role="dialog" aria-modal="true" aria-labelledby="evidenceTitle">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow">VALIDAÇÃO DE PROVA</span>
-    <h2 id="evidenceTitle">Enviar print ou vídeo</h2>
-    <p>Envie uma mídia de comprovação com seu nickname e resultado visíveis.</p>
-    <form id="evidenceForm">
-      <input type="hidden" name="kind" id="evidenceKind" value="weekly">
-      <label>Tipo de registro
-        <select name="category" id="evidenceCategory">
-          <option value="weekly">Missão semanal</option>
-          <option value="daily">Missão diária</option>
-          <option value="monthly">Missão mensal rara</option>
-          <option value="match_result">Resultado de desafio</option>
-          <option value="coach">Coach com IA</option>
-        </select>
-      </label>
-      <div class="form-row">
-        <label>Modo / Desafio<input name="mode" required placeholder="Ex.: AK117 Challenge"></label>
-        <label>Mapa<input name="map" required placeholder="Ex.: Nuketown"></label>
-      </div>
-      <div class="form-row three">
-        <label>Abates<input name="kills" type="number" min="0" value="0"></label>
-        <label>Mortes<input name="deaths" type="number" min="0" value="0"></label>
-        <label>Foi vitória?<select name="victory"><option value="yes">Sim</option><option value="no">Não</option></select></label>
-      </div>
-      <label>Print ou vídeo (do seu aparelho)<input name="file" type="file" accept="image/*,video/*" required></label>
-      <button class="button primary full" type="submit">Enviar Prova para Verificação <b>↑</b></button>
-    </form>
-  </section>
-
-  <!-- MODAL DE NOVO MARCO DA CARREIRA -->
-  <section class="modal small-modal" id="careerModal" role="dialog" aria-modal="true">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow">NOVO MARCO</span>
-    <h2>Adicionar marco na carreira</h2>
-    <form id="careerForm">
-      <label>Mês / ano<input name="date" required placeholder="Ex.: AGO 2026"></label>
-      <label>Conquista<input name="title" required maxlength="64" placeholder="Ex.: Campeão do Torneio X1"></label>
-      <label>Descrição<textarea name="description" required maxlength="160" placeholder="Conte o contexto dessa conquista."></textarea></label>
-      <button class="button primary full" type="submit">Adicionar à Carreira</button>
-    </form>
-  </section>
-
-  <!-- MODAL DE NOTIFICAÇÕES -->
-  <section class="modal small-modal" id="notificationsModal" role="dialog" aria-modal="true">
-    <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-    <span class="eyebrow">CENTRAL DE ALERTAS</span>
-    <h2>Suas notificações</h2>
-    <div id="notificationList" class="notification-list">
-      <div class="notification-item">
-        <b>Bem-vindo ao CODM HUB!</b>
-        <p>Conecte sua conta para registrar vitórias, acumular pontuação e personalizar seu perfil.</p>
-        <small>agora</small>
-      </div>
+    <div style="margin-bottom:15px; text-align:center;">
+      <button type="button" class="button ghost small" id="changeAvatarBtn">📷 Trocar Foto de Perfil</button>
     </div>
-  </section>
 
-  <!-- NOTIFICAÇÃO TOAST -->
-  <div class="toast" id="toast" role="status"><span>✓</span><p></p></div>
+    <form id="profileForm">
+      <div class="form-row">
+        <label>NICKNAME
+          <input type="text" name="nickname" required>
+        </label>
+        <label>CLÃ / TIME
+          <input type="text" name="clan">
+        </label>
+      </div>
+      <label>BIOGRAFIA / FRASE DE IMPACTO
+        <textarea name="bio" rows="2"></textarea>
+      </label>
+      <div class="form-row">
+        <label>FUNÇÃO
+          <select name="role">
+            <option value="Entry Fragger">Entry Fragger</option>
+            <option value="Sniper">Sniper</option>
+            <option value="IGL / Capitão">IGL / Capitão</option>
+            <option value="Support">Support</option>
+            <option value="Flex">Flex</option>
+          </select>
+        </label>
+        <label>ESTILO DE JOGO
+          <select name="style">
+            <option value="Aggressive">Aggressive</option>
+            <option value="Tactical">Tactical</option>
+            <option value="Anchor">Anchor</option>
+            <option value="Slayer">Slayer</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>ARMA FAVORITA
+          <input type="text" name="weapon" placeholder="Ex: AK117, DL Q33">
+        </label>
+        <label>MAPA FAVORITO
+          <input type="text" name="favoriteMap" placeholder="Ex: Standoff">
+        </label>
+      </div>
+      <button type="submit" class="button primary full">Salvar Alterações</button>
+    </form>
+  </div>
 
-  <script type="module" src="firebase-client.js"></script>
+  <!-- MODAL VER MÍDIA INSTAGRAM (LIGHTBOX) -->
+  <div class="modal" id="instaMediaModal">
+    <button class="modal-close" data-close-modal>&times;</button>
+    <div id="instaModalContent" style="display:grid; gap:12px; text-align:center;"></div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">
+    <span>✓</span>
+    <p>Ação concluída com sucesso!</p>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
