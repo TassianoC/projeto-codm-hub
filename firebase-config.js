@@ -1,7 +1,6 @@
 /**
  * Configuração pública do projeto Firebase.
- * As chaves abaixo identificam o projeto web; a segurança real está nas Rules
- * e nas Cloud Functions. Nunca coloque OPENAI_API_KEY ou segredos neste arquivo.
+ * As chaves abaixo identificam o projeto web no Firebase.
  */
 export const firebaseConfig = {
   apiKey: "AIzaSyBnysGMTtMQo0RbmEMjFPhBjZVLzovbgaA",
