@@ -56,8 +56,8 @@
   });
 
   /**
-   * Captura foto do aparelho do usuário (galeria/câmera) e envia ao Firebase Storage.
-   * Possui fallback via FileReader caso esteja operando em modo demonstrativo local.
+   * Abre o seletor de arquivos do próprio aparelho do usuário (galeria ou câmera)
+   * e faz o upload da imagem selecionada para o Firebase Storage.
    */
   async function selectAndUploadPhoto(folder = 'uploads') {
     return new Promise((resolve, reject) => {
@@ -74,7 +74,6 @@
 
         try {
           toast('Processando foto do seu aparelho...');
-          // Se o Firebase Storage estiver conectado e pronto
           if (firebase && firebase.available && firebase.storage && firebase.sdk.ref && firebase.sdk.uploadBytes) {
             const userId = currentUser ? currentUser.uid : 'user_' + Date.now();
             const fileName = `${folder}/${userId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
@@ -86,7 +85,6 @@
             toast('Foto enviada para o Firebase Storage com sucesso!');
             resolve(downloadUrl);
           } else {
-            // Fallback para FileReader local (Data URL) se o Firebase estiver off-line
             const reader = new FileReader();
             reader.onload = (e) => {
               toast('Foto do aparelho carregada com sucesso!');
@@ -169,13 +167,13 @@
 
   function updateAllProfileAvatars() {
     const url = state.profile.avatarUrl;
-    $$('.profile-mini .avatar, .profile-main .avatar, #userAvatar').forEach(el => {
+    $$('.profile-mini .avatar, .profile-main .avatar, #userAvatar, #profileAvatar').forEach(el => {
       renderAvatar(el, 'FO', url);
     });
   }
 
   function postMarkup(post, spotlight = false) {
-    const hasMedia = post.mediaUrl ? `<div class="post-media-preview"><img src="${post.mediaUrl}" alt="Mídia enviada pelo usuário"></div>` : '';
+    const hasMedia = post.mediaUrl ? `<div class="post-media-preview"><img src="${post.mediaUrl}" alt="Mídia enviada pelo usuário" style="max-width:100%; border-radius:8px; margin-top:10px;"></div>` : '';
     const avatarStyle = post.avatarUrl ? `style="background-image:url('${post.avatarUrl}');background-size:cover;background-position:center;"` : '';
 
     if (spotlight) return `
@@ -345,7 +343,7 @@
     $$('[data-close-modal]').forEach(button => button.addEventListener('click', closeModals));
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeModals(); });
 
-    // Permite trocar a foto de perfil diretamente ao clicar no Avatar
+    // Permite trocar a foto de perfil diretamente ao clicar no Avatar principal
     const mainAvatar = $('.profile-main .avatar');
     if (mainAvatar) {
       mainAvatar.title = "Clique para selecionar uma foto do seu aparelho";
@@ -371,7 +369,7 @@
       const avatarBtnGroup = document.createElement('div');
       avatarBtnGroup.style.margin = '10px 0';
       avatarBtnGroup.innerHTML = `
-        <button type="button" id="changeAvatarBtn" class="photo-upload-btn">
+        <button type="button" id="changeAvatarBtn" class="photo-upload-btn button ghost full">
           📷 Escolher Foto do Aparelho (Firebase)
         </button>
       `;
@@ -400,6 +398,7 @@
       attachBtn.id = 'attachPostPhotoBtn';
       attachBtn.className = 'text-button';
       attachBtn.style.color = 'var(--gold)';
+      attachBtn.style.cursor = 'pointer';
       attachBtn.innerHTML = '📷 Foto do Aparelho';
       postActions.prepend(attachBtn);
 
