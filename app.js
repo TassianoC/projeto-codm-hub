@@ -1,7 +1,10 @@
 (() => {
   'use strict';
 
-  const storageKey = 'codm-hub-career-v4';
+  const storageKey = 'codm-hub-career-v5';
+  let activeStorageKey = `${storageKey}:guest`;
+
+  const storageKeyForUser = user => `${storageKey}:${user?.uid || 'guest'}`;
   
   const defaultProfile = {
     nickname: 'FALLK_OP',
@@ -44,7 +47,7 @@
 
   const load = () => {
     try { 
-      const data = JSON.parse(localStorage.getItem(storageKey));
+      const data = JSON.parse(localStorage.getItem(activeStorageKey));
       return {
         ...defaults,
         ...data,
@@ -64,7 +67,18 @@
   };
 
   let state = load();
-  const persist = () => localStorage.setItem(storageKey, JSON.stringify(state));
+  const resetStateForUser = (user) => {
+    activeStorageKey = storageKeyForUser(user);
+    state = load();
+  };
+
+  const persist = () => {
+    try {
+      localStorage.setItem(activeStorageKey, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Não foi possível salvar o cache local do perfil:', error);
+    }
+  };
 
   const $ = (selector, node = document) => node.querySelector(selector);
   const $$ = (selector, node = document) => [...node.querySelectorAll(selector)];
@@ -92,96 +106,112 @@
 
   /**
    * Abre o seletor de arquivos do aparelho (galeria ou câmera)
-   * e faz o upload da foto para o Firebase Storage (com leitor local de contingência)
+   * e faz o upload da foto para o Cloudinary.
    */
+  async function uploadToCloudinary(file, folder = 'uploads') {
+    const cloudName = firebase?.config?.cloudinaryCloudName;
+    const uploadPreset = firebase?.config?.cloudinaryUploadPreset;
+
+    if (!cloudName || !uploadPreset) {
+      throw new Error('Cloudinary não configurado. Preencha CLOUDINARY_CLOUD_NAME e CLOUDINARY_UPLOAD_PRESET em firebase-config.js.');
+    }
+
+    const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/auto/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', `codm-hub/${folder}`);
+
+    const response = await fetch(endpoint, { method: 'POST', body: formData });
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok || !payload.secure_url) {
+      console.error('Cloudinary upload error:', payload);
+      throw new Error(payload?.error?.message || 'Não foi possível enviar a mídia para o armazenamento.');
+    }
+
+    return payload.secure_url;
+  }
+
+  async function compressImageForUpload(file, maxDimension = 1800, quality = 0.82) {
+    if (!file?.type?.startsWith('image/')) return file;
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = event => {
+        const image = new Image();
+        image.onload = () => {
+          const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('Não foi possível preparar a imagem.'));
+            resolve(new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.jpg`, { type: 'image/jpeg' }));
+          }, 'image/jpeg', quality);
+        };
+        image.onerror = reject;
+        image.src = event.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function selectAndUploadPhoto(folder = 'uploads') {
     return new Promise((resolve, reject) => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      
-      input.onchange = async (event) => {
-        const file = event.target.files && event.target.files[0];
-        if (!file) {
-          resolve(null);
-          return;
-        }
+      input.onchange = async event => {
+        const file = event.target.files?.[0];
+        if (!file) return resolve(null);
 
         try {
-          toast('Processando imagem do aparelho...');
-          if (firebase && firebase.available && firebase.storage && firebase.sdk.ref && firebase.sdk.uploadBytes) {
-            const userId = currentUser ? currentUser.uid : 'guest_' + Date.now();
-            const fileName = `${folder}/${userId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-            const storageRef = firebase.sdk.ref(firebase.storage, fileName);
-            
-            const snapshot = await firebase.sdk.uploadBytes(storageRef, file);
-            const downloadUrl = await firebase.sdk.getDownloadURL(snapshot.ref);
-            
-            toast('Foto enviada com sucesso!');
-            resolve(downloadUrl);
-          } else {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              toast('Foto do dispositivo carregada!');
-              resolve(e.target.result);
-            };
-            reader.onerror = (err) => reject(err);
-            reader.readAsDataURL(file);
-          }
-        } catch (err) {
-          console.warn('Erro ao subir para Firebase Storage. Usando modo de compatibilidade...', err);
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target.result);
-          reader.readAsDataURL(file);
+          if (!currentUser) throw new Error('Entre na sua conta antes de enviar uma foto.');
+          toast('Enviando foto...');
+          const prepared = await compressImageForUpload(file, 1600, 0.82);
+          const url = await uploadToCloudinary(prepared, folder);
+          toast('Foto salva no seu perfil!');
+          resolve(url);
+        } catch (error) {
+          console.error('Erro ao enviar foto:', error);
+          toast(error.message || 'Não foi possível salvar a foto.');
+          reject(error);
         }
       };
-
       input.click();
     });
   }
 
   /**
-   * Seletor universal para fotos/vídeos. Mantém fallback local quando o Firebase
-   * Storage não estiver disponível.
+   * Seletor universal para fotos/vídeos usando Cloudinary como armazenamento permanente.
    */
   async function selectAndUploadMedia(accept = 'image/*,video/*', folder = 'uploads') {
     return new Promise((resolve, reject) => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = accept;
-
       input.onchange = async event => {
-        const file = event.target.files && event.target.files[0];
+        const file = event.target.files?.[0];
         if (!file) return resolve(null);
-
         const type = file.type.startsWith('video/') ? 'video' : 'image';
 
         try {
-          toast('Processando mídia...');
-          if (firebase && firebase.available && firebase.storage && firebase.sdk.ref && firebase.sdk.uploadBytes) {
-            const userId = currentUser ? currentUser.uid : 'guest_' + Date.now();
-            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const fileName = `${folder}/${userId}_${Date.now()}_${safeName}`;
-            const storageRef = firebase.sdk.ref(firebase.storage, fileName);
-            const snapshot = await firebase.sdk.uploadBytes(storageRef, file, { contentType: file.type });
-            const downloadUrl = await firebase.sdk.getDownloadURL(snapshot.ref);
-            toast('Mídia enviada com sucesso!');
-            return resolve({ url: downloadUrl, type, file });
-          }
-
-          const reader = new FileReader();
-          reader.onload = e => resolve({ url: e.target.result, type, file });
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        } catch (err) {
-          console.warn('Erro ao subir mídia para o Firebase. Usando modo local...', err);
-          const reader = new FileReader();
-          reader.onload = e => resolve({ url: e.target.result, type, file });
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
+          if (!currentUser) throw new Error('Entre na sua conta antes de publicar uma mídia.');
+          toast('Enviando mídia...');
+          const prepared = type === 'image' ? await compressImageForUpload(file) : file;
+          const url = await uploadToCloudinary(prepared, folder);
+          toast('Mídia salva no seu perfil!');
+          resolve({ url, type, file: prepared });
+        } catch (error) {
+          console.error('Erro ao enviar mídia:', error);
+          toast(error.message || 'Não foi possível salvar essa mídia.');
+          reject(error);
         }
       };
-
       input.click();
     });
   }
@@ -228,21 +258,9 @@
           toast(`Processando Print ${slotIdx + 1}...`);
           const dataUrl = await fileToAnalysisDataUrl(file);
 
-          let storedUrl = dataUrl;
-          if (firebase && firebase.available && firebase.storage && firebase.sdk.ref && firebase.sdk.uploadBytes) {
-            try {
-              const userId = currentUser ? currentUser.uid : 'guest_' + Date.now();
-              const blob = await (await fetch(dataUrl)).blob();
-              const fileName = `coach_prints/${userId}_${Date.now()}_print_${slotIdx + 1}.jpg`;
-              const storageRef = firebase.sdk.ref(firebase.storage, fileName);
-              const snapshot = await firebase.sdk.uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
-              storedUrl = await firebase.sdk.getDownloadURL(snapshot.ref);
-            } catch (storageError) {
-              console.warn('Não foi possível salvar o print no Storage; a análise continuará com a cópia local.', storageError);
-            }
-          }
-
-          resolve({ url: storedUrl, dataUrl, type: 'image', file });
+          // Prints do Coach não precisam ser armazenados permanentemente.
+          // Eles ficam em memória apenas durante a análise e nunca entram no Firestore.
+          resolve({ url: dataUrl, dataUrl, type: 'image', file });
         } catch (error) {
           reject(error);
         }
@@ -399,7 +417,8 @@
     // A GEMINI_API_KEY fica somente nas variáveis de ambiente da Vercel e nunca é enviada ao navegador.
     const screenshots = coachPrints.map(print => print.dataUrl);
 
-    const response = await fetch('/api/analyze-coach', {
+    const apiUrl = firebase?.config?.coachApiUrl || '/api/analyze-coach';
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -567,50 +586,63 @@
    */
   async function loadUserProfile(user) {
     if (!user) return;
-    
-    // Tenta carregar do Firestore se disponível
+
+    resetStateForUser(user);
+
     if (firebase && firebase.available && firebase.db && firebase.sdk.doc && firebase.sdk.getDoc) {
       try {
         const userDocRef = firebase.sdk.doc(firebase.db, 'users', user.uid);
         const docSnap = await firebase.sdk.getDoc(userDocRef);
         if (docSnap.exists()) {
           const fetchedData = docSnap.data();
-          state.profile = { ...defaultProfile, ...(fetchedData.profile || {}) };
-          if (fetchedData.score) state.score = fetchedData.score;
+          state.profile = {
+            ...defaultProfile,
+            ...(fetchedData.profile || {}),
+            instaFeed: Array.isArray(fetchedData.profile?.instaFeed) ? fetchedData.profile.instaFeed : []
+          };
+          if (Number.isFinite(Number(fetchedData.score))) state.score = Number(fetchedData.score);
         } else {
-          // Se é uma conta recém-criada no Firebase sem documento, salva o padrão e abre a tela de edição de perfil
-          saveUserProfile();
+          await saveUserProfile();
           showModal('#editModal');
           if ($('#editModalTitle')) $('#editModalTitle').textContent = 'Crie seu perfil competitivo';
           toast('Bem-vindo! Complete seu perfil para começar.');
         }
       } catch (err) {
-        console.warn('Erro ao obter perfil no Firestore:', err);
+        console.error('Erro ao obter perfil no Firestore:', err);
+        toast('Não foi possível carregar seu perfil salvo.');
       }
     }
-    
+
     renderProfileData();
     renderProfileInstagramFeed();
     persist();
     updateAuthUI();
   }
 
-  /**
-   * Salva as alterações do perfil no Firebase Firestore e no LocalStorage
-   */
   async function saveUserProfile() {
-    persist();
-    if (currentUser && firebase && firebase.available && firebase.db && firebase.sdk.doc && firebase.sdk.setDoc) {
-      try {
-        const userDocRef = firebase.sdk.doc(firebase.db, 'users', currentUser.uid);
-        await firebase.sdk.setDoc(userDocRef, {
-          profile: state.profile,
-          score: state.score,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-      } catch (err) {
-        console.warn('Erro ao salvar perfil no Firestore:', err);
-      }
+    if (!currentUser) {
+      persist();
+      return false;
+    }
+
+    if (!(firebase && firebase.available && firebase.db && firebase.sdk.doc && firebase.sdk.setDoc)) {
+      persist();
+      return false;
+    }
+
+    try {
+      const userDocRef = firebase.sdk.doc(firebase.db, 'users', currentUser.uid);
+      await firebase.sdk.setDoc(userDocRef, {
+        profile: state.profile,
+        score: state.score,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      persist();
+      return true;
+    } catch (err) {
+      console.error('Erro ao salvar perfil no Firestore:', err);
+      toast('Não foi possível salvar seu perfil. Verifique sua conexão e as regras do Firestore.');
+      return false;
     }
   }
 
@@ -883,11 +915,15 @@
     window.addEventListener('codmFirebaseReady', (e) => {
       firebase = e.detail;
       if (firebase && firebase.available && firebase.sdk.onAuthStateChanged) {
-        firebase.sdk.onAuthStateChanged(firebase.auth, (user) => {
+        firebase.sdk.onAuthStateChanged(firebase.auth, async (user) => {
           currentUser = user;
           if (user) {
-            loadUserProfile(user);
+            await loadUserProfile(user);
           } else {
+            activeStorageKey = storageKeyForUser(null);
+            state = structuredClone(defaults);
+            renderProfileData();
+            renderProfileInstagramFeed();
             updateAuthUI();
           }
         });
@@ -982,12 +1018,7 @@
             toast(`Erro ao autenticar: ${err.message || 'Verifique seus dados.'}`);
           }
         } else {
-          // Fallback offline / local
-          currentUser = { uid: 'local_user_' + Date.now(), email };
-          state.profile.nickname = email.split('@')[0];
-          toast('Conectado em modo de demonstração local!');
-          closeModals();
-          updateAuthUI();
+          toast('Firebase não está disponível. Faça o deploy/configure o Firebase antes de entrar.');
         }
       });
     }
@@ -1008,10 +1039,7 @@
             toast('Falha ao autenticar com Google.');
           }
         } else {
-          currentUser = { uid: 'google_user_demo', email: 'usuario_google@gmail.com' };
-          toast('Conectado com Google em modo local!');
-          closeModals();
-          updateAuthUI();
+          toast('Firebase não está disponível. Configure o Firebase antes de usar o login com Google.');
         }
       });
     }
