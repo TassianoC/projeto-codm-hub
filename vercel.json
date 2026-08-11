@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/analyze-coach.js": {
+      "maxDuration": 60
+    }
+  }
+}
