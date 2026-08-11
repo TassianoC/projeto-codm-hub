@@ -6,12 +6,11 @@ import { firebaseConfig } from './firebase-config.js';
 async function bootFirebase() {
   try {
     const version = '10.12.0';
-    const [appSdk, authSdk, firestoreSdk, storageSdk, functionsSdk] = await Promise.all([
+    const [appSdk, authSdk, firestoreSdk, storageSdk] = await Promise.all([
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`),
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-storage.js`),
-      import(`https://www.gstatic.com/firebasejs/${version}/firebase-functions.js`)
     ]);
 
     const app = appSdk.initializeApp(firebaseConfig);
@@ -20,8 +19,7 @@ async function bootFirebase() {
       auth: authSdk.getAuth(app),
       db: firestoreSdk.getFirestore(app),
       storage: storageSdk.getStorage(app),
-      functions: functionsSdk.getFunctions(app, 'southamerica-east1'),
-      sdk: { ...authSdk, ...firestoreSdk, ...storageSdk, ...functionsSdk }
+      sdk: { ...authSdk, ...firestoreSdk, ...storageSdk }
     };
     window.codmFirebase = service;
     window.dispatchEvent(new CustomEvent('codmFirebaseReady', { detail: service }));
