@@ -1,69 +1,32 @@
-# CODM HUB 3.0 — Carreira competitiva
+# CODM HUB
 
-Uma experiência única para transformar a comunidade de COD Mobile em uma plataforma de identidade e evolução competitiva.
+## Coach IA sem Firebase Blaze
 
-## Como abrir
+O Coach IA deste projeto usa uma **Vercel Serverless Function** em `api/analyze-coach.js`.
+Isso permite manter o Firebase no plano atual e continuar usando Firebase para autenticação, Firestore e Storage.
 
-Abra `index.html` diretamente no navegador. Para uma experiência melhor durante alterações, rode o projeto com qualquer servidor local (por exemplo, a extensão Live Server do VS Code).
+### Configuração da IA na Vercel
 
-Não há instalação nem dependências obrigatórias: esta versão funciona somente com HTML, CSS e JavaScript.
+No projeto da Vercel, abra:
 
-## O que foi incluído
+`Settings` → `Environment Variables`
 
-- Perfil competitivo completo, com Player Score, DNA de jogo, rank, histórico, armas, mapas, conquistas e currículo para times.
-- Card de jogador compartilhável: o botão de compartilhar copia o link direto do perfil.
-- Sistema de Player Score explicado por critérios: vitórias, objetivos, eficiência, adversários, torneios, sequência e reputação.
-- Arena para desafios 1v1, 2v2 e 5v5, com modal de criação e valor de pontos.
-- Ranking global com busca de jogador e categorias preparadas para Global, X1 e Clãs.
-- Desafio semanal funcional: o progresso é atualizado e persiste no navegador.
-- Coach digital funcional: recebe dados da partida e gera um diagnóstico com mira, decisão, agressividade, posicionamento e recomendação.
-- Feed da comunidade com publicação local, curtidas e área de mercado de talentos.
-- Visual responsivo para desktop e celular, tema claro/escuro e navegação inferior no celular.
+Adicione:
 
-## Dados e persistência
+`GEMINI_API_KEY` = sua chave da API Gemini
 
-Esta é uma versão demonstrativa pronta para apresentação e validação de produto. Alterações feitas no desafio, perfil, disponibilidade e feed são salvas no `localStorage` do navegador, sem depender de login ou banco de dados.
+Opcionalmente:
 
-## Próxima etapa para colocar online
+`GEMINI_MODEL` = `gemini-2.5-flash`
 
-Para transformar o protótipo em uma rede real, conecte as ações a um backend (Firebase, Supabase ou outro):
+Depois faça um novo deploy.
 
-1. Autenticação e perfis em `players`.
-2. Partidas e confirmação dupla em `matches`.
-3. Desafios em `challenges` e progresso em `challengeProgress`.
-4. Posts, comentários e curtidas em `posts`.
-5. Ranking calculado no servidor a partir das partidas validadas.
-6. Upload de prints/clipes em Storage, com moderação antes de contabilizar pontos.
+**Não coloque a chave em `app.js`, `index.html` ou em qualquer arquivo público.**
 
-> Importante: nunca calcule nem conceda Player Score apenas no navegador em produção. A validação de resultado e o cálculo do ranking devem acontecer no servidor para evitar fraude.
+### Coach
 
-## Estrutura
-
-- `index.html` — interface e seções do HUB.
-- `styles.css` — identidade visual, responsividade e temas.
-- `app.js` — navegação, interações, persistência local, Coach, desafios, feed e ranking.
-
-
-
-## Atualizações desta versão
-
-### Perfil — feed visual estilo Instagram
-- O perfil agora possui um feed em grade de 3 colunas.
-- É possível publicar fotos e vídeos diretamente pelo botão `+ Nova Mídia`.
-- As mídias ficam persistidas no perfil via Firestore quando o Firebase está disponível e no `localStorage` como fallback.
-- Clique em uma publicação para abrir o visualizador com imagem/vídeo, legenda e metadados.
-- O código preserva dados antigos de `feedMedia`/`instaFeed` quando existirem.
-
-### Coach — análise obrigatória de 4 prints
-- O Coach exige exatamente quatro prints antes de iniciar a análise.
-- Cada slot possui uma finalidade: resultado/placar, K/D/A e dano, objetivos, e armas/perks/utilitários.
-- Os prints são redimensionados no navegador e enviados à Cloud Function.
-- A IA recebe somente as quatro imagens como fonte de métricas da partida. Modo e mapa são apenas contexto.
-- O modelo é instruído a não inventar números que não estejam visíveis ou legíveis.
-- O relatório mostra veredito, nota, métricas, evidências identificadas e avisos.
-- Sem a Cloud Function/Gemini configurados, o sistema informa a configuração necessária em vez de fabricar uma análise.
+O Coach exige exatamente 4 prints e envia somente as imagens para a função `/api/analyze-coach` junto do modo/mapa para contexto. A IA deve usar exclusivamente as informações visíveis nos prints para as métricas e marcar como `não identificado` aquilo que não estiver legível.
 
 ### Firebase
-O `index.html` agora carrega o `firebase-client.js`, corrigindo a integração que o `app.js` já esperava.
 
-Para ativar o Coach IA, veja `functions/README.md`.
+O Firebase continua sendo usado pelo frontend para os recursos já existentes. Não há Cloud Function do Firebase neste projeto, portanto o Coach não exige o plano Blaze.
