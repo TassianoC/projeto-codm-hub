@@ -190,7 +190,7 @@
    * Redimensiona um print antes de enviá-lo ao Coach.
    * Isso evita payloads gigantes e preserva a leitura dos números da tela.
    */
-  async function fileToAnalysisDataUrl(file, maxDimension = 1800, quality = 0.86) {
+  async function fileToAnalysisDataUrl(file, maxDimension = 1280, quality = 0.72) {
     if (!file || !file.type.startsWith('image/')) return null;
 
     return new Promise((resolve, reject) => {
@@ -395,20 +395,34 @@
   }
 
   async function requestCoachAI(data) {
-    if (!firebase || !firebase.available || !firebase.functions || !firebase.sdk.httpsCallable) {
-      throw new Error('COACH_AI_NOT_CONFIGURED');
-    }
-
-    const callable = firebase.sdk.httpsCallable(firebase.functions, 'analyzeCoachScreenshots');
+    // O Coach roda pela API Serverless da Vercel para não exigir o plano Blaze do Firebase.
+    // A GEMINI_API_KEY fica somente nas variáveis de ambiente da Vercel e nunca é enviada ao navegador.
     const screenshots = coachPrints.map(print => print.dataUrl);
 
-    const result = await callable({
-      mode: data.mode,
-      map: data.map,
-      screenshots
+    const response = await fetch('/api/analyze-coach', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: data.mode,
+        map: data.map,
+        screenshots
+      })
     });
 
-    return result.data;
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      const error = new Error(payload?.error || 'Não foi possível conectar ao Coach IA.');
+      error.status = response.status;
+      throw error;
+    }
+
+    return payload;
   }
 
   function renderCoachReport(report, data) {
@@ -481,16 +495,16 @@
       toast('Veredito da IA gerado com os 4 prints.');
     } catch (error) {
       console.error('Falha na análise do Coach:', error);
-      if (error.message === 'COACH_AI_NOT_CONFIGURED') {
+      if (error.status === 413) {
         if ($('#coachReport')) {
           $('#coachReport').innerHTML = `
             <div class="report-empty">
               <span>⚠</span>
-              <h2>IA ainda não conectada</h2>
-              <p>Os 4 prints foram carregados corretamente, mas a função de IA do Firebase ainda não está publicada/configurada. Veja <strong>functions/README.md</strong> para conectar o Gemini com segurança.</p>
+              <h2>Prints muito pesados</h2>
+              <p>Os 4 prints foram reduzidos automaticamente, mas ainda ficaram grandes demais para a requisição. Tente usar capturas de tela em resolução menor.</p>
             </div>`;
         }
-        toast('Configure a função analyzeCoachScreenshots no Firebase.');
+        toast('Reduza o tamanho dos 4 prints e tente novamente.');
       } else {
         if ($('#coachReport')) {
           $('#coachReport').innerHTML = `
