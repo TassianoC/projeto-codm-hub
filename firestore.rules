@@ -1,9 +1,72 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Dados privados: histórico do Coach, evidências e configurações do jogador.
     match /users/{userId} {
-      allow read, create, update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow read, create, update, delete: if isOwner(userId);
+    }
+
+    // Cartão público, usado no ranking e para que outros jogadores conheçam o perfil.
+    match /publicProfiles/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId) && request.resource.data.score == 0;
+      allow update: if isOwner(userId) && request.resource.data.score == resource.data.score;
+      allow delete: if isOwner(userId);
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.authorUid == request.auth.uid;
+      allow update, delete: if signedIn() && (
+        resource.data.authorUid == request.auth.uid ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount']) &&
+          request.resource.data.likeCount >= 0 && request.resource.data.commentCount >= 0)
+      );
+
+      match /likes/{userId} {
+        allow read: if true;
+        allow create, delete: if isOwner(userId);
+      }
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if signedIn() && request.resource.data.authorUid == request.auth.uid;
+        allow update, delete: if signedIn() && resource.data.authorUid == request.auth.uid;
+      }
+    }
+
+    // Scrims e desafios são públicos. Somente o anfitrião pode alterar ou encerrar o evento.
+    match /matches/{matchId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if signedIn() && (
+        resource.data.ownerUid == request.auth.uid ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['requestCount', 'requestedBy']) &&
+          request.resource.data.requestCount == resource.data.requestCount + 1 &&
+          request.resource.data.requestedBy.size() == resource.data.requestedBy.size() + 1 &&
+          request.resource.data.requestedBy.hasAll([request.auth.uid]))
+      );
+      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+
+      match /requests/{requestId} {
+        allow create: if signedIn() && request.resource.data.requesterUid == request.auth.uid;
+        allow read: if signedIn() && (
+          resource.data.requesterUid == request.auth.uid ||
+          get(/databases/$(database)/documents/matches/$(matchId)).data.ownerUid == request.auth.uid
+        );
+        allow update, delete: if signedIn() && (
+          resource.data.requesterUid == request.auth.uid ||
+          get(/databases/$(database)/documents/matches/$(matchId)).data.ownerUid == request.auth.uid
+        );
+      }
+    }
+
+    // Cada usuário vê e marca como lidas somente as próprias notificações.
+    match /notifications/{notificationId} {
+      allow create: if signedIn() && request.resource.data.actorUid == request.auth.uid;
+      allow read, update, delete: if isOwner(resource.data.ownerUid);
     }
   }
 }
