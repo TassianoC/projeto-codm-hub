@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "projeto-codm-hub"
-  }
+    "default": "projeto-codm-hub",
+    "firebase use": "projeto-codm-hub"
+  },
+  "targets": {},
+  "etags": {}
 }
