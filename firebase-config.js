@@ -14,8 +14,8 @@ export const firebaseConfig = {
   appId: "1:1038952355133:web:18f011328d2e111316a154",
 
   // Preencha com os dados públicos do seu Cloudinary.
-  cloudinaryCloudName: "SEU_CLOUD_NAME",
-  cloudinaryUploadPreset: "SEU_UPLOAD_PRESET",
+  cloudinaryCloudName: "rhpsry3a",
+  cloudinaryUploadPreset: "codm_hub_uploads",
 
   // Deixe vazio se o frontend e a API estiverem no mesmo projeto Vercel.
   // Se o frontend estiver em outro domínio, coloque aqui a URL completa da Function.
