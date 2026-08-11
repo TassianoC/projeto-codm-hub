@@ -1,32 +1,63 @@
-# CODM HUB
+# CODM HUB — versão pronta para GitHub + Vercel
 
-## Coach IA sem Firebase Blaze
+Esta versão foi preparada para publicação pelo GitHub sem depender do **Firebase Blaze** para o Coach IA ou para as imagens.
 
-O Coach IA deste projeto usa uma **Vercel Serverless Function** em `api/analyze-coach.js`.
-Isso permite manter o Firebase no plano atual e continuar usando Firebase para autenticação, Firestore e Storage.
+## Arquitetura
 
-### Configuração da IA na Vercel
+- **Firebase Authentication + Firestore:** contas e dados do perfil.
+- **Cloudinary:** fotos e vídeos do perfil/feed.
+- **Vercel Function:** endpoint seguro do Coach IA.
+- **Gemini API:** análise dos 4 prints, com a chave mantida somente na Vercel.
+- **Firebase Storage:** não utilizado.
 
-No projeto da Vercel, abra:
+## Antes do primeiro deploy
 
-`Settings` → `Environment Variables`
+### 1. Cloudinary
 
-Adicione:
+Crie um **unsigned upload preset** no Cloudinary e coloque os dois valores públicos em `firebase-config.js`:
 
-`GEMINI_API_KEY` = sua chave da API Gemini
+```js
+cloudinaryCloudName: "SEU_CLOUD_NAME",
+cloudinaryUploadPreset: "SEU_UPLOAD_PRESET",
+```
 
-Opcionalmente:
+Configure o preset com limites de formato e tamanho adequados. O nome do preset é público no navegador, portanto ele deve ser protegido por restrições do próprio preset.
 
-`GEMINI_MODEL` = `gemini-2.5-flash`
+### 2. Gemini na Vercel
 
-Depois faça um novo deploy.
+No projeto da Vercel, em **Settings → Environment Variables**, adicione:
 
-**Não coloque a chave em `app.js`, `index.html` ou em qualquer arquivo público.**
+```text
+GEMINI_API_KEY=sua_chave_nova
+GEMINI_MODEL=gemini-2.5-flash
+```
 
-### Coach
+Não coloque a chave no código.
 
-O Coach exige exatamente 4 prints e envia somente as imagens para a função `/api/analyze-coach` junto do modo/mapa para contexto. A IA deve usar exclusivamente as informações visíveis nos prints para as métricas e marcar como `não identificado` aquilo que não estiver legível.
+### 3. Firebase Authentication
 
-### Firebase
+No Firebase Console, habilite os provedores desejados, por exemplo:
 
-O Firebase continua sendo usado pelo frontend para os recursos já existentes. Não há Cloud Function do Firebase neste projeto, portanto o Coach não exige o plano Blaze.
+- E-mail/senha
+- Google
+
+### 4. Firestore
+
+Publique `firestore.rules` no seu projeto Firebase. O acesso ao documento `users/{UID}` é restrito ao usuário autenticado correspondente.
+
+## Publicação pelo GitHub
+
+1. Crie um repositório novo no GitHub.
+2. Envie **todo o conteúdo desta pasta** para a raiz do repositório.
+3. Importe o repositório na Vercel.
+4. Na Vercel, configure `GEMINI_API_KEY` e `GEMINI_MODEL`.
+5. Faça o deploy.
+6. Abra o endereço da Vercel e teste login, upload de foto e Coach IA.
+
+Não abra `index.html` diretamente pelo computador. A rota `/api/analyze-coach.js` é uma Serverless Function e precisa de um servidor/deploy compatível.
+
+## Segurança
+
+Se uma chave Gemini real já esteve em um arquivo público ou no `.env.example` de uma versão anterior, **revogue essa chave e gere outra**.
+
+O arquivo `.gitignore` já bloqueia arquivos `.env` reais.
