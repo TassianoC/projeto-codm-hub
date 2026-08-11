@@ -1,16 +1,12 @@
 import { firebaseConfig } from './firebase-config.js';
 
-/**
- * Carrega Firebase sem impedir que a interface abra caso haja instabilidade na rede.
- */
 async function bootFirebase() {
   try {
     const version = '10.12.0';
-    const [appSdk, authSdk, firestoreSdk, storageSdk] = await Promise.all([
+    const [appSdk, authSdk, firestoreSdk] = await Promise.all([
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
       import(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`),
-      import(`https://www.gstatic.com/firebasejs/${version}/firebase-storage.js`),
     ]);
 
     const app = appSdk.initializeApp(firebaseConfig);
@@ -18,14 +14,14 @@ async function bootFirebase() {
       available: true,
       auth: authSdk.getAuth(app),
       db: firestoreSdk.getFirestore(app),
-      storage: storageSdk.getStorage(app),
-      sdk: { ...authSdk, ...firestoreSdk, ...storageSdk }
+      config: firebaseConfig,
+      sdk: { ...authSdk, ...firestoreSdk }
     };
     window.codmFirebase = service;
     window.dispatchEvent(new CustomEvent('codmFirebaseReady', { detail: service }));
   } catch (error) {
-    console.warn('Firebase indisponível; utilizando modo de dados locais.', error);
-    const service = { available: false, error };
+    console.error('Firebase indisponível:', error);
+    const service = { available: false, error, config: firebaseConfig };
     window.codmFirebase = service;
     window.dispatchEvent(new CustomEvent('codmFirebaseReady', { detail: service }));
   }
