@@ -5,6 +5,21 @@
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
+async function verifyFirebaseUser(req) {
+  const authorization = String(req.headers?.authorization || '');
+  const token = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+  if (!token) return null;
+  if (!process.env.FIREBASE_WEB_API_KEY) return 'configuration-error';
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(process.env.FIREBASE_WEB_API_KEY)}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: token }) }
+  );
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data?.users?.[0]?.localId || null;
+}
+
 function parseDataUrl(value) {
   if (typeof value !== 'string') return null;
   const match = value.match(/^data:(image\/(?:jpeg|jpg|png|webp));base64,([A-Za-z0-9+/=]+)$/i);
@@ -51,6 +66,14 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({
       error: 'GEMINI_API_KEY não configurada na Vercel.'
     });
+  }
+
+  const authenticatedUser = await verifyFirebaseUser(req);
+  if (authenticatedUser === 'configuration-error') {
+    return res.status(500).json({ error: 'FIREBASE_WEB_API_KEY não configurada na Vercel.' });
+  }
+  if (!authenticatedUser) {
+    return res.status(401).json({ error: 'Entre em uma conta válida para usar o Coach IA.' });
   }
 
   try {
