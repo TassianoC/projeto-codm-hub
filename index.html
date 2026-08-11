@@ -78,7 +78,7 @@
                 <span class="avatar stack a2">VK</span>
                 <span class="avatar stack a3">LB</span>
               </div>
-              <p>Mais de <strong>1.400+ jogadores</strong> ativos participando de scrims e desafios.</p>
+              <p>Encontre jogadores, publique scrims e construa seu histórico competitivo.</p>
             </div>
           </div>
 
@@ -89,7 +89,7 @@
 
             <article class="featured-card">
               <div class="featured-top">
-                <div class="rank-emblem">E3</div>
+                <div class="rank-emblem" id="homeRankEmblem">—</div>
                 <span class="signal">● ONLINE</span>
               </div>
               <div class="featured-name">
@@ -111,9 +111,9 @@
                 </div>
               </div>
               <div class="featured-stats">
-                <div><small>K/D RATIO</small><b>2.84</b></div>
-                <div><small>WIN RATE</small><b>68%</b></div>
-                <div><small>MODO</small><b>Hardpoint</b></div>
+                <div><small>K/D RATIO</small><b>—</b></div>
+                <div><small>WIN RATE</small><b>—</b></div>
+                <div><small>MODO</small><b>—</b></div>
               </div>
               <div class="card-footer">
                 <span>CODM HUB VERIFIED PLAYER</span>
@@ -735,6 +735,64 @@
   <div class="modal" id="instaMediaModal">
     <button class="modal-close" data-close-modal>&times;</button>
     <div id="instaModalContent" style="display:grid; gap:12px; text-align:center;"></div>
+  </div>
+
+  <!-- AGENDAMENTO DE SCRIM / DESAFIO -->
+  <div class="modal modal-wide" id="matchModal">
+    <button class="modal-close" data-close-modal>&times;</button>
+    <h2>Agendar scrim ou desafio</h2>
+    <p>O evento ficará público, com data, formato, mapa e canal de contato claros para a outra line-up.</p>
+    <form id="matchForm">
+      <div class="form-row">
+        <label>TÍTULO
+          <input name="title" required maxlength="80" placeholder="Ex.: Treino 5v5 competitivo">
+        </label>
+        <label>TIPO
+          <select name="mode"><option value="1v1">1v1</option><option value="2v2">2v2</option><option value="5v5">5v5 Scrim</option></select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>MODO DO CODM
+          <select name="gameMode"><option>Hardpoint</option><option>Search &amp; Destroy</option><option>Domination</option><option>Control</option><option>Multimodo</option></select>
+        </label>
+        <label>MAPA
+          <input name="map" required maxlength="60" placeholder="Ex.: Raid">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>DATA<input type="date" name="date" required></label>
+        <label>HORÁRIO (BRT)<input type="time" name="time" required></label>
+      </div>
+      <div class="form-row">
+        <label>FORMATO<select name="format"><option>BO1</option><option>BO3</option><option>BO5</option></select></label>
+        <label>JOGADORES POR LADO<select name="teamSize"><option value="1">1</option><option value="2">2</option><option value="5">5</option></select></label>
+      </div>
+      <label>CONTATO / DISCORD / WHATSAPP
+        <input name="contact" maxlength="100" placeholder="Ex.: Discord: meuclan#0001">
+      </label>
+      <label>REGRAS E OBSERVAÇÕES
+        <textarea name="description" maxlength="500" rows="3" placeholder="Ex.: sala privada, banimentos, horário limite e regras da série."></textarea>
+      </label>
+      <button class="button primary full" type="submit">Publicar agendamento</button>
+    </form>
+  </div>
+
+  <div class="modal" id="matchManageModal">
+    <button class="modal-close" data-close-modal>&times;</button>
+    <div id="matchManageContent"></div>
+  </div>
+
+  <div class="modal" id="publicProfileModal">
+    <button class="modal-close" data-close-modal>&times;</button>
+    <div id="publicProfileContent"></div>
+  </div>
+
+  <div class="modal" id="notificationsModal">
+    <button class="modal-close" data-close-modal>&times;</button>
+    <h2>Notificações</h2>
+    <p>Solicitações, confirmações e lembretes da sua atividade no HUB.</p>
+    <button class="button ghost small" id="enableNotifications">Ativar lembretes neste navegador</button>
+    <div id="notificationsList" class="notifications-list"></div>
   </div>
 
   <!-- TOAST NOTIFICATION -->
